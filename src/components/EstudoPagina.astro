@@ -1,0 +1,144 @@
+---
+import type { Lang, Projeto } from '@content/types';
+import { projetos } from '@content/projetos';
+import { perfil } from '@content/perfil';
+import { ui } from '@/i18n/ui';
+import { blocos } from '@/i18n/md';
+import Base from '@/layouts/Base.astro';
+import Topo from './Topo.astro';
+import Midia from './Midia.astro';
+import Tags from './Tags.astro';
+import Rodape from './Rodape.astro';
+
+interface Props { projeto: Projeto; lang: Lang }
+const { projeto: p, lang } = Astro.props;
+const base = lang === 'pt' ? '' : '/en';
+const comEstudo = projetos.filter((x) => x.estudoDeCaso);
+const proximo = comEstudo[(comEstudo.indexOf(p) + 1) % comEstudo.length];
+const secoes = p.estudo?.secoes ?? [];
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': p.codigoUrl ? 'SoftwareSourceCode' : 'CreativeWork',
+  name: p.nome,
+  description: p.frase[lang],
+  author: { '@type': 'Person', name: perfil.nome, url: perfil.site },
+  dateCreated: p.ano.slice(0, 4),
+  keywords: p.stack.join(', '),
+  ...(p.codigoUrl ? { codeRepository: p.codigoUrl } : {}),
+  ...(p.demoUrl ? { url: p.demoUrl } : {}),
+  inLanguage: lang === 'pt' ? 'pt-BR' : 'en',
+};
+---
+<Base lang={lang} title={`${p.nome} — ${ui.estudoDeCaso[lang]} · Lucas Kenzo`} description={p.frase[lang]} jsonLd={[jsonLd]} imagem={p.midia?.poster}>
+  <Topo lang={lang} atual="projetos" />
+  <main id="conteudo" class="pb-20">
+    <!-- Header -->
+    <section class="mx-auto max-w-[1240px] px-4 pt-12 sm:px-8">
+      <a href={`${base}/projetos`} class="eyebrow hover:text-ink">← {lang === 'pt' ? 'Todos os projetos' : 'All projects'}</a>
+      <p class="eyebrow mt-6">{p.parceiro[lang]} · {p.ano}</p>
+      <h1 class="mt-2 max-w-[20ch] text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl">{p.nome}</h1>
+      <p class="mt-4 max-w-[60ch] text-lg text-muted">{p.frase[lang]}</p>
+      <div class="mt-6 flex flex-wrap items-center gap-2.5">
+        {p.demoUrl && <a href={p.demoUrl} class="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink">{ui.abrirSite[lang]} ↗</a>}
+        {p.apresentacaoUrl && <a href={p.apresentacaoUrl} class="rounded-lg border border-line px-4 py-2.5 text-sm font-semibold hover:border-ink">{ui.modoApresentacao[lang]} ↗</a>}
+        {p.codigoUrl ? <a href={p.codigoUrl} class="rounded-lg border border-line px-4 py-2.5 text-sm font-semibold hover:border-ink">{ui.codigo[lang]} ↗</a> : <span class="px-1 text-sm text-muted">{ui.codigoPrivado[lang]}</span>}
+      </div>
+      <dl class="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4">
+        <div class="bg-panel p-4">
+          <dt class="eyebrow">{ui.meuPapel[lang]}</dt>
+          <dd class="mt-1 text-sm font-medium">{p.papel[lang]}</dd>
+        </div>
+        {p.numeros.map((n) => (
+          <div class="flex flex-col-reverse justify-end bg-panel p-4">
+            <dt class="eyebrow mt-1">{n.rotulo[lang]}</dt>
+            <dd class="font-mono text-2xl font-semibold text-accent">{n.valor}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    {p.midia && (
+      <figure class="mx-auto mt-10 max-w-[1240px] px-4 sm:px-8">
+        <Midia midia={p.midia} lang={lang} eager class="block aspect-video w-full rounded-xl border border-line object-cover object-top" />
+        {p.midia.legenda && <figcaption class="eyebrow mt-3">{p.midia.legenda[lang]}</figcaption>}
+      </figure>
+    )}
+
+    <!-- Body with a sticky table of contents -->
+    <div class="mx-auto mt-14 grid max-w-[1240px] grid-cols-1 gap-10 px-4 sm:px-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
+      <nav aria-label={lang === 'pt' ? 'Nesta página' : 'On this page'} class="hidden lg:block">
+        <ol class="sticky top-24 space-y-1 border-l border-line">
+          {secoes.map((s) => (
+            <li><a href={`#${s.id}`} data-toc={s.id} class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-sm text-muted hover:text-ink aria-[current=true]:border-accent aria-[current=true]:text-ink">{s.titulo[lang]}</a></li>
+          ))}
+          {p.estudo?.trecho && <li><a href="#codigo" class="-ml-px block border-l-2 border-transparent py-1 pl-4 text-sm text-muted hover:text-ink">{lang === 'pt' ? 'Código' : 'Code'}</a></li>}
+        </ol>
+      </nav>
+      <article class="max-w-[68ch]">
+        {secoes.map((s) => (
+          <section id={s.id} data-secao class="mb-12 scroll-mt-24">
+            <h2 class="dim eyebrow mb-4 text-ink">{s.titulo[lang]}</h2>
+            {blocos(s.texto.map((t) => t[lang])).map((b) =>
+              b.tipo === 'p' ? (
+                <p class="mb-4 text-[1.05rem] leading-relaxed text-muted" set:html={b.itens[0]} />
+              ) : (
+                <ul class="mb-4 space-y-3">
+                  {b.itens.map((i) => <li class="relative pl-5 text-[1.05rem] leading-relaxed text-muted before:absolute before:top-[0.7em] before:left-0 before:h-px before:w-2.5 before:bg-accent" set:html={i} />)}
+                </ul>
+              ),
+            )}
+          </section>
+        ))}
+
+        {p.estudo?.trecho && (
+          <section id="codigo" class="mb-12 scroll-mt-24">
+            <h2 class="dim eyebrow mb-4 text-ink">{lang === 'pt' ? 'Código' : 'Code'}</h2>
+            <figure>
+              <pre tabindex="0" aria-label={lang === 'pt' ? 'Trecho de código' : 'Code excerpt'} class="overflow-x-auto rounded-xl border border-line bg-[#0a0f1e] p-5 font-mono text-[0.8rem] leading-relaxed text-[#e8ecf6]"><code>{p.estudo.trecho.codigo}</code></pre>
+              <figcaption class="mt-3 text-sm text-muted">{p.estudo.trecho.legenda[lang]}</figcaption>
+            </figure>
+          </section>
+        )}
+
+        <section class="mb-12">
+          <h2 class="dim eyebrow mb-4 text-ink">Stack</h2>
+          <Tags itens={p.stack} />
+        </section>
+      </article>
+    </div>
+
+    {p.estudo?.galeria && (
+      <section class="mx-auto max-w-[1240px] px-4 sm:px-8" aria-label={lang === 'pt' ? 'Galeria' : 'Gallery'}>
+        <div class="grid items-start gap-5 md:grid-cols-[2fr_1fr]">
+          {p.estudo.galeria.map((m) => (
+            <figure>
+              <Midia midia={m} lang={lang} class="block h-auto w-full rounded-xl border border-line" />
+              {m.legenda && <figcaption class="eyebrow mt-2">{m.legenda[lang]}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {proximo && proximo !== p && (
+      <section class="mx-auto mt-16 max-w-[1240px] px-4 sm:px-8">
+        <a href={`${base}/projetos/${proximo.slug}`} class="group block rounded-xl border border-line bg-panel p-6 transition-colors hover:border-accent sm:p-8">
+          <p class="eyebrow">{lang === 'pt' ? 'Próximo estudo de caso' : 'Next case study'}</p>
+          <p class="mt-2 text-2xl font-semibold tracking-tight">{proximo.nome} <span class="inline-block transition-transform duration-300 ease-out-soft group-hover:translate-x-1">→</span></p>
+          <p class="mt-1 text-muted">{proximo.frase[lang]}</p>
+        </a>
+      </section>
+    )}
+    <div class="mx-auto max-w-[1240px] px-4 sm:px-8"><Rodape lang={lang} /></div>
+  </main>
+</Base>
+
+<script>
+  const links = new Map<string, HTMLElement>();
+  document.querySelectorAll<HTMLElement>('[data-toc]').forEach((a) => links.set(a.dataset.toc!, a));
+  const io = new IntersectionObserver(
+    (es) => es.forEach((e) => e.isIntersecting && links.forEach((a, id) => a.setAttribute('aria-current', String(id === e.target.id)))),
+    { rootMargin: '-30% 0px -60% 0px' },
+  );
+  document.querySelectorAll('[data-secao]').forEach((s) => io.observe(s));
+</script>

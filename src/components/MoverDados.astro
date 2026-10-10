@@ -1,0 +1,326 @@
+---
+// Data story under the MOVER scene: one section per question, each with a chart built at build time
+// (inline SVG, no JS), the decision and why, the result, and the source file.
+import type { Lang } from '@content/types';
+import dados from '@content/mover-dados.json';
+import { moverTexto as M } from '@content/mover-texto';
+import { COR, corRampa } from '@/lab/mover/cores';
+import { fichasMover } from '@content/lab-historias/fichas-mover';
+import FichaAnalise from './dados/FichaAnalise.astro';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const base = lang === 'pt' ? '' : '/en';
+const R = M.rotulos;
+const loc = lang === 'pt' ? 'pt-BR' : 'en-US';
+const f = (v: number, k = 1) => v.toLocaleString(loc, { maximumFractionDigits: k });
+const preencher = (s: string, v: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(v[k] ?? `{${k}}`));
+
+// ---------- derived numbers ----------
+const zs = dados.rota.map((r) => r.z);
+const desnivel = Math.max(...zs) - Math.min(...zs);
+const classes = [0, 0, 0];
+dados.arvores.forEach((a) => classes[a[3]]++);
+const arvPerto = classes[1] + classes[2];
+const medidos = dados.predios.filter((p) => p.medida);
+const altMed = medidos.map((p) => p.altura);
+const lombadasNaRota = dados.objetos
+  .filter((o) => o.tipo === 'lombada')
+  .map((o) => {
+    let melhor = dados.rota[0], dmin = Infinity;
+    for (const r of dados.rota) { const d = Math.hypot(r.p[0] - o.pos[0], r.p[2] - o.pos[2]); if (d < dmin) { dmin = d; melhor = r; } }
+    return { codigo: o.codigo, d: melhor.d, z: melhor.z, dist: dmin };
+  })
+  .filter((l) => l.dist < 6);
+const av = dados.aoVivo;
+const ev = dados.evolucao;
+
+const valores: Record<string, Record<string, string | number>> = {
+  fonte: { usadas: dados.dxf.usadas, layers: dados.dxf.layers },
+  perfil: { metros: f(dados.contagens.rotaMetros, 0), desnivel: f(desnivel) },
+  estacoes: { calcada: f(dados.estacoes.calcada.mediana, 2), p90: f(dados.estacoes.calcada.p90, 2), sup: f(dados.estacoes.superelev.mediana, 2), p05: f(dados.estacoes.superelev.p05, 2), p95: f(dados.estacoes.superelev.p95, 2) },
+  props: { arvores: f(dados.arvores.length, 0), perto: f(arvPerto, 0), carla: f(classes[2], 0), web: f(dados.contagens.arvoresWeb, 0) },
+  predios: { medidos: medidos.length, predios: dados.predios.length, min: f(Math.min(...altMed)), max: f(Math.max(...altMed)) },
+  aovivo: { metros: av.volta.metros, segundos: av.volta.segundos, cte: f(av.volta.cteMedio, 2), t9: av.testesOffline.r9, t10: av.testesOffline.r10 },
+};
+
+// ---------- chart geometry helpers ----------
+const W = 640;
+const nomeGrupo: Record<string, { pt: string; en: string }> = {
+  outros: { pt: 'outros', en: 'other' }, altimetria: { pt: 'altimetria', en: 'altimetry' }, vegetacao: { pt: 'vegetação', en: 'vegetation' },
+  edificacao: { pt: 'edificação', en: 'buildings' }, 'drenagem e utilidades': { pt: 'drenagem e utilidades', en: 'drainage & utilities' },
+  'meio-fio e calcada': { pt: 'meio-fio e calçada', en: 'curb & sidewalk' }, 'divisa e perimetro': { pt: 'divisa e perímetro', en: 'boundary' },
+  iluminacao: { pt: 'iluminação', en: 'lighting' }, mobiliario: { pt: 'mobiliário', en: 'street furniture' }, sinalizacao: { pt: 'sinalização', en: 'signage' },
+  'apoio topografico': { pt: 'apoio topográfico', en: 'survey control' }, lombada: { pt: 'lombada', en: 'speed bump' }, pavimento: { pt: 'pavimento', en: 'pavement' },
+};
+const nomeProp: Record<string, { pt: string; en: string }> = {
+  arvore: { pt: 'árvore', en: 'tree' }, grelha: { pt: 'grelha', en: 'drain' }, abrigo: { pt: 'abrigo', en: 'shelter' }, poste: { pt: 'poste', en: 'pole' },
+  placa: { pt: 'placa', en: 'sign' }, luminaria: { pt: 'luminária', en: 'lamp' }, banco: { pt: 'banco', en: 'bench' }, portao: { pt: 'portão', en: 'gate' },
+};
+
+// 1) DXF groups: total entities (grey) with the part in used layers (blue) on top.
+const g1 = dados.dxf.grupos;
+const g1max = Math.max(...g1.map((g) => g.entidades));
+const g1x0 = 170, g1w = W - g1x0 - 70, g1h = 22;
+
+// 3) Altitude profile + grade bars (two charts, one axis each).
+const pf = { x0: 48, x1: W - 12, y0: 16, y1: 176 };
+const dmax = dados.contagens.rotaMetros;
+const zmin = Math.floor(Math.min(...zs)), zmax = Math.ceil(Math.max(...zs));
+const px = (d: number) => pf.x0 + (d / dmax) * (pf.x1 - pf.x0);
+const pyZ = (z: number) => pf.y1 - ((z - zmin) / (zmax - zmin)) * (pf.y1 - pf.y0);
+const linhaZ = dados.rota.map((r, i) => `${i ? 'L' : 'M'}${px(r.d).toFixed(1)},${pyZ(r.z).toFixed(1)}`).join('');
+const areaZ = `${linhaZ}L${px(dmax)},${pf.y1}L${px(0)},${pf.y1}Z`;
+const rmax = 12;
+const ra = { y0: 12, y1: 132 };
+const pyR = (v: number) => (ra.y0 + ra.y1) / 2 - (Math.max(-rmax, Math.min(rmax, v)) / rmax) * ((ra.y1 - ra.y0) / 2);
+const ticksD = [0, 200, 400, 600, 800];
+
+// 4) Histograms.
+const hist = (bins: { de: number; ate: number; n: number }[]) => {
+  const max = Math.max(...bins.map((b) => b.n));
+  const x0 = 40, x1 = 300, y0 = 10, y1 = 150, bw = (x1 - x0) / bins.length;
+  return { x0, x1, y0, y1, bw, max, barras: bins.map((b, i) => ({ ...b, x: x0 + i * bw + 1, w: bw - 2, h: (b.n / max) * (y1 - y0) })) };
+};
+const hC = hist(dados.estacoes.calcada.hist);
+const hS = hist(dados.estacoes.superelev.hist);
+
+// 5) Props funnel per category.
+const props = Object.entries(dados.funilProps).sort((a, b) => b[1].total - a[1].total);
+const pmax = Math.max(...props.map(([, v]) => v.total));
+const p5 = { x0: 110, w: W - 110 - 150, linha: 34 };
+
+// 6) Buildings scatter (log area).
+const sc = { x0: 48, x1: W - 16, y0: 12, y1: 208 };
+const amin = 20, amaxA = 5000, hmax = 18;
+const sx = (a: number) => sc.x0 + (Math.log10(a / amin) / Math.log10(amaxA / amin)) * (sc.x1 - sc.x0);
+const sy = (h: number) => sc.y1 - (h / hmax) * (sc.y1 - sc.y0);
+
+// 7) Evolution small multiples.
+const mini = (serie: (number | null)[]) => {
+  const pts = serie.map((v, i) => ({ v, i })).filter((p): p is { v: number; i: number } => p.v !== null);
+  const max = Math.max(...pts.map((p) => p.v)) || 1;
+  const x = (i: number) => 16 + (i / 7) * 168, y = (v: number) => 92 - (v / max) * 72;
+  return { pts: pts.map((p) => ({ ...p, x: x(p.i), y: y(p.v) })), d: pts.map((p, k) => `${k ? 'L' : 'M'}${x(p.i)},${y(p.v)}`).join(''), max };
+};
+const minis = (['erroBolsao', 'furoCarla', 'triangulos'] as const).map((k) => ({ k, ...mini(ev[k]) }));
+
+const kpis = [
+  { v: f(dados.dxf.entidades, 0), r: M.kpis.entidades[lang] },
+  { v: String(dados.dxf.usadas), r: preencher(M.kpis.layers[lang], { n: dados.dxf.layers }) },
+  { v: f(dados.estacoes.total, 0), r: M.kpis.estacoes[lang] },
+  { v: f(dados.arvores.length, 0), r: M.kpis.arvores[lang] },
+  { v: String(av.volta.colisoes), r: M.kpis.colisoes[lang] },
+];
+---
+<section id="dados" class="md" aria-labelledby="h-dados">
+  <h2 id="h-dados"><span>{M.titulo[lang]}</span></h2>
+  <p class="md-intro">{M.intro[lang]}</p>
+  <ul class="md-kpis">
+    {kpis.map((k) => <li><b>{k.v}</b><span>{k.r}</span></li>)}
+  </ul>
+
+  {M.secoes.map((s, i) => (
+    <article class="md-secao" id={`md-${s.id}`} aria-labelledby={`h-md-${s.id}`}>
+      <header class="md-cab">
+        <span class="md-n">{String(i + 1).padStart(2, '0')}</span>
+        <h3 id={`h-md-${s.id}`}>{s.titulo[lang]}</h3>
+      </header>
+      <div class="md-corpo">
+        <div class="md-texto">
+          <p class="md-pergunta"><small>{R.pergunta[lang]}</small>{preencher(s.pergunta[lang], valores[s.id] ?? {})}</p>
+          <p><small>{R.decisao[lang]}</small>{preencher(s.decisao[lang], valores[s.id] ?? {})}</p>
+          <p class="md-resultado"><small>{R.resultado[lang]}</small>{preencher(s.resultado[lang], valores[s.id] ?? {})}</p>
+          <p class="md-fonte">{R.fonte[lang]}: <code>{s.fonte}</code></p>
+          {fichasMover[s.id] && <FichaAnalise ficha={fichasMover[s.id]} lang={lang} />}
+        </div>
+        <figure class="md-fig">
+
+          {s.id === 'fonte' && (
+            <>
+              <ul class="md-leg"><li><i style={`background:${COR.longe}`}></i>{R.entidades[lang]}</li><li><i style={`background:${COR.medido}`}></i>{R.usadas[lang]}</li></ul>
+              <svg viewBox={`0 0 ${W} ${g1.length * g1h + 8}`} role="img" aria-label={lang === 'pt' ? 'Entidades do levantamento por grupo de layers e parte em layers usadas' : 'Survey entities by layer group and the part in used layers'}>
+                {g1.map((g, k) => {
+                  const y = 4 + k * g1h;
+                  const w = (g.entidades / g1max) * g1w, wu = (g.entidadesUsadas / g1max) * g1w;
+                  return (
+                    <g>
+                      <title>{`${nomeGrupo[g.grupo]?.[lang] ?? g.grupo}: ${f(g.entidades, 0)} ${R.entidades[lang]}, ${f(g.entidadesUsadas, 0)} ${R.usadas[lang]} (${g.usadas}/${g.layers} layers)`}</title>
+                      <text x={g1x0 - 8} y={y + 13} text-anchor="end" class="md-eixo">{nomeGrupo[g.grupo]?.[lang] ?? g.grupo}</text>
+                      <rect x={g1x0} y={y + 3} width={Math.max(2, w)} height={14} rx="3" fill={COR.longe} />
+                      {wu > 0 && <rect x={g1x0} y={y + 3} width={Math.max(2, wu)} height={14} rx="3" fill={COR.medido} />}
+                      <text x={g1x0 + w + 6} y={y + 14} class="md-valor">{f(g.entidades, 0)}</text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </>
+          )}
+
+          {s.id === 'procedencia' && (
+            <div class="md-tabela" tabindex="0">
+              <table>
+                <tbody>
+                  {dados.procedencia.map((p) => (
+                    <tr>
+                      <th scope="row">{p.elemento}</th>
+                      <td><span class:list={['md-chip', p.origem === 'medido' ? 'md-chip-m' : 'md-chip-s']}>{p.origem === 'medido' ? R.medido[lang] : R.sintetico[lang]}</span></td>
+                      <td>{p.valor}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {s.id === 'perfil' && (
+            <>
+              <p class="md-fig-t">{R.altitude[lang]}</p>
+              <svg viewBox={`0 0 ${W} 200`} role="img" aria-label={lang === 'pt' ? `Perfil de altitude da rota, de ${f(Math.min(...zs))} a ${f(Math.max(...zs))} metros` : `Route altitude profile, from ${f(Math.min(...zs))} to ${f(Math.max(...zs))} metres`}>
+                {[zmin, (zmin + zmax) / 2, zmax].map((z) => <g><line x1={pf.x0} x2={pf.x1} y1={pyZ(z)} y2={pyZ(z)} class="md-grade" /><text x={pf.x0 - 6} y={pyZ(z) + 4} text-anchor="end" class="md-eixo">{f(z, 0)}</text></g>)}
+                <path d={areaZ} fill={COR.medido} opacity="0.14" />
+                <path d={linhaZ} fill="none" stroke={COR.medido} stroke-width="2" />
+                {lombadasNaRota.map((l) => (
+                  <g><title>{`${l.codigo} · ${f(l.d, 0)} m`}</title>
+                    <line x1={px(l.d)} x2={px(l.d)} y1={pf.y0} y2={pf.y1} stroke={COR.lombada} stroke-dasharray="3 3" />
+                    <circle cx={px(l.d)} cy={pyZ(l.z)} r="4.5" fill={COR.lombada} stroke="#0c1328" stroke-width="2" />
+                  </g>
+                ))}
+                {ticksD.map((d) => <text x={px(d)} y={194} text-anchor="middle" class="md-eixo">{d}</text>)}
+              </svg>
+              <p class="md-fig-t">{R.rampa[lang]} <span class="md-sub">(±{rmax} %)</span></p>
+              <svg viewBox={`0 0 ${W} 156`} role="img" aria-label={lang === 'pt' ? 'Rampa ao longo da rota: laranja sobe, azul desce' : 'Grade along the route: orange climbs, blue descends'}>
+                <line x1={pf.x0} x2={pf.x1} y1={pyR(0)} y2={pyR(0)} class="md-grade" />
+                {[rmax, -rmax].map((v) => <text x={pf.x0 - 6} y={pyR(v) + 4} text-anchor="end" class="md-eixo">{v > 0 ? `+${v}` : v}</text>)}
+                {dados.rota.map((r, k) => k % 2 === 0 && (
+                  <rect x={px(r.d) - 1} width="2.6" y={Math.min(pyR(0), pyR(r.rampa))} height={Math.max(1, Math.abs(pyR(r.rampa) - pyR(0)))} fill={`#${corRampa(r.rampa).getHexString()}`} />
+                ))}
+                {ticksD.map((d) => <text x={px(d)} y={150} text-anchor="middle" class="md-eixo">{d}</text>)}
+              </svg>
+              <figcaption>{R.distancia[lang]} · <span style={`color:${COR.lombada}`}>●</span> {R.lombada[lang]}</figcaption>
+            </>
+          )}
+
+          {s.id === 'estacoes' && (
+            <div class="md-duas">
+              {[{ h: hC, t: R.calcada[lang], m: dados.estacoes.calcada.mediana, cor: COR.medido }, { h: hS, t: R.superelev[lang], m: dados.estacoes.superelev.mediana, cor: COR.medido }].map(({ h, t, m, cor }) => {
+                const x = (v: number) => h.x0 + ((v - h.barras[0].de) / (h.barras.at(-1)!.ate - h.barras[0].de)) * (h.x1 - h.x0);
+                return (
+                  <div>
+                    <p class="md-fig-t">{t}</p>
+                    <svg viewBox="0 0 310 176" role="img" aria-label={`${t}: ${lang === 'pt' ? 'histograma, mediana' : 'histogram, median'} ${f(m, 2)}`}>
+                      {h.barras.map((b) => <rect x={b.x} y={h.y1 - b.h} width={b.w} height={b.h} rx="2" fill={cor}><title>{`${f(b.de, 2)} – ${f(b.ate, 2)}: ${b.n} ${R.lados[lang]}`}</title></rect>)}
+                      <line x1={h.x0} x2={h.x1} y1={h.y1} y2={h.y1} class="md-grade" />
+                      <line x1={x(m)} x2={x(m)} y1={h.y0} y2={h.y1} stroke="#eef1fa" stroke-dasharray="3 3" />
+                      <text x={x(m) + 4} y={h.y0 + 10} class="md-valor">{lang === 'pt' ? 'mediana' : 'median'} {f(m, 2)}</text>
+                      {[h.barras[0].de, h.barras.at(-1)!.ate].map((v) => <text x={x(v)} y={170} text-anchor="middle" class="md-eixo">{f(v, 1)}</text>)}
+                    </svg>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {s.id === 'props' && (
+            <>
+              <ul class="md-leg"><li><i style={`background:${COR.longe}`}></i>{R.total[lang]}</li><li><i style={`background:${COR.medido}`}></i>{R.perto[lang]}</li><li><i style={`background:${COR.carla}`}></i>{R.carla[lang]}</li></ul>
+              <svg viewBox={`0 0 ${W} ${props.length * p5.linha + 6}`} role="img" aria-label={lang === 'pt' ? 'Objetos levantados por categoria: no campus, perto da via e no CARLA' : 'Surveyed objects by category: on campus, near the road and in CARLA'}>
+                {props.map(([cat, v], k) => {
+                  const y = 4 + k * p5.linha;
+                  const w = (n: number) => Math.max(n ? 2 : 0, (Math.sqrt(n) / Math.sqrt(pmax)) * p5.w);
+                  return (
+                    <g>
+                      <title>{`${nomeProp[cat]?.[lang] ?? cat}: ${v.total} ${R.total[lang]}, ${v.perto} ${R.perto[lang]}, ${v.carla} ${R.carla[lang]}`}</title>
+                      <text x={p5.x0 - 8} y={y + 16} text-anchor="end" class="md-eixo">{nomeProp[cat]?.[lang] ?? cat}</text>
+                      <rect x={p5.x0} y={y + 2} width={w(v.total)} height="8" rx="3" fill={COR.longe} />
+                      <rect x={p5.x0} y={y + 12} width={w(v.perto)} height="8" rx="3" fill={COR.medido} />
+                      {v.carla > 0 && <rect x={p5.x0} y={y + 22} width={w(v.carla)} height="8" rx="3" fill={COR.carla} />}
+                      <text x={p5.x0 + w(v.total) + 6} y={y + 10} class="md-valor">{f(v.total, 0)} · {f(v.perto, 0)} · {f(v.carla, 0)}</text>
+                    </g>
+                  );
+                })}
+              </svg>
+              <figcaption>{lang === 'pt' ? 'Comprimento da barra em raiz quadrada da contagem, para as categorias pequenas aparecerem.' : 'Bar length is the square root of the count, so small categories stay visible.'}</figcaption>
+            </>
+          )}
+
+          {s.id === 'predios' && (
+            <>
+              <ul class="md-leg"><li><i style={`background:${COR.medido}`}></i>{R.medida[lang]} ({medidos.length})</li><li><i style={`background:${COR.assumido}`}></i>{R.assumida[lang]} ({dados.predios.length - medidos.length})</li></ul>
+              <svg viewBox={`0 0 ${W} 236`} role="img" aria-label={lang === 'pt' ? 'Área por altura de cada prédio; os assumidos ficam todos em 7 metros' : 'Area versus height of each building; the assumed ones all sit at 7 metres'}>
+                {[0, 6, 12, 18].map((h) => <g><line x1={sc.x0} x2={sc.x1} y1={sy(h)} y2={sy(h)} class="md-grade" /><text x={sc.x0 - 6} y={sy(h) + 4} text-anchor="end" class="md-eixo">{h}</text></g>)}
+                {[30, 100, 300, 1000, 3000].map((a) => <text x={sx(a)} y={228} text-anchor="middle" class="md-eixo">{f(a, 0)}</text>)}
+                {dados.predios.map((p) => (
+                  <circle cx={sx(p.area)} cy={sy(p.altura)} r="6" fill={p.medida ? COR.medido : COR.assumido} stroke="#0c1328" stroke-width="2" fill-opacity="0.9">
+                    <title>{`${p.nome}: ${f(p.area, 0)} m², ${f(p.altura)} m (${p.medida ? R.medida[lang] : R.assumida[lang]})`}</title>
+                  </circle>
+                ))}
+              </svg>
+              <figcaption>{R.area[lang]} ({lang === 'pt' ? 'escala log' : 'log scale'}) × {R.altura[lang]}</figcaption>
+            </>
+          )}
+
+          {s.id === 'evolucao' && (
+            <div class="md-tres">
+              {minis.map((m) => (
+                <div>
+                  <p class="md-fig-t">{M.evolucao[m.k][lang]}</p>
+                  <svg viewBox="0 0 200 116" role="img" aria-label={`${M.evolucao[m.k][lang]}: ${m.pts.map((p) => `r${p.i + 1} ${f(p.v, 2)}`).join(', ')}`}>
+                    <line x1="16" x2="184" y1="92" y2="92" class="md-grade" />
+                    <path d={m.d} fill="none" stroke={COR.medido} stroke-width="2" />
+                    {m.pts.map((p, k) => (
+                      <g>
+                        <circle cx={p.x} cy={p.y} r="4" fill={COR.medido} stroke="#0c1328" stroke-width="2"><title>{`r${p.i + 1}: ${f(p.v, 2)}`}</title></circle>
+                        {(k === 0 || k === m.pts.length - 1) && <text x={p.x} y={k === 0 && m.pts[1] && m.pts[1].y < p.y ? p.y + 16 : p.y - 8} text-anchor={k === 0 ? 'start' : 'end'} class="md-valor">{f(p.v, p.v > 1000 ? 0 : 2)}</text>}
+                      </g>
+                    ))}
+                    {ev.rodadas.map((r, i) => <text x={16 + (i / 7) * 168} y="110" text-anchor="middle" class="md-eixo">{r}</text>)}
+                  </svg>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {s.id === 'aovivo' && (
+            <div class="md-tabela" tabindex="0">
+              <table>
+                <thead><tr><th scope="col">{R.metrica[lang]}</th><th scope="col">r9</th><th scope="col">r10</th><th scope="col">{R.variacao[lang]}</th></tr></thead>
+                <tbody>
+                  {av.comparacao.map((c) => {
+                    const melhorou = c.melhor === 'maior' ? c.r10 > c.r9 : c.r10 < c.r9;
+                    return (
+                      <tr>
+                        <th scope="row">{M.metricas[c.m as keyof typeof M.metricas][lang]}</th>
+                        <td>{f(c.r9, 2)} {c.unidade}</td>
+                        <td><b>{f(c.r10, 2)} {c.unidade}</b></td>
+                        <td class:list={[melhorou ? 'md-bom' : 'md-ruim']}>{melhorou ? '▲' : '▼'} {c.r9 ? `${f(((c.r10 - c.r9) / c.r9) * 100, 0)} %` : '—'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {s.id === 'detector' && (
+            <div class="md-stats">
+              <div><b>{av.detector.achadas}/{av.detector.lombadasNaVolta}</b><span>{R.revocacao[lang]} · {f((av.detector.achadas / av.detector.lombadasNaVolta) * 100, 0)} %</span>
+                <div class="md-meter" aria-hidden="true"><i style={`width:${(av.detector.achadas / av.detector.lombadasNaVolta) * 100}%`}></i></div></div>
+              <div><b>{av.detector.perto}/{av.detector.eventos}</b><span>{R.precisao[lang]} · {f((av.detector.perto / av.detector.eventos) * 100, 0)} %</span>
+                <div class="md-meter" aria-hidden="true"><i style={`width:${(av.detector.perto / av.detector.eventos) * 100}%`}></i></div></div>
+            </div>
+          )}
+        </figure>
+      </div>
+    </article>
+  ))}
+
+  <article class="md-fim" aria-labelledby="h-md-fim">
+    <h3 id="h-md-fim">{M.conclusoes.titulo[lang]}</h3>
+    <ol>{M.conclusoes.itens.map((c) => <li>{c[lang]}</li>)}</ol>
+    <p class="md-links">
+      <a class="lab-botao" href={`${base}/projetos/mover`}>{M.conclusoes.estudo[lang]} →</a>
+      <a class="lab-botao" href="https://lucaskenz.github.io/mover-campus-3d-site/" rel="noopener">{M.conclusoes.demo[lang]} ↗</a>
+    </p>
+  </article>
+</section>

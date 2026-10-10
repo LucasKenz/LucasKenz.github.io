@@ -1,0 +1,130 @@
+---
+import type { Lang } from '@content/types';
+import { perfil } from '@content/perfil';
+import { projetos } from '@content/projetos';
+import { experiencias, formacao } from '@content/experiencia';
+import { lab } from '@content/lab';
+import { ui, mes } from '@/i18n/ui';
+import Base from '@/layouts/Base.astro';
+import Sidebar from './Sidebar.astro';
+import Topo from './Topo.astro';
+import ProjetoDestaque from './ProjetoDestaque.astro';
+import Linha from './Linha.astro';
+import Rodape from './Rodape.astro';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const base = lang === 'pt' ? '' : '/en';
+const destaque = projetos.find((p) => p.destaque)!;
+const outros = projetos.filter((p) => !p.destaque);
+const titulo = `${perfil.nome} — ${perfil.titulo[lang]}`;
+const descricao = lang === 'pt'
+  ? 'Portfólio e currículo de Lucas Kenzo: gêmeo digital de caminhão autônomo, apps para a SPTrans e agentes de IA. Buscando Trainee 2027.'
+  : 'Portfolio and résumé of Lucas Kenzo: autonomous truck digital twin, apps for SPTrans and AI agents. Looking for a 2027 trainee program.';
+---
+<Base lang={lang} title={titulo} description={descricao} imagem={destaque.midia?.poster}>
+  <Topo lang={lang} />
+  <div class="mx-auto max-w-[1240px] px-4 sm:px-8 lg:grid lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-16">
+    <Sidebar lang={lang} />
+
+    <main id="conteudo" class="pb-24 lg:py-16">
+      <!-- Projects -->
+      <section id="projetos" data-secao class="mb-24 scroll-mt-28 sm:scroll-mt-20" aria-labelledby="h-projetos">
+        <h2 id="h-projetos" class="dim eyebrow mb-6">{ui.destaque[lang]}</h2>
+        <ProjetoDestaque projeto={destaque} lang={lang} />
+
+        <h2 class="dim eyebrow mt-16 mb-3">{ui.outrosProjetos[lang]}</h2>
+        <ul class="-mx-3">
+          {outros.map((p) => (
+            <Linha
+              lang={lang}
+              quando={p.ano}
+              titulo={p.nome}
+              subtitulo={p.parceiro[lang]}
+              href={p.estudoDeCaso ? `${base}/projetos/${p.slug}` : p.codigoUrl}
+              externo={!p.estudoDeCaso && Boolean(p.codigoUrl)}
+              texto={p.frase[lang]}
+              tags={p.stack.slice(0, 5)}
+              preview={p.midia?.poster ? { src: p.midia.poster, alt: p.midia.alt[lang], width: p.midia.width, height: p.midia.height } : undefined}
+              numeros={p.numeros}
+            />
+          ))}
+        </ul>
+      </section>
+
+      <!-- Path: experience + education -->
+      <section id="trajetoria" data-secao class="mb-24 scroll-mt-28 sm:scroll-mt-20" aria-labelledby="h-traj">
+        <h2 id="h-traj" class="dim eyebrow mb-3">{ui.experiencia[lang]}</h2>
+        <ul class="-mx-3">
+          {experiencias.map((e) => (
+            <Linha
+              lang={lang}
+              quando={`${mes(e.inicio, lang)} — ${mes(e.fim, lang)}`}
+              titulo={e.cargo[lang]}
+              subtitulo={e.org}
+              texto={e.bullets[0].text[lang]}
+            />
+          ))}
+          <Linha
+            lang={lang}
+            quando={`${formacao.inicio.slice(0, 4)} — ${formacao.fim.slice(0, 4)}`}
+            titulo={formacao.curso[lang]}
+            subtitulo={formacao.instituicao}
+            texto={formacao.media[lang]}
+          />
+        </ul>
+        <div class="mt-6 rounded-lg border-l-2 border-accent bg-panel/60 px-4 py-3">
+          <p class="eyebrow">{ui.agora[lang]}</p>
+          <p class="mt-1">{perfil.agora[lang]}</p>
+        </div>
+        <a href={`${base}/curriculo`} class="mt-6 inline-flex items-center gap-2 font-semibold underline-offset-4 hover:underline">{lang === 'pt' ? 'Ver currículo completo' : 'See full résumé'} →</a>
+      </section>
+
+      <!-- Lab teaser: opens the game-like area -->
+      <section id="lab" data-secao class="mb-24 scroll-mt-28 sm:scroll-mt-20" aria-labelledby="h-lab">
+        <h2 id="h-lab" class="dim eyebrow mb-6">Lab</h2>
+        <a href={`${base}/lab`} class="group relative block overflow-hidden rounded-xl bg-[#0a0f1e] p-7 text-[#e8ecf6] sm:p-9">
+          <div class="lombada absolute inset-x-0 top-0 h-2"></div>
+          <span aria-hidden="true" data-marca="LAB" class="pointer-events-none absolute -right-6 -bottom-10 font-mono text-[9rem] leading-none font-bold text-white/5 select-none before:content-[attr(data-marca)]"></span>
+          <p class="font-mono text-xs tracking-widest text-[#a1abc6] uppercase">{lab.length} {lang === 'pt' ? 'simulações' : 'simulations'}</p>
+          <p class="mt-3 max-w-[30ch] text-2xl font-semibold tracking-tight">{ui.labIntro[lang]}</p>
+          <ul class="mt-6 grid gap-2 sm:grid-cols-3">
+            {lab.map((l) => (
+              <li class="rounded-md border border-white/10 bg-white/5 px-3 py-2.5">
+                <span class="block text-sm font-semibold">{l.nome[lang]}</span>
+                <span class="block font-mono text-[0.7rem] text-[#a1abc6]">{l.tecnica[lang]}</span>
+              </li>
+            ))}
+          </ul>
+          <span class="mt-6 inline-flex items-center gap-2 font-semibold text-[#7a9bff] transition-transform duration-300 ease-out-soft group-hover:translate-x-1">{lang === 'pt' ? 'Entrar no Lab' : 'Enter the Lab'} →</span>
+        </a>
+      </section>
+
+      <!-- Contact -->
+      <section id="contato" data-secao class="scroll-mt-28 sm:scroll-mt-20" aria-labelledby="h-contato">
+        <h2 id="h-contato" class="dim eyebrow mb-6">{ui.navContato[lang]}</h2>
+        <p class="max-w-[46ch] text-lg">{ui.contatoIntro[lang]}</p>
+        <a href={`mailto:${perfil.email}`} class="mt-4 inline-block font-mono text-xl font-semibold text-accent underline-offset-4 hover:underline sm:text-2xl">{perfil.email}</a>
+        <p class="mt-3 text-muted">{perfil.disponibilidade[lang]}</p>
+      </section>
+
+      <Rodape lang={lang} />
+    </main>
+  </div>
+</Base>
+
+<script>
+  // Active section in the side nav.
+  const links = new Map<string, HTMLElement>();
+  document.querySelectorAll<HTMLElement>('[data-nav]').forEach((a) => links.set(a.dataset.nav!, a));
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        links.forEach((a, id) => a.setAttribute('aria-current', String(id === e.target.id)));
+      }
+    },
+    { rootMargin: '-45% 0px -50% 0px' },
+  );
+  document.querySelectorAll('[data-secao]').forEach((s) => io.observe(s));
+</script>

@@ -1,0 +1,88 @@
+---
+import type { Lang } from '@content/types';
+import { perfil } from '@content/perfil';
+import { formacao, idiomas, extracurriculares } from '@content/experiencia';
+import { habilidades } from '@content/habilidades';
+import Base from '@/layouts/Base.astro';
+import Topo from './Topo.astro';
+import Rodape from './Rodape.astro';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const pt = lang === 'pt';
+const base = pt ? '' : '/en';
+// Story built only from facts in content/ (no invented details).
+const historia = pt
+  ? [
+      'Entrei em Ciência da Computação no Instituto Mauá em 2023 e, desde o primeiro ano, procurei projetos com gente de fora da sala: um app de nutrição para o Centro Universitário São Camilo, um sistema de acesso por reconhecimento facial para a SPTrans e, no TCC, o gêmeo digital de um caminhão autônomo com uma multinacional do setor automotivo.',
+      'Desde 2024 sou monitor dos cursos de TI. Explicar lógica, banco de dados e front-end para calouros me ensinou a quebrar problemas em passos pequenos, que é como gosto de construir software.',
+      'Em 2026 comecei a estagiar na SBN Engenharia, onde automatizei rotinas em Python e economizei cerca de 1 hora de trabalho por dia. Nas horas vagas, construo simulações 3D no navegador, que estão no Lab.',
+    ]
+  : [
+      'I started Computer Science at Instituto Mauá in 2023 and, from the first year, looked for projects with people outside the classroom: a nutrition app for Centro Universitário São Camilo, a face recognition access system for SPTrans and, for my capstone, the digital twin of an autonomous truck with a multinational automotive company.',
+      'Since 2024 I have been an IT teaching assistant. Explaining logic, databases and front end to first-year students taught me to break problems into small steps, which is how I like to build software.',
+      'In 2026 I started interning at SBN Engenharia, where I automated routines in Python and saved about one hour of work per day. In my spare time I build 3D simulations for the browser, which live in the Lab.',
+    ];
+---
+<Base lang={lang} title={pt ? 'Sobre — Lucas Kenzo' : 'About — Lucas Kenzo'} description={pt ? 'Quem é Lucas Kenzo: estudante de Ciência da Computação no Mauá, monitor e estagiário. Trajetória, habilidades, formação e o que busca no Trainee 2027.' : 'Who Lucas Kenzo is: Computer Science student at Mauá, teaching assistant and intern. Path, skills, education and goals for a 2027 trainee program.'} imagem={perfil.foto.src}>
+  <Topo lang={lang} atual="sobre" />
+  <main id="conteudo" class="mx-auto max-w-[1000px] px-4 pt-12 pb-20 sm:px-8">
+    <div class="grid gap-10 md:grid-cols-[minmax(0,1fr)_14rem]">
+      <div>
+        <p class="eyebrow">{perfil.cidade[lang]}</p>
+        <h1 class="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">{pt ? 'Sobre' : 'About'}</h1>
+        {historia.map((p) => <p class="mt-5 max-w-[64ch] text-lg leading-relaxed text-muted">{p}</p>)}
+      </div>
+      <figure class="order-first md:order-none">
+        <img src={perfil.foto.src} alt={perfil.foto.alt[lang]} width="320" height="320" class="w-40 rounded-2xl border border-line md:w-full" />
+      </figure>
+    </div>
+
+    <section class="mt-14 rounded-xl border-l-4 border-accent bg-panel p-6" aria-labelledby="h-busca">
+      <h2 id="h-busca" class="eyebrow text-ink">{pt ? 'O que estou buscando' : 'What I am looking for'}</h2>
+      <p class="mt-2 text-xl font-semibold">{perfil.busca[lang]}</p>
+      <p class="mt-1 text-muted">{pt ? 'Áreas: desenvolvimento Full Stack e IA com análise de dados.' : 'Areas: Full Stack development and AI with data analysis.'} {perfil.disponibilidade[lang]}</p>
+      <div class="mt-4 flex flex-wrap gap-2.5">
+        <a href={`${base}/curriculo`} class="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-ink">{pt ? 'Ver currículo' : 'See résumé'}</a>
+        <a href={`${base}/contato`} class="rounded-lg border border-line px-4 py-2 text-sm font-semibold hover:border-ink">{pt ? 'Contato' : 'Contact'}</a>
+      </div>
+    </section>
+
+    <section class="mt-14" aria-labelledby="h-hab">
+      <h2 id="h-hab" class="dim eyebrow mb-5">{pt ? 'Habilidades (nível avançado)' : 'Skills (advanced level)'}</h2>
+      <dl class="grid gap-5 sm:grid-cols-2">
+        {habilidades.map((g) => (
+          <div>
+            <dt class="font-semibold">{g.grupo[lang]}</dt>
+            <dd class="mt-2 flex flex-wrap gap-1.5">
+              {g.itens.map((i) => <span class="rounded-full border border-line px-2.5 py-0.5 font-mono text-xs text-muted">{(lang === 'en' && i.en) || i.nome}</span>)}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section class="mt-14 grid gap-8 sm:grid-cols-2">
+      <div>
+        <h2 class="dim eyebrow mb-3">{pt ? 'Formação' : 'Education'}</h2>
+        <p class="font-semibold">{formacao.curso[lang]}</p>
+        <p class="text-muted">{formacao.instituicao} · {formacao.inicio.slice(0, 4)} – {formacao.fim.slice(0, 4)}</p>
+        <p class="mt-1 text-muted">{formacao.media[lang]}</p>
+        <h2 class="dim eyebrow mt-8 mb-3">{pt ? 'Idiomas' : 'Languages'}</h2>
+        <p class="text-muted">{idiomas[lang]}</p>
+      </div>
+      <div>
+        <h2 class="dim eyebrow mb-3">{pt ? 'Fora da sala' : 'Outside class'}</h2>
+        <ul class="space-y-4">
+          {extracurriculares.map((x) => (
+            <li>
+              <p class="font-semibold">{x.nome[lang]} <span class="font-mono text-xs font-normal text-muted">{x.periodo}</span></p>
+              <p class="text-muted">{x.texto[lang]}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+    <Rodape lang={lang} />
+  </main>
+</Base>

@@ -1,0 +1,81 @@
+---
+import type { Area, Lang } from '@content/types';
+import { perfil } from '@content/perfil';
+import Base from '@/layouts/Base.astro';
+import Topo from './Topo.astro';
+import Rodape from './Rodape.astro';
+import CvDocumento from './CvDocumento.astro';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const pt = lang === 'pt';
+const areas: { id: Area; nome: string }[] = [
+  { id: 'fullstack', nome: 'Full Stack' },
+  { id: 'ia', nome: pt ? 'IA e Dados' : 'AI and Data' },
+];
+const pdf = (a: Area) => `/cv/cv-lucas-kenzo-${a}-${lang}.pdf`;
+---
+<Base
+  lang={lang}
+  title={pt ? 'Currículo — Lucas Kenzo Murakami Tada' : 'Résumé — Lucas Kenzo Murakami Tada'}
+  description={pt ? 'Currículo de Lucas Kenzo: Trainee 2027 em tecnologia, Full Stack e IA e Análise de Dados. Versão web e PDF.' : 'Résumé of Lucas Kenzo: 2027 technology trainee, Full Stack and AI and Data Analysis. Web and PDF versions.'}
+>
+  <Topo lang={lang} atual="curriculo" />
+  <main id="conteudo" class="mx-auto max-w-[1000px] px-4 pt-12 pb-20 sm:px-8">
+    <p class="eyebrow">{perfil.busca[lang]}</p>
+    <h1 class="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">{pt ? 'Currículo' : 'Résumé'}</h1>
+    <p class="mt-3 max-w-[62ch] text-muted">
+      {pt
+        ? 'Duas versões geradas dos mesmos dados do site: muda o título, a ordem dos projetos e os cursos. O PDF tem texto selecionável, uma página e é próprio para sistemas de triagem (ATS).'
+        : 'Two versions generated from the same data as the site: the headline, project order and courses change. The PDF has selectable text, fits one page and is ATS friendly.'}
+    </p>
+
+    <div class="mt-8 flex flex-wrap items-center gap-3">
+      <div class="hidden rounded-full border border-line p-1 [.js_&]:inline-flex" role="group" aria-label={pt ? 'Versão do currículo' : 'Résumé version'}>
+        {areas.map((a, i) => (
+          <button type="button" data-area={a.id} aria-pressed={i === 0 ? 'true' : 'false'} class="rounded-full px-4 py-1.5 text-sm font-semibold text-muted transition-colors aria-pressed:bg-accent aria-pressed:text-accent-ink">{a.nome}</button>
+        ))}
+      </div>
+      {areas.map((a, i) => (
+        <a href={pdf(a.id)} download data-pdf={a.id} hidden={i !== 0} class="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink">
+          {pt ? `Baixar PDF · ${a.nome}` : `Download PDF · ${a.nome}`}
+        </a>
+      ))}
+      <noscript>
+        {areas.slice(1).map((a) => <a href={pdf(a.id)} class="rounded-lg border border-line px-4 py-2.5 text-sm font-semibold">{pt ? `PDF · ${a.nome}` : `PDF · ${a.nome}`}</a>)}
+      </noscript>
+    </div>
+
+    {areas.map((a, i) => (
+      <div data-cv={a.id} class:list={['folha-web mt-8', { 'nao-ativa': i !== 0 }]}>
+        <CvDocumento lang={lang} area={a.id} web />
+      </div>
+    ))}
+    <Rodape lang={lang} />
+  </main>
+</Base>
+
+<style>
+  .folha-web {
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: #fff;
+    padding: clamp(1.25rem, 4vw, 3rem);
+    box-shadow: 0 30px 60px -40px rgb(20 22 27 / 0.45);
+    font-size: 1.12rem;
+    overflow-wrap: anywhere;
+  }
+  :global(.js) .nao-ativa { display: none; }
+</style>
+
+<script>
+  const botoes = document.querySelectorAll<HTMLButtonElement>('[data-area]');
+  botoes.forEach((b) =>
+    b.addEventListener('click', () => {
+      const a = b.dataset.area!;
+      botoes.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      document.querySelectorAll<HTMLElement>('[data-cv]').forEach((el) => el.classList.toggle('nao-ativa', el.dataset.cv !== a));
+      document.querySelectorAll<HTMLElement>('[data-pdf]').forEach((el) => (el.hidden = el.dataset.pdf !== a));
+    }),
+  );
+</script>

@@ -1,0 +1,52 @@
+# Builds the portfolio (site + CV PDFs + social cards) and publishes it to GitHub Pages at
+# https://lucaskenz.github.io/ (user site, domain root). Project sites such as
+# https://lucaskenz.github.io/mover-campus-3d-site/ live in their own repositories and are not touched.
+name: Publicar no GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.8.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Chromium for the CV PDFs and the Open Graph cards generated after `astro build`.
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+      # Safety net: the portfolio must never ship a folder that would shadow the MOVER project site.
+      - name: Conferir que nao existe dist/mover-campus-3d-site
+        run: test ! -e dist/mover-campus-3d-site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

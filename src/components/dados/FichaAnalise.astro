@@ -1,0 +1,25 @@
+---
+// Technical sheet of one analysis (objective, motive, target, predictors, method, metric, validation, outcome).
+import type { Lang } from '@content/types';
+import type { Ficha } from './tipos';
+
+interface Props { ficha: Ficha; lang: Lang; titulo?: string; aberta?: boolean; compacta?: boolean }
+const { ficha, lang, titulo, aberta = false, compacta = false } = Astro.props;
+const campos: [keyof Ficha, { pt: string; en: string }][] = [
+  ['objetivo', { pt: 'Objetivo', en: 'Objective' }],
+  ['porque', { pt: 'Por quê', en: 'Why' }],
+  ['alvo', { pt: 'Variável alvo', en: 'Target variable' }],
+  ['preditoras', { pt: 'Variáveis preditoras / explicativas', en: 'Predictors / explanatory variables' }],
+  ['metodo', { pt: 'Método', en: 'Method' }],
+  ['metrica', { pt: 'Métrica', en: 'Metric' }],
+  ['validacao', { pt: 'Validação', en: 'Validation' }],
+  ['atingido', { pt: 'Objetivo atingido?', en: 'Objective reached?' }],
+];
+const lista = compacta ? campos.filter(([k]) => ['objetivo', 'porque', 'alvo', 'preditoras', 'metodo', 'atingido'].includes(k)) : campos;
+---
+<details class:list={['ficha', { 'ficha-compacta': compacta }]} open={aberta}>
+  <summary>{titulo ?? (lang === 'pt' ? 'Ficha técnica da análise' : 'Analysis technical sheet')}</summary>
+  <dl>
+    {lista.map(([k, rot]) => <div class:list={[{ 'ficha-destaque': k === 'objetivo' || k === 'atingido' }]}><dt>{rot[lang]}</dt><dd>{ficha[k][lang]}</dd></div>)}
+  </dl>
+</details>

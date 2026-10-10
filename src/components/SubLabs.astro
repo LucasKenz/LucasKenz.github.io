@@ -1,0 +1,87 @@
+---
+// Sub-labs inside a Lab page: tabs, each with context (public facts with links), question -> decision
+// -> result, a light 3D chart (loaded only when its tab is shown) and a few numbers.
+import type { Lang } from '@content/types';
+import type { SubLab } from '@content/lab-historias/farma-sublabs';
+import Mini3D from '@/lab/dados/Mini3D';
+import FichaAnalise from './dados/FichaAnalise.astro';
+
+interface Props { subs: SubLab[]; lang: Lang; titulo: { pt: string; en: string }; intro: { pt: string; en: string } }
+const { subs, lang, titulo, intro } = Astro.props;
+const R = {
+  contexto: { pt: 'Contexto público', en: 'Public context' },
+  pergunta: { pt: 'Pergunta', en: 'Question' },
+  decisao: { pt: 'Como medi', en: 'How I measured it' },
+  resultado: { pt: 'Resultado', en: 'Result' },
+  contribuicao: { pt: 'Onde isso ajuda', en: 'Where this helps' },
+  fonte: { pt: 'Fontes', en: 'Sources' },
+};
+---
+<section id="sublabs" class="md sl" aria-labelledby="h-sublabs">
+  <h2 id="h-sublabs"><span>{titulo[lang]}</span></h2>
+  <p class="md-intro">{intro[lang]}</p>
+
+  <div class="sl-abas" role="tablist" aria-label={titulo[lang]} data-abas>
+    {subs.map((s, i) => (
+      <button type="button" role="tab" id={`aba-${s.id}`} aria-controls={`painel-${s.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} class="sl-aba">
+        <span class="sl-n">{String(i + 1).padStart(2, '0')}</span>{s.titulo[lang]}
+      </button>
+    ))}
+  </div>
+
+  {subs.map((s, i) => (
+    <div class="sl-painel" role="tabpanel" id={`painel-${s.id}`} aria-labelledby={`aba-${s.id}`} hidden={i !== 0}>
+      <div class="md-corpo">
+        <div class="md-texto">
+          <div class="sl-contexto"><small>{R.contexto[lang]}</small><p>{s.contexto[lang]}</p></div>
+          <p class="md-pergunta"><small>{R.pergunta[lang]}</small>{s.pergunta[lang]}</p>
+          <p><small>{R.decisao[lang]}</small>{s.decisao[lang]}</p>
+          <p class="md-resultado"><small>{R.resultado[lang]}</small>{s.resultado[lang]}</p>
+          <p><small>{R.contribuicao[lang]}</small>{s.contribuicao[lang]}</p>
+          <FichaAnalise ficha={s.ficha} lang={lang} />
+          <p class="md-fonte">{R.fonte[lang]}: {s.fontes.map((f, k) => <>{k > 0 && ' · '}{f.url ? <a href={f.url} rel="noopener">{f.nome}</a> : <code>{f.nome}</code>}</>)}</p>
+        </div>
+        <figure class="md-fig">
+          <p class="md-fig-t">{s.mini.titulo[lang]}</p>
+          <Mini3D client:visible spec={s.mini.spec} lang={lang} />
+          {s.numeros && (
+            <div class="md-stats sl-numeros">
+              {s.numeros.map((n) => <div><b>{typeof n.valor === 'string' ? n.valor : n.valor[lang]}</b><span>{n.rotulo[lang]}</span></div>)}
+            </div>
+          )}
+          {s.mini.nota && <p class="md-nota">{s.mini.nota[lang]}</p>}
+        </figure>
+      </div>
+    </div>
+  ))}
+</section>
+
+<script>
+  // Accessible tabs: click, arrow keys, Home/End. Hidden panels keep their 3D chart unloaded.
+  document.querySelectorAll<HTMLElement>('[data-abas]').forEach((lista) => {
+    const abas = [...lista.querySelectorAll<HTMLButtonElement>('[role=tab]')];
+    const ativar = (i: number, foco = true) => {
+      abas.forEach((a, k) => {
+        const sel = k === i;
+        a.setAttribute('aria-selected', String(sel));
+        a.tabIndex = sel ? 0 : -1;
+        document.getElementById(a.getAttribute('aria-controls')!)!.hidden = !sel;
+      });
+      if (foco) abas[i].focus();
+      history.replaceState(null, '', `#${abas[i].getAttribute('aria-controls')}`);
+    };
+    abas.forEach((a, i) => a.addEventListener('click', () => ativar(i, false)));
+    lista.addEventListener('keydown', (e) => {
+      const i = abas.indexOf(document.activeElement as HTMLButtonElement);
+      if (i < 0) return;
+      if (e.key === 'ArrowRight') ativar((i + 1) % abas.length);
+      else if (e.key === 'ArrowLeft') ativar((i - 1 + abas.length) % abas.length);
+      else if (e.key === 'Home') ativar(0);
+      else if (e.key === 'End') ativar(abas.length - 1);
+      else return;
+      e.preventDefault();
+    });
+    const inicial = abas.findIndex((a) => `#${a.getAttribute('aria-controls')}` === location.hash);
+    if (inicial > 0) ativar(inicial, false);
+  });
+</script>

@@ -1,0 +1,10 @@
+---
+import type { Lang } from '@content/types';
+import { ui } from '@/i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+---
+<footer class="mt-24 border-t border-line pt-6 text-sm text-muted">
+  <p>{ui.feitoCom[lang]} © {new Date().getFullYear()} Lucas Kenzo Murakami Tada.</p>
+</footer>

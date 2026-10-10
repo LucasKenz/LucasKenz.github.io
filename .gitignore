@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.astro/
+*.local.*
+private/
+docs/direcoes/*.gif
+docs/direcoes/serpentina.png
+prompt code.txt
+Adicionar site ar condicionado.txt
+referencias/
+# F4: regenerable heavy outputs (scripts/lighthouse.mjs, scripts/capturas.mjs)
+docs/lighthouse/*.report.*
+docs/capturas/f4/*/
+!docs/capturas/f4/og/

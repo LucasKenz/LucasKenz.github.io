@@ -1,0 +1,47 @@
+---
+// Project media: muted looping video with a poster, or a still image.
+// Video only plays when visible and stops under prefers-reduced-motion (see script).
+import type { Lang, Midia } from '@content/types';
+
+interface Props { midia: Midia; lang: Lang; class?: string; eager?: boolean }
+const { midia, lang, class: cls = '', eager = false } = Astro.props;
+---
+{midia.video ? (
+  <video
+    class={cls}
+    width={midia.width}
+    height={midia.height}
+    poster={midia.poster}
+    muted
+    loop
+    playsinline
+    preload="none"
+    data-auto
+    aria-label={midia.alt[lang]}
+  >
+    {midia.video.webm && <source src={midia.video.webm} type="video/webm" />}
+    <source src={midia.video.mp4} type="video/mp4" />
+  </video>
+) : (
+  <img
+    class={cls}
+    src={midia.poster}
+    width={midia.width}
+    height={midia.height}
+    alt={midia.alt[lang]}
+    loading={eager ? 'eager' : 'lazy'}
+    decoding="async"
+  />
+)}
+
+<script>
+  const reduz = matchMedia('(prefers-reduced-motion: reduce)');
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const v = e.target as HTMLVideoElement;
+      if (e.isIntersecting && !reduz.matches) v.play().catch(() => {});
+      else v.pause();
+    }
+  }, { threshold: 0.25 });
+  document.querySelectorAll<HTMLVideoElement>('video[data-auto]').forEach((v) => io.observe(v));
+</script>

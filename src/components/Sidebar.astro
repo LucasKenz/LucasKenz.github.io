@@ -1,0 +1,58 @@
+---
+import type { Lang } from '@content/types';
+import { perfil } from '@content/perfil';
+import { ui } from '@/i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const cv = `/cv/cv-lucas-kenzo-fullstack-${lang}.pdf`;
+const secoes = [
+  { id: 'projetos', label: ui.navProjetos[lang] },
+  { id: 'trajetoria', label: ui.navTrajetoria[lang] },
+  { id: 'lab', label: ui.navLab[lang] },
+  { id: 'contato', label: ui.navContato[lang] },
+];
+---
+<section aria-label={lang === 'pt' ? 'Apresentação' : 'Introduction'} class="flex flex-col gap-5 pt-10 pb-6 lg:sticky lg:top-14 lg:h-[calc(100dvh-3.5rem)] lg:justify-between lg:py-12">
+  <div class="flex flex-col gap-5">
+    <div class="flex items-center justify-between">
+      <img
+        src={perfil.foto.src}
+        alt={perfil.foto.alt[lang]}
+        width="80"
+        height="80"
+        class="size-20 rounded-full border border-line object-cover"
+      />
+    </div>
+    <div>
+      <h1 class="text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl">{perfil.nome}</h1>
+      <p class="mt-3 text-lg font-medium">{perfil.titulo[lang]}</p>
+    </div>
+    <p class="max-w-[34ch] text-muted">{perfil.frase[lang]}</p>
+    <p class="eyebrow flex items-center gap-2">
+      <span class="relative flex size-2"><span class="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-60"></span><span class="relative inline-flex size-2 rounded-full bg-accent"></span></span>
+      {perfil.busca[lang]} · {perfil.cidade[lang]}
+    </p>
+    <div class="flex flex-wrap gap-2.5">
+      <a href="#projetos" class="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink transition-transform duration-200 ease-out-soft hover:-translate-y-0.5">{ui.verProjetos[lang]}</a>
+      <a href={cv} class="rounded-lg border border-ink/80 px-4 py-2.5 text-sm font-semibold transition-transform duration-200 ease-out-soft hover:-translate-y-0.5" download>{ui.baixarCv[lang]}</a>
+    </div>
+    <nav aria-label={lang === 'pt' ? 'Seções' : 'Sections'} class="mt-6 hidden lg:block">
+      <ul class="flex flex-col gap-1">
+        {secoes.map((s) => (
+          <li>
+            <a href={`#${s.id}`} data-nav={s.id} class="group flex items-center gap-3 py-1.5 text-xs font-semibold tracking-widest text-muted uppercase transition-colors hover:text-ink aria-[current=true]:text-ink">
+              <span class="h-px w-6 bg-current transition-all duration-300 ease-out-soft group-hover:w-14 group-aria-[current=true]:w-14"></span>
+              {s.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+  <ul class="flex items-center gap-4 text-sm text-muted">
+    <li><a class="hover:text-ink" href={perfil.github} rel="me">GitHub</a></li>
+    <li><a class="hover:text-ink" href={perfil.linkedin} rel="me">LinkedIn</a></li>
+    <li><a class="hover:text-ink" href={`mailto:${perfil.email}`}>E-mail</a></li>
+  </ul>
+</section>

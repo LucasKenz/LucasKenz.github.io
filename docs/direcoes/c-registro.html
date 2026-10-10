@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Direção C · Registro</title>
+<style>
+:root{--bg:#fbfbfa;--ink:#111;--muted:#6b6b6b;--line:#e6e6e3;--accent:#2F5BEA}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 "Segoe UI",system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:96px 20px}
+.mono{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:13px;color:var(--muted)}
+h1{font-size:20px;margin:0}h2{font-size:13px;font-weight:600;margin:56px 0 12px;color:var(--muted);font-family:ui-monospace,Consolas,monospace}
+p{margin:12px 0}a{color:var(--ink);text-decoration-color:var(--line);text-underline-offset:3px}a:hover{text-decoration-color:var(--accent)}
+.item{display:grid;grid-template-columns:96px 1fr;gap:16px;padding:10px 0;border-top:1px solid var(--line);position:relative}
+.item b{font-weight:600}.item span.d{color:var(--muted)}
+.prev{position:absolute;right:-300px;top:-20px;width:260px;border-radius:8px;border:1px solid var(--line);opacity:0;transform:translateY(6px) rotate(-2deg);transition:.2s;pointer-events:none}
+.item:hover .prev{opacity:1;transform:none}
+.now{border-left:2px solid var(--accent);padding-left:14px}
+@media (max-width:1100px){.prev{display:none}}
+@media (max-width:600px){.item{grid-template-columns:1fr;gap:0}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Lucas Kenzo Murakami Tada</h1>
+  <p class="mono">Full Stack · IA e Dados · São Paulo</p>
+  <p>Estudo Ciência da Computação no Instituto Mauá e procuro um Trainee 2027. Gosto de software que sai da tela: um caminhão autônomo simulado, um app de acesso para a SPTrans, agentes que revisam código.</p>
+  <p><a href="#">Projetos</a> · <a href="#">Currículo (PDF)</a> · <a href="#">LinkedIn</a> · <a href="#">GitHub</a></p>
+  <h2>// agora</h2>
+  <p class="now">Fechando o TCC MOVER e estagiando na SBN Engenharia.</p>
+  <h2>// projetos</h2>
+  <div class="item"><span class="mono">2026</span><div><a href="#"><b>MOVER · Campus Mauá 3D</b></a> <span class="d">— gêmeo digital, caminhão autônomo, 784 m de anel.</span><img class="prev" src="mover_campus.gif" alt=""></div></div>
+  <div class="item"><span class="mono">2026</span><div><a href="#"><b>Serpentina</b></a> <span class="d">— orçamento de ar-condicionado aprovado no celular.</span><img class="prev" src="serpentina.png" alt=""></div></div>
+  <div class="item"><span class="mono">2025</span><div><a href="#"><b>GiTeam</b></a> <span class="d">— agentes de IA que revisaram 1.000+ PRs.</span></div></div>
+  <div class="item"><span class="mono">2024</span><div><b>SPTrans · acesso facial</b> <span class="d">— 95% de acurácia em ~5 s.</span></div></div>
+  <h2>// lab</h2>
+  <div class="item"><span class="mono">sim</span><div><a href="#"><b>Cidade de uma semente</b></a> <span class="d">— procedural, determinística.</span></div></div>
+  <div class="item"><span class="mono">sim</span><div><a href="#"><b>Robô por matemática</b></a> <span class="d">— IK, molas, sem keyframe.</span></div></div>
+</main>
+</body>
+</html>
