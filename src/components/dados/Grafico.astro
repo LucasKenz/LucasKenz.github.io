@@ -1,0 +1,185 @@
+---
+// Static SVG charts for the Lab data stories (one axis per chart, recessive grid, thin marks,
+// legend for 2+ series, native <title> tooltips on every mark, figure caption and source text).
+import type { Lang } from '@content/types';
+import type { Formato, Grafico } from './tipos';
+
+interface Props { g: Grafico; lang: Lang }
+const { g, lang } = Astro.props;
+const loc = lang === 'pt' ? 'pt-BR' : 'en-US';
+const t = (x: { pt: string; en: string } | string) => (typeof x === 'string' ? x : x[lang]);
+function fmt(v: number | null | undefined, f: Formato): string {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '—';
+  const n = (k: number, x = v) => x.toLocaleString(loc, { minimumFractionDigits: k, maximumFractionDigits: k });
+  switch (f) {
+    case 'int': return v.toLocaleString(loc, { maximumFractionDigits: 0 });
+    case 'dec1': return n(1);
+    case 'dec2': return n(2);
+    case 'dec3': return n(3);
+    case 'pct0': return `${n(0, v * 100)} %`;
+    case 'pct1': return `${n(1, v * 100)} %`;
+    case 'pp': return `${n(2)} %`;
+    case 'bi': return `R$ ${n(1)} bi`;
+    case 'mw': return `${v.toLocaleString(loc, { maximumFractionDigits: 0 })} MW`;
+    case 'reais': return `R$ ${n(2)}`;
+    default: return String(v);
+  }
+}
+const W = 640;
+function escala(min: number, max: number) {
+  if (min === max) { min -= 1; max += 1; }
+  const passo = Math.pow(10, Math.floor(Math.log10((max - min) / 4)));
+  const k = [1, 2, 2.5, 5, 10].find((m) => (max - min) / (passo * m) <= 5) ?? 10;
+  const s = passo * k;
+  const a = Math.floor(min / s) * s, b = Math.ceil(max / s) * s;
+  const ticks: number[] = [];
+  for (let v = a; v <= b + s / 2; v += s) ticks.push(Math.round(v / s) * s);
+  return { a, b, ticks };
+}
+
+// ---------- lines ----------
+let L: any = null;
+if (g.tipo === 'linhas') {
+  const vals = g.series.flatMap((s) => s.valores).filter((v): v is number => v !== null && Number.isFinite(v));
+  const e = escala(g.yMin ?? Math.min(...vals), Math.max(...vals));
+  const x0 = 56, x1 = W - 12, y0 = 10, y1 = 190, n = g.x.length;
+  const px = (i: number) => x0 + (i / Math.max(1, n - 1)) * (x1 - x0);
+  const py = (v: number) => y1 - ((v - e.a) / (e.b - e.a)) * (y1 - y0);
+  const caminhos = g.series.map((s) => {
+    let d = '', aberto = false;
+    s.valores.forEach((v, i) => {
+      if (v === null || !Number.isFinite(v)) { aberto = false; return; }
+      d += `${aberto ? 'L' : 'M'}${px(i).toFixed(1)},${py(v).toFixed(1)}`;
+      aberto = true;
+    });
+    return { ...s, d };
+  });
+  const passoX = Math.ceil(n / 8);
+  L = { e, x0, x1, y0, y1, px, py, caminhos, passoX, n };
+}
+
+// ---------- bars ----------
+let B: any = null;
+if (g.tipo === 'barras') {
+  const vals = g.itens.flatMap((i) => i.valores).filter((v): v is number => v !== null);
+  // Diverging when there are negative values: bars grow left/right from a zero line.
+  const vmax = g.maxFixo ?? Math.max(0, ...vals), vmin = Math.min(0, ...vals);
+  const ns = g.series.length;
+  const alturaBarra = ns === 1 ? 14 : 8;
+  const linha = ns * (alturaBarra + 2) + 12;
+  const x0 = 190, w = W - 190 - 90 - (vmin < 0 ? 40 : 0);
+  const k = w / (vmax - vmin || 1);
+  const zero = x0 + (vmin < 0 ? 40 : 0) + -vmin * k;
+  const barra = (v: number) => ({ x: v >= 0 ? zero : zero + v * k, w: Math.max(2, Math.abs(v) * k) });
+  B = { ns, alturaBarra, linha, x0, zero, barra, neg: vmin < 0, h: g.itens.length * linha + 6 };
+}
+
+// ---------- scatter ----------
+let D: any = null;
+if (g.tipo === 'dispersao') {
+  const xs = g.pontos.map((p) => p.x), ys = g.pontos.map((p) => p.y).concat((g.curva ?? []).map((c) => c.y));
+  const fx = (v: number) => (g.logX ? Math.log10(Math.max(v, 1e-9)) : v);
+  const ex = escala(Math.min(...xs.map(fx)), Math.max(...xs.map(fx)));
+  const ey = escala(Math.min(...ys), Math.max(...ys));
+  const x0 = 56, x1 = W - 12, y0 = 10, y1 = 210;
+  const px = (v: number) => x0 + ((fx(v) - ex.a) / (ex.b - ex.a)) * (x1 - x0);
+  const py = (v: number) => y1 - ((v - ey.a) / (ey.b - ey.a)) * (y1 - y0);
+  const curva = g.curva?.map((c, i) => `${i ? 'L' : 'M'}${px(c.x).toFixed(1)},${py(c.y).toFixed(1)}`).join('');
+  D = { ex, ey, x0, x1, y0, y1, px, py, curva };
+}
+
+// ---------- histogram ----------
+let H: any = null;
+if (g.tipo === 'hist') {
+  const max = Math.max(...g.contagens);
+  const x0 = 44, x1 = W - 12, y0 = 14, y1 = 170, n = g.contagens.length, bw = (x1 - x0) / n;
+  const a = g.bordas[0], b = g.bordas[g.bordas.length - 1];
+  const px = (v: number) => x0 + ((v - a) / (b - a)) * (x1 - x0);
+  H = { max, x0, x1, y0, y1, bw, px, n };
+}
+---
+<div class="md-graf">
+  {'titulo' in g && g.titulo && <p class="md-fig-t">{t(g.titulo)}</p>}
+
+  {g.tipo === 'linhas' && L && (
+    <>
+      {g.series.length > 1 && <ul class="md-leg">{g.series.map((s) => <li><i style={`background:${s.cor}`}></i>{t(s.nome)}</li>)}</ul>}
+      <svg viewBox={`0 0 ${W} 210`} role="img" aria-label={t(g.aria)}>
+        {L.e.ticks.map((v: number) => <g><line x1={L.x0} x2={L.x1} y1={L.py(v)} y2={L.py(v)} class="md-grade" /><text x={L.x0 - 6} y={L.py(v) + 4} text-anchor="end" class="md-eixo">{fmt(v, g.formato)}</text></g>)}
+        {(g.marcas ?? []).map((m) => <g><line x1={L.px(m.i)} x2={L.px(m.i)} y1={L.y0} y2={L.y1} stroke="#ffc21a" stroke-dasharray="3 3" /><text x={L.px(m.i) + 4} y={L.y0 + 10} class="md-valor">{t(m.rotulo)}</text></g>)}
+        {L.caminhos.map((c: any) => <path d={c.d} fill="none" stroke={c.cor} stroke-width="2" stroke-dasharray={c.tracejada ? '5 4' : undefined} stroke-linejoin="round" />)}
+        {g.series.map((s) => s.valores.map((v, i) => v !== null && Number.isFinite(v) && (
+          <circle cx={L.px(i)} cy={L.py(v)} r="6" fill="transparent"><title>{`${t(s.nome)} · ${g.x[i]}: ${fmt(v, g.formato)}`}</title></circle>
+        )))}
+        {g.x.map((x, i) => (i % L.passoX === 0 || i === L.n - 1) && <text x={L.px(i)} y={205} text-anchor="middle" class="md-eixo">{x}</text>)}
+      </svg>
+    </>
+  )}
+
+  {g.tipo === 'barras' && B && (
+    <>
+      {B.ns > 1 && <ul class="md-leg">{g.series.map((s) => <li><i style={`background:${s.cor}`}></i>{t(s.nome)}</li>)}</ul>}
+      <svg viewBox={`0 0 ${W} ${B.h}`} role="img" aria-label={t(g.aria)}>
+        {B.neg && <line x1={B.zero} x2={B.zero} y1={0} y2={B.h} stroke="#a8b2cc" stroke-opacity="0.5" />}
+        {g.itens.map((it, k) => {
+          const y = 4 + k * B.linha;
+          return (
+            <g>
+              <title>{`${t(it.rotulo)}: ${it.valores.map((v, j) => `${t(g.series[j].nome)} ${fmt(v, g.formato)}`).join(' · ')}`}</title>
+              <text x={B.x0 - 8} y={y + (B.ns * (B.alturaBarra + 2)) / 2 + 4} text-anchor="end" class="md-eixo">{t(it.rotulo).length > 28 ? `${t(it.rotulo).slice(0, 27)}…` : t(it.rotulo)}</text>
+              {it.valores.map((v, j) => v !== null && (
+                <>
+                  <rect x={B.barra(v).x} y={y + j * (B.alturaBarra + 2)} width={B.barra(v).w} height={B.alturaBarra} rx="3" fill={v < 0 && B.ns === 1 ? '#d95926' : g.series[j].cor} />
+                  <text x={v < 0 ? B.barra(v).x - 6 : B.barra(v).x + B.barra(v).w + 6} y={y + j * (B.alturaBarra + 2) + B.alturaBarra - 1} text-anchor={v < 0 ? 'end' : 'start'} class="md-valor">{fmt(v, g.formato)}</text>
+                </>
+              ))}
+            </g>
+          );
+        })}
+      </svg>
+    </>
+  )}
+
+  {g.tipo === 'dispersao' && D && (
+    <>
+      {g.grupos.length > 1 && <ul class="md-leg">{g.grupos.map((s) => <li><i style={`background:${s.cor}`}></i>{t(s.nome)}</li>)}</ul>}
+      <svg viewBox={`0 0 ${W} 236`} role="img" aria-label={t(g.aria)}>
+        {D.ey.ticks.map((v: number) => <g><line x1={D.x0} x2={D.x1} y1={D.py(v)} y2={D.py(v)} class="md-grade" /><text x={D.x0 - 6} y={D.py(v) + 4} text-anchor="end" class="md-eixo">{fmt(v, g.formatoY)}</text></g>)}
+        {D.ex.ticks.map((v: number) => <text x={D.x0 + ((v - D.ex.a) / (D.ex.b - D.ex.a)) * (D.x1 - D.x0)} y={228} text-anchor="middle" class="md-eixo">{fmt(g.logX ? 10 ** v : v, g.formatoX)}</text>)}
+        {g.pontos.map((p) => (
+          <circle cx={D.px(p.x)} cy={D.py(p.y)} r="4" fill={g.grupos[p.g].cor} fill-opacity="0.75" stroke="#0c1328" stroke-width="1"><title>{`${t(g.grupos[p.g].nome)} · ${t(g.eixoX)} ${fmt(p.x, g.formatoX)} · ${t(g.eixoY)} ${fmt(p.y, g.formatoY)}`}</title></circle>
+        ))}
+        {D.curva && <path d={D.curva} fill="none" stroke="#eef1fa" stroke-width="2" stroke-dasharray="5 4" />}
+      </svg>
+      <p class="md-sub md-eixos">{t(g.eixoX)}{g.logX ? (lang === 'pt' ? ' (escala log)' : ' (log scale)') : ''} × {t(g.eixoY)}</p>
+    </>
+  )}
+
+  {g.tipo === 'hist' && H && (
+    <svg viewBox={`0 0 ${W} 194`} role="img" aria-label={t(g.aria)}>
+      {g.contagens.map((c, i) => <rect x={H.x0 + i * H.bw + 1} y={H.y1 - (c / H.max) * (H.y1 - H.y0)} width={H.bw - 2} height={(c / H.max) * (H.y1 - H.y0)} rx="2" fill={g.cor}><title>{`${fmt(g.bordas[i], g.formato)} – ${fmt(g.bordas[i + 1], g.formato)}: ${c}`}</title></rect>)}
+      <line x1={H.x0} x2={H.x1} y1={H.y1} y2={H.y1} class="md-grade" />
+      {g.marca && <g><line x1={H.px(g.marca.valor)} x2={H.px(g.marca.valor)} y1={H.y0 - 6} y2={H.y1} stroke="#eef1fa" stroke-dasharray="3 3" /><text x={H.px(g.marca.valor) + 5} y={H.y0 + 4} class="md-valor">{t(g.marca.rotulo)}</text></g>}
+      {g.bordas.map((b, i) => i % Math.ceil(g.bordas.length / 8) === 0 && <text x={H.px(b)} y={188} text-anchor="middle" class="md-eixo">{fmt(b, g.formato)}</text>)}
+    </svg>
+  )}
+
+  {g.tipo === 'tabela' && (
+    <div class="md-tabela" tabindex="0">
+      <table>
+        <thead><tr>{g.colunas.map((c) => <th scope="col">{t(c)}</th>)}</tr></thead>
+        <tbody>{g.linhas.map((l) => <tr>{l.map((c, i) => (i === 0 ? <th scope="row">{t(c)}</th> : <td>{t(c)}</td>))}</tr>)}</tbody>
+      </table>
+    </div>
+  )}
+
+  {g.tipo === 'numeros' && (
+    <div class="md-stats">
+      {g.itens.map((n) => (
+        <div><b>{n.valor}</b><span>{t(n.rotulo)}</span>{n.medidor !== undefined && <div class="md-meter" aria-hidden="true"><i style={`width:${Math.max(0, Math.min(1, n.medidor)) * 100}%`}></i></div>}</div>
+      ))}
+    </div>
+  )}
+
+  {'nota' in g && g.nota && <p class="md-nota">{t(g.nota)}</p>}
+</div>

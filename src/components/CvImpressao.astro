@@ -1,0 +1,31 @@
+---
+// Print-only page for the PDF: white, A4, no navigation. Not indexed.
+import '@/styles/global.css';
+import type { Area, Lang } from '@content/types';
+import { perfil } from '@content/perfil';
+import CvDocumento from './CvDocumento.astro';
+
+interface Props { lang: Lang; area: Area }
+const { lang, area } = Astro.props;
+---
+<!doctype html>
+<html lang={lang === 'pt' ? 'pt-BR' : 'en'} data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{perfil.nome} — CV</title>
+    <style is:global>
+      @page { size: A4; margin: 8mm 11mm; }
+      html, body { background: #fff !important; background-image: none !important; }
+      body { margin: 0; }
+      .folha { max-width: 184mm; margin: 0 auto; padding: 8mm 0; }
+      @media print { .folha { padding: 0; } }
+    </style>
+  </head>
+  <body>
+    <main class="folha">
+      <CvDocumento lang={lang} area={area} />
+    </main>
+  </body>
+</html>

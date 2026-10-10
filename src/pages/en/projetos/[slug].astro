@@ -1,0 +1,10 @@
+---
+import { projetos } from '@content/projetos';
+import EstudoPagina from '@/components/EstudoPagina.astro';
+
+export function getStaticPaths() {
+  return projetos.filter((p) => p.estudoDeCaso).map((p) => ({ params: { slug: p.slug }, props: { projeto: p } }));
+}
+const { projeto } = Astro.props;
+---
+<EstudoPagina projeto={projeto} lang="en" />

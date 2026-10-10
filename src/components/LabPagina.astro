@@ -1,0 +1,117 @@
+---
+import type { Lang, LabItem } from '@content/types';
+import { lab } from '@content/lab';
+import Base from '@/layouts/Base.astro';
+import LabTopo from './LabTopo.astro';
+import Lentes from '@/lab/lentes/Lentes';
+import Adiado from '@/lab/comum/Adiado';
+import MoverDados from './MoverDados.astro';
+import HistoriaDados from './HistoriaDados.astro';
+import { historias } from '@content/lab-historias';
+import { subLabsFarma } from '@content/lab-historias/farma-sublabs';
+import { fichasMover } from '@content/lab-historias/fichas-mover';
+import { moverTexto } from '@content/mover-texto';
+import SubLabs from './SubLabs.astro';
+import FichaAnalise from './dados/FichaAnalise.astro';
+import '@/styles/lab.css';
+
+interface Props { lang: Lang; item: LabItem }
+const { lang, item } = Astro.props;
+const base = lang === 'pt' ? '' : '/en';
+const i = lab.findIndex((l) => l.slug === item.slug);
+const n2 = (k: number) => String(k + 1).padStart(2, '0');
+const rolavel = item.slug === 'lentes';
+---
+<Base lang={lang} title={`${item.nome[lang]} — Lab · Lucas Kenzo`} description={item.frase[lang]} imagem={`/media/lab-${item.slug}.webp`}>
+  <div class="lab">
+    <LabTopo lang={lang} voltar={{ href: `${base}/lab#sim-${item.slug}`, label: lang === 'pt' ? 'Seleção' : 'Select' }} marca={`LAB<b>·</b>${n2(i)}`} />
+    <main id="conteudo" class:list={['sim', { rolavel }]}>
+      <div class="sim-hud">
+        <div class="sim-tag">
+          <small>LAB · {n2(i)} / {n2(lab.length - 1)}</small>
+          <h1>{item.nome[lang]}</h1>
+        </div>
+        <p class="sim-sobre">{item.frase[lang]} <span class="font-mono text-[0.75rem] text-[#ffc21a]">{item.tecnica[lang]}</span></p>
+        <div class="sim-modo" role="group" aria-label={lang === 'pt' ? 'Modo de exibição' : 'Display mode'}>
+          <a href="?modo=visual" data-modo="visual" aria-current="true">{lang === 'pt' ? 'Visual' : 'Visual'}</a>
+          <a href="?modo=leve" data-modo="leve">{lang === 'pt' ? 'Leve' : 'Light'}</a>
+          <a href="#como-funciona">{lang === 'pt' ? 'Como funciona ↓' : 'How it works ↓'}</a>
+        </div>
+      </div>
+      <nav class="sim-outras" aria-label={lang === 'pt' ? 'Outras simulações' : 'Other simulations'}>
+        {lab.map((l, k) => <a href={`${base}/lab/${l.slug}`} aria-current={l.slug === item.slug ? 'page' : undefined} aria-label={l.nome[lang]}>{n2(k)}</a>)}
+      </nav>
+
+      {item.slug === 'lentes'
+        ? <Lentes client:visible lang={lang} />
+        : <Adiado client:only="react" cena={item.slug as 'mover' | 'seguros' | 'banco' | 'farma' | 'energia' | 'cidade' | 'robo' | 'agua'} lang={lang} poster={`/media/lab-${item.slug}.webp`} />}
+
+      {!rolavel && (
+        <noscript>
+          <p class="p-8 pt-40 text-[#a8b2cc]">{lang === 'pt' ? 'Esta simulação precisa de JavaScript e WebGL.' : 'This simulation needs JavaScript and WebGL.'}</p>
+        </noscript>
+      )}
+    </main>
+    {item.explicacao && (
+      <section id="como-funciona" class="explica" aria-labelledby="h-explica">
+        <h2 id="h-explica"><span>{lang === 'pt' ? 'Como funciona' : 'How it works'}</span></h2>
+        <p class="explica-modo">
+          {historias[item.slug]
+            ? (lang === 'pt'
+              ? 'Modo Visual: sombras, oclusão de ambiente, profundidade de campo e qualidade que se ajusta ao seu aparelho. Modo Leve: sem sombras nem pós-processamento. Cada barra é uma célula dos dados; a análise completa está logo abaixo.'
+              : 'Visual mode: shadows, ambient occlusion, depth of field and quality that adapts to your device. Light mode: no shadows or post-processing. Each bar is one cell of the data; the full analysis is right below.')
+            : item.slug === 'mover'
+            ? (lang === 'pt'
+              ? 'Modo Visual: sol quente e céu frio com sombras, oclusão de ambiente, bloom na rota e qualidade que se ajusta ao seu aparelho. Modo Leve: sem sombras nem pós-processamento. A análise completa dos dados está logo abaixo.'
+              : 'Visual mode: warm sun and cool sky with shadows, ambient occlusion, bloom on the route and quality that adapts to your device. Light mode: no shadows or post-processing. The full data analysis is right below.')
+            : lang === 'pt'
+            ? 'Modo Visual: iluminação por HDRI, oclusão de ambiente, bloom, profundidade de campo e qualidade que se ajusta ao seu aparelho. Modo Leve: sem pós-processamento, para celular, notebook fraco e para estudar a técnica.'
+            : 'Visual mode: HDRI lighting, ambient occlusion, bloom, depth of field and quality that adapts to your device. Light mode: no post-processing, for phones, weak laptops and for studying the technique.'}
+        </p>
+        {(historias[item.slug] || item.slug === 'mover') && (
+          <div class="explica-fichas">
+            <h3>{lang === 'pt' ? 'Ficha de cada análise' : 'Sheet of each analysis'}</h3>
+            <p class="explica-modo">{lang === 'pt' ? 'Objetivo, por quê, variável alvo, variáveis preditoras, método, métrica, validação e se o objetivo foi atingido.' : 'Objective, why, target variable, predictors, method, metric, validation and whether the objective was reached.'}</p>
+            <div class="explica-fichas-lista">
+              {item.slug === 'mover'
+                ? moverTexto.secoes.map((s) => fichasMover[s.id] && <FichaAnalise ficha={fichasMover[s.id]} lang={lang} titulo={s.titulo[lang]} />)
+                : historias[item.slug].secoes.map((s) => s.ficha && <FichaAnalise ficha={s.ficha} lang={lang} titulo={s.titulo[lang]} />)}
+              {item.slug === 'farma' && subLabsFarma.map((s) => <FichaAnalise ficha={s.ficha} lang={lang} titulo={`Sub-lab · ${s.titulo[lang]}`} />)}
+            </div>
+          </div>
+        )}
+        <ol class="explica-grade">
+          {item.explicacao.map((e, k) => (
+            <li>
+              <span class="explica-n">{String(k + 1).padStart(2, '0')}</span>
+              <h3>{e.titulo[lang]}</h3>
+              <p>{e.texto[lang]}</p>
+              {e.formula && <code>{e.formula}</code>}
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
+    {item.slug === 'mover' && <MoverDados lang={lang} />}
+    {historias[item.slug] && <HistoriaDados h={historias[item.slug]} lang={lang} />}
+    {item.slug === 'farma' && (
+      <SubLabs
+        subs={subLabsFarma}
+        lang={lang}
+        titulo={{ pt: 'Sub-labs: estratégia de um laboratório de genéricos', en: 'Sub-labs: a generics maker’s strategy' }}
+        intro={{
+          pt: 'Seis análises curtas, cada uma a partir de um fato público recente do setor: um lançamento que não decolou, uma compra em análise no CADE, uma falha de qualidade, um biossimilar atrasado, um recolhimento de antibiótico infantil e um problema de dado. Em cada uma: o objetivo, por que importa, como medi e se cheguei lá.',
+          en: 'Six short analyses, each starting from a recent public fact in the sector: a launch that did not take off, a deal under CADE review, a quality failure, a delayed biosimilar, a children’s antibiotic recall and a data problem. For each: the objective, why it matters, how I measured it and whether I got there.',
+        }}
+      />
+    )}
+  </div>
+</Base>
+
+<script>
+  // Highlight the current mode (the page reads ?modo= on its own).
+  const leve = new URLSearchParams(location.search).get('modo') === 'leve';
+  document.querySelectorAll<HTMLElement>('[data-modo]').forEach((a) =>
+    a.setAttribute('aria-current', String((a.dataset.modo === 'leve') === leve)),
+  );
+</script>

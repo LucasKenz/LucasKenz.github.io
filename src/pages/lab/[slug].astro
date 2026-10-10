@@ -1,0 +1,10 @@
+---
+import { lab } from '@content/lab';
+import LabPagina from '@/components/LabPagina.astro';
+
+export function getStaticPaths() {
+  return lab.map((item) => ({ params: { slug: item.slug }, props: { item } }));
+}
+const { item } = Astro.props;
+---
+<LabPagina item={item} lang="pt" />

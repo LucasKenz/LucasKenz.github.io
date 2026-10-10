@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Direção B · Maquete</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a30;--line:#24304f;--ink:#e9edf7;--muted:#97a3c0;--accent:#2F5BEA;--accent2:#7aa2ff;--warn:#ffcc33}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,sans-serif}
+.mono{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:12px;letter-spacing:.05em;color:var(--muted)}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;border-bottom:1px solid var(--line)}
+header nav{display:flex;gap:22px}header a{color:var(--muted);text-decoration:none;font-size:14px}
+.hero{display:grid;grid-template-columns:1fr 1.1fr;gap:24px;align-items:center;max-width:1240px;margin:0 auto;padding:56px 32px}
+h1{font-size:56px;line-height:1;letter-spacing:-.03em;margin:12px 0}
+h1 em{font-style:normal;color:var(--accent2)}
+.lead{color:var(--muted);font-size:18px;max-width:40ch}
+.cta{display:flex;gap:10px;margin-top:22px}.btn{padding:12px 18px;border-radius:8px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:600}
+.btn.p{background:var(--accent);border-color:var(--accent)}
+.stage{position:relative;aspect-ratio:1.25;border-radius:16px;background:radial-gradient(120% 90% at 50% 30%,#1a2547,#0b1020);border:1px solid var(--line);overflow:hidden}
+.stage svg{width:100%;height:100%}
+.hud{position:absolute;display:flex;gap:8px}.hud.t{top:14px;left:14px}.hud.b{bottom:14px;right:14px}
+.chip{background:rgba(18,26,48,.85);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.chip b{font:600 16px ui-monospace,Consolas,monospace;color:var(--ink);margin-right:6px}
+.truck{offset-path:path("M120 250 L300 160 L480 250 L300 340 Z");animation:go 9s linear infinite}
+@keyframes go{to{offset-distance:100%}}
+@media (prefers-reduced-motion:reduce){.truck{animation:none}}
+.lab{max-width:1240px;margin:0 auto;padding:24px 32px 80px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.card .v{height:150px;border-radius:8px;margin-bottom:12px}
+.card h3{margin:0 0 4px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}
+@media (max-width:900px){.hero{grid-template-columns:1fr}h1{font-size:40px}.grid{grid-template-columns:1fr}header nav{display:none}}
+</style>
+</head>
+<body>
+<header><span class="mono">LUCAS KENZO · LK</span><nav><a href="#">Projetos</a><a href="#">Lab</a><a href="#">Currículo</a><a href="#">Contato</a></nav><span class="mono">PT / EN · ◐</span></header>
+<div class="hero">
+  <div>
+    <span class="mono">TRAINEE 2027 · FULL STACK · IA E DADOS</span>
+    <h1>Software que <em>anda</em> no mundo real.</h1>
+    <p class="lead">Sou Lucas Kenzo, Ciência da Computação no Mauá. Fiz o gêmeo digital de um caminhão autônomo, apps para a SPTrans e agentes de IA que revisaram 1.000+ PRs.</p>
+    <div class="cta"><a class="btn p" href="#">Ver projetos</a><a class="btn" href="#">Baixar CV</a></div>
+  </div>
+  <div class="stage" aria-label="Miniatura 3D do caminhão MOVER no anel do campus">
+    <svg viewBox="0 0 600 480" role="img" aria-hidden="true">
+      <polygon points="300,90 560,220 300,350 40,220" fill="#16244a" stroke="#2b3c6b"/>
+      <polygon points="300,135 480,225 300,315 120,225" fill="none" stroke="#3d4f80" stroke-width="22" stroke-linejoin="round"/>
+      <polygon points="300,135 480,225 300,315 120,225" fill="none" stroke="#ffcc33" stroke-width="1.5" stroke-dasharray="8 8"/>
+      <g fill="#2F5BEA"><polygon points="250,190 300,165 340,185 290,210"/><polygon points="290,210 340,185 340,230 290,255" fill="#2148c4"/><polygon points="250,190 290,210 290,255 250,235" fill="#4a72ff"/></g>
+      <g fill="#2a8d5c"><circle cx="420" cy="180" r="10"/><circle cx="180" cy="270" r="10"/><circle cx="400" cy="290" r="9"/></g>
+      <g class="truck"><rect x="-14" y="-8" width="28" height="16" rx="3" fill="#e9edf7"/><rect x="8" y="-8" width="8" height="16" rx="2" fill="#2F5BEA"/></g>
+    </svg>
+    <div class="hud t"><span class="chip"><b>784 m</b><span class="mono">anel</span></span><span class="chip"><b>4</b><span class="mono">lombadas</span></span></div>
+    <div class="hud b"><span class="chip mono">▶ arraste para girar · ⏸ pausar</span></div>
+  </div>
+</div>
+<div class="lab">
+  <span class="mono">LAB · SIMULAÇÕES</span>
+  <div class="grid">
+    <div class="card"><div class="v" style="background:linear-gradient(160deg,#1b2a55,#0e1530)"></div><h3>Cidade de uma semente</h3><p>Mesma semente, mesma cidade. Voe com WASD.</p></div>
+    <div class="card"><div class="v" style="background:linear-gradient(160deg,#2a2140,#120f22)"></div><h3>Robô por matemática</h3><p>Olha o cursor, pega objetos com IK. Zero keyframe.</p></div>
+    <div class="card"><div class="v" style="background:linear-gradient(160deg,#10302d,#0b1a19)"></div><h3>Laboratório de lentes</h3><p>Gire o foco e veja a profundidade de campo mudar.</p></div>
+  </div>
+</div>
+</body>
+</html>

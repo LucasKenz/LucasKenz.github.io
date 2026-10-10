@@ -1,0 +1,106 @@
+---
+import '@/styles/global.css';
+import type { Lang } from '@content/types';
+import { perfil } from '@content/perfil';
+import { ui, outraRota } from '@/i18n/ui';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** Extra JSON-LD objects for this page. */
+  jsonLd?: object[];
+  /** Image (path in /public) shown on this page's social card, generated after the build. */
+  imagem?: string;
+  /** Keep the page out of search results (404). */
+  semIndice?: boolean;
+}
+const { lang, title, description, jsonLd = [], imagem, semIndice = false } = Astro.props;
+const path = Astro.url.pathname;
+const site = Astro.site!;
+const canonical = new URL(path, site).href;
+const ptPath = lang === 'pt' ? path : outraRota(path, 'en');
+const enPath = lang === 'en' ? path : outraRota(path, 'pt');
+// Social card: /og/<route>.png, made by scripts/gerar-og.mjs from this page's title and description.
+const ogChave = path.replace(/^\/|\/$/g, '').replace(/\//g, '-') || 'inicio';
+const ogImagem = new URL(`/og/${ogChave}.png`, site).href;
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: perfil.nome,
+  jobTitle: perfil.titulo[lang],
+  email: `mailto:${perfil.email}`,
+  url: perfil.site,
+  image: new URL(perfil.foto.src, site).href,
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'Instituto Mauá de Tecnologia' },
+  address: { '@type': 'PostalAddress', addressLocality: 'São Paulo', addressCountry: 'BR' },
+  sameAs: [perfil.linkedin, perfil.github],
+};
+---
+<!doctype html>
+<html lang={lang === 'pt' ? 'pt-BR' : 'en'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {semIndice ? <meta name="robots" content="noindex" /> : (
+      <>
+        <link rel="canonical" href={canonical} />
+        <link rel="alternate" hreflang="pt-BR" href={new URL(ptPath, site).href} />
+        <link rel="alternate" hreflang="en" href={new URL(enPath, site).href} />
+        <link rel="alternate" hreflang="x-default" href={new URL(ptPath, site).href} />
+      </>
+    )}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#f4f3ef" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0f1e" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'pt' ? 'pt_BR' : 'en_US'} />
+    <meta property="og:site_name" content={perfil.nome} />
+    <meta property="og:image" content={ogImagem} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImagem} />
+    <script is:inline>
+      // Theme before first paint: saved choice, else the system setting.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('tema'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+        document.documentElement.classList.add('js');
+      })();
+    </script>
+    <script type="application/ld+json" set:html={JSON.stringify([person, ...jsonLd])} />
+  </head>
+  <body class="min-h-dvh antialiased" data-og-imagem={imagem}>
+    <a
+      href="#conteudo"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-ink"
+      >{ui.skip[lang]}</a
+    >
+    <slot />
+    <script>
+      // Theme toggle (any button with data-tema).
+      document.querySelectorAll('[data-tema]').forEach((b) =>
+        b.addEventListener('click', () => {
+          const el = document.documentElement;
+          const novo = el.dataset.theme === 'dark' ? 'light' : 'dark';
+          el.dataset.theme = novo;
+          try { localStorage.setItem('tema', novo); } catch {}
+        }),
+      );
+    </script>
+  </body>
+</html>

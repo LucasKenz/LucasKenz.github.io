@@ -1,0 +1,37 @@
+---
+import type { Lang } from '@content/types';
+import { perfil } from '@content/perfil';
+import Base from '@/layouts/Base.astro';
+import Topo from './Topo.astro';
+import Rodape from './Rodape.astro';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const pt = lang === 'pt';
+const canais = [
+  { nome: 'E-mail', valor: perfil.email, href: `mailto:${perfil.email}`, nota: pt ? 'canal principal' : 'main channel' },
+  { nome: 'LinkedIn', valor: 'lucas-kenzo-murakami-tada', href: perfil.linkedin, nota: pt ? 'perfil profissional' : 'professional profile' },
+  { nome: 'GitHub', valor: 'LucasKenz', href: perfil.github, nota: pt ? 'código público' : 'public code' },
+];
+---
+<Base lang={lang} title={pt ? 'Contato — Lucas Kenzo' : 'Contact — Lucas Kenzo'} description={pt ? 'Fale com Lucas Kenzo por e-mail, LinkedIn ou GitHub.' : 'Reach Lucas Kenzo by e-mail, LinkedIn or GitHub about roles, projects or the MOVER digital twin.'}>
+  <Topo lang={lang} atual="contato" />
+  <main id="conteudo" class="mx-auto max-w-[1000px] px-4 pt-12 pb-20 sm:px-8">
+    <p class="eyebrow">{perfil.busca[lang]}</p>
+    <h1 class="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">{pt ? 'Contato' : 'Contact'}</h1>
+    <p class="mt-3 max-w-[56ch] text-lg text-muted">{pt ? 'Vagas, projetos ou uma conversa sobre o MOVER: escreva por um destes canais. Sem formulário e sem rastreadores.' : 'Roles, projects or a chat about MOVER: write through one of these channels. No form and no trackers.'}</p>
+    <ul class="mt-10 divide-y divide-line border-y border-line">
+      {canais.map((c) => (
+        <li>
+          <a href={c.href} class="group grid gap-1 py-6 sm:grid-cols-[10rem_1fr_auto] sm:items-center">
+            <span class="eyebrow">{c.nome}</span>
+            <span class="font-mono text-lg font-semibold break-all transition-colors group-hover:text-accent sm:text-2xl">{c.valor}</span>
+            <span class="text-sm text-muted">{c.nota} →</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-8 text-muted">{perfil.disponibilidade[lang]}</p>
+    <Rodape lang={lang} />
+  </main>
+</Base>

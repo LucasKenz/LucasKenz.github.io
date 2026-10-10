@@ -1,0 +1,99 @@
+---
+import fs from 'node:fs';
+import type { Lang } from '@content/types';
+import { lab } from '@content/lab';
+import { ui } from '@/i18n/ui';
+import Base from '@/layouts/Base.astro';
+import LabTopo from './LabTopo.astro';
+import '@/styles/lab.css';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const base = lang === 'pt' ? '' : '/en';
+const poster = (slug: string) => (fs.existsSync(`public/media/lab-${slug}.webp`) ? `/media/lab-${slug}.webp` : null);
+const n2 = (i: number) => String(i + 1).padStart(2, '0');
+---
+<Base
+  lang={lang}
+  title={lang === 'pt' ? 'Lab — simulações 3D · Lucas Kenzo' : 'Lab — 3D simulations · Lucas Kenzo'}
+  description={lang === 'pt' ? 'Projetos de dados e simulações 3D: TCC MOVER, seguros, crédito, genéricos e energia com dados públicos, mais cidade, robô, lentes e mar.' : 'Data projects and 3D simulations: MOVER capstone, insurance, credit, generics and power on public data, plus a city, robot, lenses and sea.'}
+  imagem={poster(lab[0].slug) ?? undefined}
+>
+  <div class="lab">
+    <LabTopo lang={lang} voltar={{ href: `${base}/`, label: lang === 'pt' ? 'Início' : 'Home' }} marca="LAB<b>·</b>LK" />
+    <main id="conteudo" class="sel" data-sel>
+      <span class="sel-marca-dagua" aria-hidden="true" data-marca>{lab[0].nome[lang].split(' ')[0].toUpperCase()}</span>
+      <h1 class="sel-rotulo"><span>{lang === 'pt' ? 'Simulações' : 'Simulations'}</span><b data-num>01</b></h1>
+
+      <div class="sel-palco" aria-live="polite">
+        {lab.map((l, i) => {
+          const p = poster(l.slug);
+          return (
+            <article class:list={['sel-item', { ativo: i === 0 }]} id={`sim-${l.slug}`} data-item={i} data-marca={l.nome[lang].split(' ')[0].toUpperCase()}>
+              <a class="sel-arte" href={`${base}/lab/${l.slug}`} tabindex="-1" aria-hidden="true">
+                {p ? <img src={p} alt="" width="1280" height="800" loading={i === 0 ? 'eager' : 'lazy'} /> : <span class="block h-full w-full bg-gradient-to-br from-[#1b2a55] to-[#070b17]"></span>}
+              </a>
+              <div class="sel-texto">
+                <span class="sel-tipo">{n2(i)} · {l.status === 'pronto' ? (lang === 'pt' ? 'simulação' : 'simulation') : ui.emConstrucao[lang]}</span>
+                <h2 class="sel-nome">{l.nome[lang]}</h2>
+                <p class="sel-frase">{l.frase[lang]}</p>
+                <p class="sel-tec">{l.tecnica[lang]}</p>
+                <a class="sel-entrar" href={`${base}/lab/${l.slug}`}>{lang === 'pt' ? 'Entrar' : 'Enter'} <span aria-hidden="true">→</span></a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <nav class="sel-tira" aria-label={lang === 'pt' ? 'Escolher simulação' : 'Choose a simulation'}>
+        <button class="sel-seta" type="button" data-passo="-1" aria-label={lang === 'pt' ? 'Anterior' : 'Previous'}>←</button>
+        {lab.map((l, i) => {
+          const p = poster(l.slug);
+          return (
+            <button class="sel-thumb" type="button" data-ir={i} aria-current={i === 0 ? 'true' : 'false'} aria-controls={`sim-${l.slug}`} aria-label={l.nome[lang]}>
+              {p ? <img src={p} alt="" width="176" height="102" loading="lazy" /> : <span class="block h-full w-full bg-[#1b2a55]"></span>}
+            </button>
+          );
+        })}
+        <button class="sel-seta" type="button" data-passo="1" aria-label={lang === 'pt' ? 'Próxima' : 'Next'}>→</button>
+      </nav>
+
+      <nav class="sel-pager" aria-label={lang === 'pt' ? 'Índice' : 'Index'}>
+        {lab.map((l, i) => <button type="button" data-ir={i} aria-current={i === 0 ? 'true' : 'false'} aria-label={l.nome[lang]}>{n2(i)}</button>)}
+      </nav>
+    </main>
+  </div>
+</Base>
+
+<script>
+  const raiz = document.querySelector<HTMLElement>('[data-sel]')!;
+  const itens = [...raiz.querySelectorAll<HTMLElement>('[data-item]')];
+  const num = raiz.querySelector<HTMLElement>('[data-num]')!;
+  const marca = raiz.querySelector<HTMLElement>('[data-marca]')!;
+  let atual = 0;
+  const ir = (i: number) => {
+    atual = (i + itens.length) % itens.length;
+    itens.forEach((el, k) => el.classList.toggle('ativo', k === atual));
+    raiz.querySelectorAll<HTMLElement>('[data-ir]').forEach((b) => b.setAttribute('aria-current', String(Number(b.dataset.ir) === atual)));
+    num.textContent = String(atual + 1).padStart(2, '0');
+    marca.textContent = itens[atual].dataset.marca ?? '';
+    history.replaceState(null, '', `#${itens[atual].id}`);
+  };
+  raiz.querySelectorAll<HTMLElement>('[data-ir]').forEach((b) => b.addEventListener('click', () => ir(Number(b.dataset.ir))));
+  raiz.querySelectorAll<HTMLElement>('[data-passo]').forEach((b) => b.addEventListener('click', () => ir(atual + Number(b.dataset.passo))));
+  addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') ir(atual + 1);
+    if (e.key === 'ArrowLeft') ir(atual - 1);
+  });
+  // Swipe on touch screens.
+  let x0: number | null = null;
+  raiz.addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+  raiz.addEventListener('touchend', (e) => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) ir(atual + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+  const inicial = itens.findIndex((el) => `#${el.id}` === location.hash);
+  if (inicial > 0) ir(inicial);
+</script>

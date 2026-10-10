@@ -1,0 +1,18 @@
+---
+// GitHub Pages serves this file for any unknown path. One page for both languages.
+import Base from '@/layouts/Base.astro';
+---
+<Base lang="pt" title="Página não encontrada · Lucas Kenzo" description="Esta página não existe no portfólio de Lucas Kenzo. This page does not exist." semIndice>
+  <main id="conteudo" class="mx-auto flex min-h-dvh max-w-[760px] flex-col justify-center px-4 py-20 sm:px-8">
+    <p class="eyebrow">Erro 404</p>
+    <h1 class="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">Esta rua não existe.</h1>
+    <p class="mt-4 max-w-[48ch] text-lg text-muted">O endereço pode ter mudado ou ter sido digitado errado.</p>
+    <p lang="en" class="mt-1 max-w-[48ch] text-muted">This page does not exist. The address may have changed or have a typo.</p>
+    <div class="lombada mt-8 h-3 w-40 rounded-sm" aria-hidden="true"></div>
+    <ul class="mt-8 flex flex-wrap gap-3 text-sm font-semibold">
+      <li><a class="inline-block rounded-lg bg-accent px-4 py-2.5 text-accent-ink" href="/">Ir para o início</a></li>
+      <li><a class="inline-block rounded-lg border border-ink/80 px-4 py-2.5" href="/projetos">Projetos</a></li>
+      <li><a class="inline-block rounded-lg border border-ink/80 px-4 py-2.5" href="/en/" lang="en">English home</a></li>
+    </ul>
+  </main>
+</Base>

@@ -1,0 +1,130 @@
+---
+// The résumé itself: one semantic, single-column document (ATS friendly). Used by the web
+// page and by the print route that Playwright turns into the PDF.
+import type { Area, Lang } from '@content/types';
+import { perfil } from '@content/perfil';
+import { experiencias, formacao, idiomas } from '@content/experiencia';
+import { projetos } from '@content/projetos';
+import { habilidades, cursos } from '@content/habilidades';
+import { mes } from '@/i18n/ui';
+
+interface Props {
+  lang: Lang;
+  area: Area;
+  /** Inside the web page the résumé sits under the page's h1, so its headings go one level down. */
+  web?: boolean;
+}
+const { lang, area, web = false } = Astro.props;
+const Nome = web ? 'h2' : 'h1';
+const Secao = web ? 'h3' : 'h2';
+const Item = web ? 'h4' : 'h3';
+const pt = lang === 'pt';
+const site = perfil.site.replace('https://', '');
+const linkedin = perfil.linkedin.replace('https://www.', '').replace(/\/$/, '');
+const github = perfil.github.replace('https://', '');
+const comCv = projetos.filter((p) => p.cv);
+// IA version: projects with AI first (MOVER, GiTeam, SPTrans), then the rest; Full Stack keeps the content order.
+const ordem = area === 'ia' ? [...comCv].sort((a, b) => Number(b.areas.includes('ia')) - Number(a.areas.includes('ia'))) : comCv;
+const cursosArea = cursos.filter((c) => c.areas !== 'reserva' && c.areas.includes(area));
+// Courses grouped by institution to save lines.
+const grupos = [...cursosArea.reduce((m, c) => m.set(c.instituicao, [...(m.get(c.instituicao) ?? []), c]), new Map<string, typeof cursosArea>())];
+const resumo = `${perfil.resumo[lang]} ${perfil.disponibilidade[lang]}`;
+---
+<article class="cv" lang={pt ? 'pt-BR' : 'en'}>
+  <header class="cv-topo">
+    <Nome class="cv-nome">{perfil.nome}</Nome>
+    <p class="cv-titulo">{perfil.tituloCv[area][lang]}</p>
+    <p class="cv-contato">
+      {perfil.cidade[lang]} <span data-telefone hidden></span> · <a href={`mailto:${perfil.email}`}>{perfil.email}</a>
+    </p>
+    <p class="cv-contato">
+      <a href={perfil.linkedin}>{linkedin}</a> · <a href={perfil.github}>{github}</a> · <a href={perfil.site}>{site}</a>
+    </p>
+  </header>
+
+  <section>
+    <Secao class="cv-secao">{pt ? 'Resumo' : 'Summary'}</Secao>
+    <p>{resumo}</p>
+  </section>
+
+  <section>
+    <Secao class="cv-secao">{pt ? 'Experiência profissional' : 'Experience'}</Secao>
+    {experiencias.map((e) => (
+      <div class="cv-item">
+        <Item class="cv-item-t"><strong>{e.cargo[lang]} — {e.org}</strong> <span>| {mes(e.inicio, lang)} – {mes(e.fim, lang)}</span></Item>
+        <ul>{e.bullets.filter((b) => !b.areas || b.areas.includes(area)).map((b) => <li>{b.text[lang]}</li>)}</ul>
+      </div>
+    ))}
+  </section>
+
+  <section>
+    <Secao class="cv-secao">{pt ? 'Projetos com parceiros reais' : 'Projects with real partners'}</Secao>
+    {ordem.map((p) => (
+      <div class="cv-item">
+        <Item class="cv-item-t"><strong>{p.cv!.titulo[lang]}</strong> <span>| {p.cv!.periodo[lang]}</span></Item>
+        <ul>{p.cv!.bullets.map((b) => <li>{b[lang]}</li>)}</ul>
+      </div>
+    ))}
+  </section>
+
+  <section>
+    <Secao class="cv-secao">{pt ? 'Formação e idiomas' : 'Education and languages'}</Secao>
+    <div class="cv-item">
+      <Item class="cv-item-t"><strong>{formacao.curso[lang]} — {formacao.instituicao}</strong> <span>| {mes(formacao.inicio, lang)} – {mes(formacao.fim, lang)}</span></Item>
+      <ul>
+        <li>{formacao.media[lang]}</li>
+        <li>{idiomas[lang]}</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <Secao class="cv-secao">{pt ? 'Habilidades técnicas' : 'Skills'}</Secao>
+    <p class="cv-habilidades">
+      {habilidades.map((g, i) => (
+        <span><strong>{g.grupo[lang]}:</strong> {g.itens.map((x) => (lang === 'en' && x.en) || x.nome).join(', ')}{i < habilidades.length - 1 ? ' · ' : ''}</span>
+      ))}
+    </p>
+  </section>
+
+  <section>
+    <Secao class="cv-secao">{pt ? 'Cursos e certificações' : 'Courses and certifications'}</Secao>
+    <p>
+      {grupos.map(([inst, cs], i) => (
+        <span><strong>{inst}:</strong> {cs.map((c) => `${(lang === 'en' && c.en) || c.nome}${c.duracao.pt.includes('cada') ? ` (${c.duracao[lang]})` : ''}`).join('; ')}{i < grupos.length - 1 ? ' · ' : ''}</span>
+      ))}
+      {pt ? ' · cerca de 6 meses cada, salvo indicação.' : ' · about 6 months each unless noted.'}
+    </p>
+  </section>
+</article>
+
+<style>
+  .cv {
+    --cv-ink: #14161b;
+    --cv-muted: #4b515c;
+    --cv-acc: #2f5bea;
+    color: var(--cv-ink);
+    font-family: var(--font-sans);
+    font-size: 9.2pt;
+    line-height: 1.24;
+  }
+  .cv a { color: inherit; text-decoration: none; }
+  .cv-topo { text-align: center; margin-bottom: 6pt; }
+  .cv .cv-nome { font-size: 18pt; font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; }
+  .cv-titulo { margin-top: 2pt; font-weight: 600; }
+  .cv-contato { color: var(--cv-muted); }
+  .cv .cv-secao {
+    margin: 5.5pt 0 2.5pt;
+    padding-bottom: 1.5pt;
+    border-bottom: 1px solid var(--cv-acc);
+    color: var(--cv-acc);
+    font-size: 9.2pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .cv .cv-item-t { font-size: 9.2pt; font-weight: 400; margin-top: 2.5pt; }
+  .cv .cv-item-t span { color: var(--cv-muted); }
+  .cv ul { margin: 1pt 0 0; padding-left: 12pt; list-style: disc; }
+  .cv li { margin: 0.3pt 0; }
+</style>

@@ -1,0 +1,54 @@
+---
+// Data story for the Lab data projects: question -> decision and why -> result -> source, with charts.
+import type { Lang } from '@content/types';
+import type { Historia } from './dados/tipos';
+import Grafico from './dados/Grafico.astro';
+import FichaAnalise from './dados/FichaAnalise.astro';
+
+interface Props { h: Historia; lang: Lang }
+const { h, lang } = Astro.props;
+const R = {
+  pergunta: { pt: 'Pergunta', en: 'Question' },
+  decisao: { pt: 'Decisão e porquê', en: 'Decision and why' },
+  resultado: { pt: 'Resultado', en: 'Result' },
+  fonte: { pt: 'Fonte', en: 'Source' },
+  aplicacao: { pt: 'Aplicação real', en: 'Real-world use' },
+  limites: { pt: 'Limites desta análise', en: 'Limits of this analysis' },
+  metodo: { pt: 'Código da análise', en: 'Analysis code' },
+};
+---
+<section id="dados" class="md" aria-labelledby="h-dados">
+  <h2 id="h-dados"><span>{h.titulo[lang]}</span></h2>
+  <p class="md-intro">{h.intro[lang]}</p>
+  <div class="md-aplicacao"><small>{R.aplicacao[lang]}</small><p>{h.aplicacao[lang]}</p></div>
+  <ul class="md-kpis">{h.kpis.map((k) => <li><b>{typeof k.valor === "string" ? k.valor : k.valor[lang]}</b><span>{k.rotulo[lang]}</span></li>)}</ul>
+
+  {h.secoes.map((s, i) => (
+    <article class="md-secao" id={`md-${s.id}`} aria-labelledby={`h-md-${s.id}`}>
+      <header class="md-cab">
+        <span class="md-n">{String(i + 1).padStart(2, '0')}</span>
+        <h3 id={`h-md-${s.id}`}>{s.titulo[lang]}</h3>
+      </header>
+      <div class="md-corpo">
+        <div class="md-texto">
+          <p class="md-pergunta"><small>{R.pergunta[lang]}</small>{s.pergunta[lang]}</p>
+          <p><small>{R.decisao[lang]}</small>{s.decisao[lang]}</p>
+          <p class="md-resultado"><small>{R.resultado[lang]}</small>{s.resultado[lang]}</p>
+          <p class="md-fonte">{R.fonte[lang]}: <code>{s.fonte}</code></p>
+          {s.ficha && <FichaAnalise ficha={s.ficha} lang={lang} />}
+        </div>
+        <figure class="md-fig">
+          {s.graficos.map((g) => <Grafico g={g} lang={lang} />)}
+        </figure>
+      </div>
+    </article>
+  ))}
+
+  <article class="md-fim" aria-labelledby="h-md-fim">
+    <h3 id="h-md-fim">{h.conclusoes.titulo[lang]}</h3>
+    <ol>{h.conclusoes.itens.map((c) => <li>{c[lang]}</li>)}</ol>
+    <h4 class="md-limites-t">{R.limites[lang]}</h4>
+    <ul class="md-limites">{h.limites.map((l) => <li>{l[lang]}</li>)}</ul>
+    <p class="md-fonte">{R.metodo[lang]}: <code>{h.metodo}</code></p>
+  </article>
+</section>

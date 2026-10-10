@@ -1,0 +1,27 @@
+---
+// Lab header: same five links as the site's top bar, in the lab's dark style. On phones the
+// links drop to a second row that scrolls sideways.
+import type { Lang } from '@content/types';
+import { ui, outraRota } from '@/i18n/ui';
+
+interface Props { lang: Lang; voltar: { href: string; label: string }; marca: string }
+const { lang, voltar, marca } = Astro.props;
+const base = lang === 'pt' ? '' : '/en';
+const links = [
+  { href: `${base}/projetos`, label: ui.navProjetos[lang] },
+  { href: `${base}/sobre`, label: lang === 'pt' ? 'Sobre' : 'About' },
+  { href: `${base}/curriculo`, label: ui.navCurriculo[lang] },
+  { href: `${base}/lab`, label: ui.navLab[lang], atual: true },
+  { href: `${base}/contato`, label: ui.navContato[lang] },
+];
+---
+<header class="lab-topo">
+  <a href={voltar.href} class="lab-voltar">← {voltar.label}</a>
+  <span class="lab-marca" set:html={marca} />
+  <nav aria-label={lang === 'pt' ? 'Principal' : 'Main'} class="lab-nav sem-barra">
+    <ul>
+      {links.map((l) => <li><a href={l.href} aria-current={l.atual ? 'page' : undefined}>{l.label}</a></li>)}
+    </ul>
+  </nav>
+  <a href={outraRota(Astro.url.pathname, lang)} hreflang={lang === 'pt' ? 'en' : 'pt-BR'} lang={lang === 'pt' ? 'en' : 'pt-BR'} class="lab-idioma font-mono">{lang === 'pt' ? 'EN' : 'PT'}</a>
+</header>

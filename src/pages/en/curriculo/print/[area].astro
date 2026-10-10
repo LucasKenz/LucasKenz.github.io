@@ -1,0 +1,9 @@
+---
+import CvImpressao from '@/components/CvImpressao.astro';
+
+export function getStaticPaths() {
+  return [{ params: { area: 'fullstack' } }, { params: { area: 'ia' } }];
+}
+const { area } = Astro.params as { area: 'fullstack' | 'ia' };
+---
+<CvImpressao lang="en" area={area} />

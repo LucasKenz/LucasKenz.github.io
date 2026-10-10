@@ -1,0 +1,122 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+/* Theme: light by default, dark from the system or from data-theme. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root {
+  --paper: #f4f3ef;
+  --panel: #ffffff;
+  --ink: #14161b;
+  --muted: #565c68;
+  --line: #d9d6cc;
+  --grid: #e4e1d8;
+  --accent: #2f5bea;
+  --accent-ink: #ffffff;
+  --hazard: #ffc21a;
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  --paper: #0a0f1e;
+  --panel: #111a2e;
+  --ink: #e8ecf6;
+  --muted: #a1abc6;
+  --line: #24304f;
+  --grid: #141d33;
+  --accent: #7a9bff;
+  --accent-ink: #0a0f1e;
+  color-scheme: dark;
+}
+/* Without JS (no data-theme), follow the system setting. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --paper: #0a0f1e;
+    --panel: #111a2e;
+    --ink: #e8ecf6;
+    --muted: #a1abc6;
+    --line: #24304f;
+    --grid: #141d33;
+    --accent: #7a9bff;
+    --accent-ink: #0a0f1e;
+    color-scheme: dark;
+  }
+}
+
+@theme {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --color-paper: var(--paper);
+  --color-panel: var(--panel);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-hazard: var(--hazard);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  font-family: var(--font-sans);
+  /* Drafting-table grid. */
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Section label with a dimension line, like a CAD drawing. */
+.dim {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.dim::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+/* Speed-bump stripes: the site's signature detail. */
+.lombada {
+  background: repeating-linear-gradient(-45deg, var(--hazard) 0 10px, #14161b 10px 20px);
+}
+
+/* Sideways-scrolling nav on phones: no scrollbar or arrow buttons (links stay reachable by swipe and Tab). */
+.sem-barra { scrollbar-width: none; }
+.sem-barra::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

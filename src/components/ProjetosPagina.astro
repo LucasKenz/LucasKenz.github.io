@@ -1,0 +1,80 @@
+---
+import type { Lang } from '@content/types';
+import { projetos } from '@content/projetos';
+import Base from '@/layouts/Base.astro';
+import Topo from './Topo.astro';
+import ProjetoCard from './ProjetoCard.astro';
+import Rodape from './Rodape.astro';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+
+// Filters: technologies used in 2+ projects, most used first.
+const contagem = new Map<string, number>();
+for (const p of projetos) for (const s of p.stack) contagem.set(s, (contagem.get(s) ?? 0) + 1);
+const filtros = [...contagem].filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).map(([s]) => s);
+const titulo = lang === 'pt' ? 'Projetos — Lucas Kenzo' : 'Projects — Lucas Kenzo';
+const descricao = lang === 'pt'
+  ? 'Projetos com parceiros reais e pessoais: gêmeo digital do MOVER, GiTeam, Serpentina, Onepage, SPTrans e FEEDIT.'
+  : 'Projects with real partners and personal ones: MOVER digital twin, GiTeam, Serpentina, Onepage, SPTrans and FEEDIT.';
+---
+<Base lang={lang} title={titulo} description={descricao}>
+  <Topo lang={lang} atual="projetos" />
+  <main id="conteudo" class="mx-auto max-w-[1240px] px-4 pt-12 pb-20 sm:px-8">
+    <p class="eyebrow">{projetos.length} {lang === 'pt' ? 'projetos' : 'projects'}</p>
+    <h1 class="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">{lang === 'pt' ? 'Projetos' : 'Projects'}</h1>
+    <p class="mt-3 max-w-[60ch] text-muted">
+      {lang === 'pt'
+        ? 'Entregas para parceiros reais e projetos pessoais. Código privado aparece só como descrição.'
+        : 'Work for real partners and personal projects. Private code is shown as a description only.'}
+    </p>
+
+    <div class="mt-8 hidden flex-wrap gap-2 [.js_&]:flex" role="group" aria-label={lang === 'pt' ? 'Filtrar por tecnologia' : 'Filter by technology'} data-filtros>
+      <button type="button" aria-pressed="true" data-filtro="" class="filtro">{lang === 'pt' ? 'Todos' : 'All'}</button>
+      <button type="button" aria-pressed="false" data-filtro="area:fullstack" class="filtro">Full Stack</button>
+      <button type="button" aria-pressed="false" data-filtro="area:ia" class="filtro">{lang === 'pt' ? 'IA e Dados' : 'AI and Data'}</button>
+      <span class="mx-1 w-px self-stretch bg-line" aria-hidden="true"></span>
+      {filtros.map((f) => <button type="button" aria-pressed="false" data-filtro={f} class="filtro">{f}</button>)}
+    </div>
+    <p class="sr-only" aria-live="polite" data-contagem></p>
+
+    <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" data-grade>
+      {projetos.map((p) => <ProjetoCard projeto={p} lang={lang} />)}
+    </div>
+    <Rodape lang={lang} />
+  </main>
+</Base>
+
+<style>
+  .filtro {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .filtro:hover { color: var(--ink); border-color: var(--ink); }
+  .filtro[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+</style>
+
+<script>
+  const botoes = document.querySelectorAll<HTMLButtonElement>('[data-filtro]');
+  const cards = document.querySelectorAll<HTMLElement>('[data-card]');
+  const aviso = document.querySelector<HTMLElement>('[data-contagem]')!;
+  const pt = document.documentElement.lang.startsWith('pt');
+  botoes.forEach((b) =>
+    b.addEventListener('click', () => {
+      const f = b.dataset.filtro!;
+      botoes.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      let n = 0;
+      cards.forEach((c) => {
+        const ok = !f || c.dataset.stack!.split('|').includes(f);
+        c.hidden = !ok;
+        if (ok) n++;
+      });
+      aviso.textContent = pt ? `${n} projetos visíveis` : `${n} projects shown`;
+    }),
+  );
+</script>
