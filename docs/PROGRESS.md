@@ -76,3 +76,9 @@
 - Ficha técnica em todas as análises dos 5 projetos de dados (MOVER incluído): objetivo, por quê, variável alvo, preditoras, método, métrica, validação e se o objetivo foi atingido. Aparece recolhida em cada seção e reunida em "Como funciona".
 - Scripts: `analises/farma_sublabs.py` (SNGPC jan/jul em blocos + IBGE 2025), `analises/farma_estrategia.py`.
 - Verificação: typecheck 0 erros, 15/15 testes, build 41 páginas, auditoria 37 páginas 0 falhas 0 avisos.
+
+## 2026-10-10 — F5: publicação no GitHub Pages
+- Por ordem explícita do usuário (antecipando o "só depois de novembro"), o portfólio foi publicado em https://lucaskenz.github.io/ pelo repositório público `LucasKenz/LucasKenz.github.io`, com GitHub Actions (`.github/workflows/deploy.yml`: pnpm, Playwright/Chromium para PDFs e cartões, `pnpm build`, trava contra pasta `mover-campus-3d-site`, deploy-pages).
+- O repositório público começa com um commit único (branch local `publico`): o histórico de `main` tem as imagens de terceiros de `referencias/` e não foi enviado. Próximos envios: `bash scripts/publicar.sh "mensagem"`.
+- O site do MOVER (`LucasKenz/mover-campus-3d-site`, Pages próprio) não foi tocado. Antes e depois do deploy: HTTP 200, 8.409 bytes, mesmo SHA-256 do HTML (`ab7a14b9…`), assets `_next` com 200 em ~0,2 s e a maquete carregando no navegador sem erros.
+- Conferido no ar: `/`, `/lab/`, `/lab/farma/`, `/lab/mover/`, `/en/`, PDF do currículo e `campus.glb` com 200; rota inexistente com a 404 do portfólio. PDFs públicos sem telefone (`pdftotext`).
