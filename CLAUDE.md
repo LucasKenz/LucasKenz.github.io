@@ -4,7 +4,8 @@ Site pessoal (portfólio + currículo) para `https://lucaskenz.github.io/` (site
 Leia também `docs/HISTORICO.md` (resumo da construção e próximos passos), `docs/DECISIONS.md` e `docs/PROGRESS.md` (só acrescentar).
 
 ## Regras
-- **Nada de push, repositório remoto ou deploy** sem ordem explícita. Publicação só depois de novembro/2026.
+- **Publicado** em https://lucaskenz.github.io/ (repositório público `LucasKenz/LucasKenz.github.io`, desde 10/10/2026, por ordem do usuário). Novo envio só com ordem explícita, sempre por `bash scripts/publicar.sh "mensagem"`: ele copia a árvore de `main` para a branch `publico` (histórico próprio e limpo) e envia. **Nunca** dar push de `main`: o histórico local tem imagens de terceiros (`referencias/`).
+- **https://lucaskenz.github.io/mover-campus-3d-site/ deve continuar intacto**: é outro repositório, servido à parte. O portfólio nunca pode ter pasta `mover-campus-3d-site` (o script e o fluxo de deploy conferem). Depois de cada envio, conferir que o MOVER responde 200 e carrega.
 - Não mexer em `LucasKenz/mover-campus-3d`, `LucasKenz/mover-campus-3d-site` nem na pasta `D:\Minhas coisas\tcc\adptacao\animacao_campus_3d` (só leitura).
 - Não inventar dados pessoais, números ou experiência. Falta dado = `TODO` visível no `content/`.
 - Telefone, bairro, data de nascimento, CPF/RG nunca entram no repositório (repositório será público). O PDF com telefone é gerado só em `private/` (ignorado).
