@@ -13,7 +13,7 @@ const { lang } = Astro.props;
 const contagem = new Map<string, number>();
 for (const p of projetos) for (const s of p.stack) contagem.set(s, (contagem.get(s) ?? 0) + 1);
 const filtros = [...contagem].filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).map(([s]) => s);
-const titulo = lang === 'pt' ? 'Projetos — Lucas Kenzo' : 'Projects — Lucas Kenzo';
+const titulo = lang === 'pt' ? 'Projetos | Lucas Kenzo' : 'Projects | Lucas Kenzo';
 const descricao = lang === 'pt'
   ? 'Projetos com parceiros reais e pessoais: gêmeo digital do MOVER, GiTeam, Serpentina, Onepage, SPTrans e FEEDIT.'
   : 'Projects with real partners and personal ones: MOVER digital twin, GiTeam, Serpentina, Onepage, SPTrans and FEEDIT.';

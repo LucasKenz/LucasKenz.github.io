@@ -1,5 +1,6 @@
 ---
 import '@/styles/global.css';
+import fonteTexto from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url';
 import type { Lang } from '@content/types';
 import { perfil } from '@content/perfil';
 import { ui, outraRota } from '@/i18n/ui';
@@ -42,6 +43,7 @@ const person = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={fonteTexto} as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     <meta name="description" content={description} />
     {semIndice ? <meta name="robots" content="noindex" /> : (

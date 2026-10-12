@@ -82,3 +82,14 @@
 - O repositório público começa com um commit único (branch local `publico`): o histórico de `main` tem as imagens de terceiros de `referencias/` e não foi enviado. Próximos envios: `bash scripts/publicar.sh "mensagem"`.
 - O site do MOVER (`LucasKenz/mover-campus-3d-site`, Pages próprio) não foi tocado. Antes e depois do deploy: HTTP 200, 8.409 bytes, mesmo SHA-256 do HTML (`ab7a14b9…`), assets `_next` com 200 em ~0,2 s e a maquete carregando no navegador sem erros.
 - Conferido no ar: `/`, `/lab/`, `/lab/farma/`, `/lab/mover/`, `/en/`, PDF do currículo e `campus.glb` com 200; rota inexistente com a 404 do portfólio. PDFs públicos sem telefone (`pdftotext`).
+
+## 2026-10-10 — Limpeza de indícios de IA (local, não publicado)
+- Pedido do usuário depois de um detector de "site feito por IA": tirar os indícios sem mudar nenhuma funcionalidade. Relatório completo em `docs/evitand_ia_evidencias.md`.
+- Travessões zerados em `src/`, `content/` e `analises/` (títulos com `|`, períodos com meia-risca, legendas com dois-pontos, vazio `n/d`). Etiquetas de cantos retos, ponto pulsante trocado por marcador fixo, grade do fundo em SVG, Lab sem degradê, IBM Plex no lugar da Geist (com preload), títulos de seção da home sem caixa alta e Lab da home em lista numerada.
+- Verificação: typecheck 0 erros, 15/15 testes, auditoria 37 páginas 0 falhas, PDFs com 1 página, Lighthouse no celular de 95 a 99 (cidade 64), igual ao de antes, dentro da variação.
+- Nada foi enviado ao GitHub.
+
+## 2026-10-12 — Lab: render pausado fora da tela
+- Pedido do usuário: cenas 3D do Lab pesavam no celular mesmo com a pessoa lendo o texto abaixo. Sem mexer em nenhum elemento da página.
+- Novo `src/lab/comum/SoNaTela.tsx` dentro de cada `<Canvas>` (Agua, Cidade, Barras3D, Mover, Robo, Visor3D): `IntersectionObserver` + `visibilitychange` trocam o `frameloop` para `'never'` quando a cena sai da tela ou a aba fica oculta, e voltam ao original quando ela reaparece. A cena continua montada (estado preservado), só os frames param. `Mini3D` já usa `frameloop="demand"` e ficou de fora.
+- Verificação: typecheck 0 erros, 15/15 testes, conferido no `pnpm dev` pelo usuário.

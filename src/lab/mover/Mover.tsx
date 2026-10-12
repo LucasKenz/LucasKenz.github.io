@@ -6,6 +6,7 @@ import dados from '@content/mover-dados.json';
 import { MedidorFps, useCelular, useDebug, useMenosMovimento } from '../comum/Fps';
 import { Dpr, Pos, useModo, useQualidade } from '../comum/Pos';
 import { COR, corPredio, corRampa, type Camada } from './cores';
+import { SoNaTela } from '../comum/SoNaTela';
 
 type Lang = 'pt' | 'en';
 const txt = {
@@ -257,6 +258,7 @@ export default function Mover({ lang }: { lang: Lang }) {
         role="img"
         aria-label={lang === 'pt' ? 'Maquete 3D do campus Mauá com a rota do caminhão, prédios e árvores coloridos pelos dados do levantamento' : '3D model of the Mauá campus with the truck route, buildings and trees coloured by the survey data'}
       >
+        <SoNaTela />
         <Dpr valor={leve ? 1 : dpr} />
         {monitor(
           <>

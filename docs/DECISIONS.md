@@ -32,3 +32,6 @@
 | 2026-10-10 | Gráficos das histórias em SVG gerado no build, sem biblioteca | Leves, acessíveis (texto, `title` em cada marca), funcionam sem JS e seguem o mesmo visual do Lab. |
 | 2026-10-10 | Nenhuma página cita a empresa do programa de trainee | A página fala do setor; o vínculo com cada processo seletivo fica com o usuário (repositório público). |
 | 2026-10-10 | Resultados fracos ou negativos ficam na página (ganho de 1,6 % da credibilidade, hipótese de concorrência rejeitada, salto do ciprofloxacino) | Mostrar o limite do método vale mais para quem avalia do que um número inflado. |
+| 2026-10-10 | Sem travessão (—) no site: títulos com `\|`, intervalos com meia-risca (–), legendas com dois-pontos | Travessão é o indício de texto gerado por IA mais citado pelos detectores. O separador `' \| '` também é o que `scripts/gerar-og.mjs` usa para separar título e subtítulo do cartão. |
+| 2026-10-10 | IBM Plex Sans + IBM Plex Mono no lugar de Geist, com preload do arquivo latin da Sans | A Geist no padrão é marca de site gerado. A Plex combina com o tema de prancha técnica. Sem o preload, o LCP no celular piorava 0,3 a 0,5 s. |
+| 2026-10-10 | Grade do fundo em SVG (`--grade` por tema), não em `linear-gradient` | Mesmo visual, e os detectores param de ler a grade como fundo em degradê. |

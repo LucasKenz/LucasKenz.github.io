@@ -8,9 +8,8 @@
   --lab-line: #263256;
   --lab-acc: #ffc21a;
   --lab-blue: #5d86ff;
-  background:
-    repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.018) 0 2px, transparent 2px 9px),
-    radial-gradient(120% 80% at 70% 20%, #13204a 0%, var(--lab-bg) 60%);
+  background-color: var(--lab-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13'%3E%3Cpath d='M0 13L13 0M-1 1L1 -1M12 14L14 12' stroke='%23fff' stroke-opacity='.018' stroke-width='2'/%3E%3C/svg%3E");
   color: var(--lab-ink);
   color-scheme: dark;
   min-height: 100dvh;
@@ -454,7 +453,7 @@
 .md-stats span { font-size: 0.82rem; color: var(--lab-muted); }
 .md-meter { margin-top: 0.6rem; height: 6px; border-radius: 999px; background: #263256; overflow: hidden; }
 .md-meter i { display: block; height: 100%; background: var(--lab-acc); border-radius: 999px; }
-.md-fim { margin-top: 4rem; padding: 2rem; border-radius: 1.25rem; background: linear-gradient(135deg, rgb(57 135 229 / 0.12), rgb(15 23 48 / 0.6)); border: 1px solid var(--lab-line); }
+.md-fim { margin-top: 4rem; padding: 2rem; border-radius: 1.25rem; background: var(--lab-panel); border: 1px solid var(--lab-line); }
 .md-fim h3 { font-size: clamp(1.3rem, 2.6vw, 1.9rem); font-weight: 800; }
 .md-fim ol { margin-top: 1rem; display: grid; gap: 0.6rem; padding-left: 1.2rem; color: var(--lab-muted); }
 @media (min-width: 900px) { .md-fim ol { grid-template-columns: 1fr 1fr; column-gap: 2rem; } }

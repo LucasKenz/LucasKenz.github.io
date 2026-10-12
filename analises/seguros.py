@@ -133,7 +133,7 @@ zdf = pd.DataFrame(zs)
 curva = [{'familia': z.familia, 'premio': r(z.premio, 2), 'Z': r(z.Z, 3)} for z in zdf.itertuples()]
 
 saida = {
-    'fonte': 'SUSEP — Base de Dados do SES (Ses_seguros.csv), atualizada até 2026-07',
+    'fonte': 'SUSEP: Base de Dados do SES (Ses_seguros.csv), atualizada até 2026-07',
     'anos': ANOS,
     'familias': list(FAMILIAS),
     'familiasEn': FAM_EN,

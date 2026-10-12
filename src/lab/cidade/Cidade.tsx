@@ -5,6 +5,7 @@ import { CHUNK, BLOCO, RUA, gerarChunk, hash, nomeRua, rng } from './gerador';
 import { dourado, materialCeu, materialChao, materialPredios, materialTelhado, uniformes } from './materiais';
 import { MedidorFps, useCelular, useDebug, useMenosMovimento } from '../comum/Fps';
 import { Dpr, Pos, useModo, useQualidade } from '../comum/Pos';
+import { SoNaTela } from '../comum/SoNaTela';
 
 type Lang = 'pt' | 'en';
 const txt = {
@@ -428,6 +429,7 @@ export default function Cidade({ lang }: { lang: Lang }) {
         aria-label={lang === 'pt' ? `Cidade gerada pela semente ${seed}` : `City generated from seed ${seed}`}
         role="img"
       >
+        <SoNaTela />
         {!leve && <Dpr valor={dpr} />}
         {!leve && <Ceu />}
         <hemisphereLight args={['#b9c8ff', '#1a1d26', 0.6]} />

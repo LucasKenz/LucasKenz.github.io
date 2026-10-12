@@ -130,9 +130,9 @@ op = op.sort_values('score', ascending=False)
 
 saida = {
     'fonte': {
-        'precos': 'CMED/ANVISA — Lista de preços (PMC), 09/10/2026',
-        'registros': 'ANVISA — Dados abertos de medicamentos registrados',
-        'vendas': 'ANVISA — SNGPC, venda de medicamentos industrializados controlados e antimicrobianos, ' + ', '.join(meses),
+        'precos': 'CMED/ANVISA: Lista de preços (PMC), 09/10/2026',
+        'registros': 'ANVISA: Dados abertos de medicamentos registrados',
+        'vendas': 'ANVISA: SNGPC, venda de medicamentos industrializados controlados e antimicrobianos, ' + ', '.join(meses),
     },
     'cmed': {'apresentacoes': int(len(pmc)), 'tipos': {k: int(v) for k, v in tipos.items()}, 'pares': int(len(par)), 'paresApres': int(len(por_apres))},
     'desconto': {'hist': [int(v) for v in hist[0]], 'bordas': [r(v, 2) for v in hist[1]], 'mediana': r(par.desconto.median(), 3), 'abaixo35': abaixo35},

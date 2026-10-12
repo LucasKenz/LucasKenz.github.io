@@ -6,6 +6,7 @@ import { difAngulo, ik2, mola } from './ik';
 import { rng } from '../cidade/gerador';
 import { MedidorFps, useCelular, useDebug, useMenosMovimento } from '../comum/Fps';
 import { Dpr, Pos, useModo, useQualidade } from '../comum/Pos';
+import { SoNaTela } from '../comum/SoNaTela';
 
 const MAT = { azul: '#2448d8', amarelo: '#ffb81a' };
 const FOCO_ROBO = new THREE.Vector3(0, 0.8, 0);
@@ -656,6 +657,7 @@ export default function Robo({ lang }: { lang: Lang }) {
         role="img"
         aria-label={lang === 'pt' ? 'Robô procedural num pátio com blocos coloridos' : 'Procedural robot in a yard with colored blocks'}
       >
+        <SoNaTela />
         <Dpr valor={leve ? 1 : dpr} />
         {monitor(
           <>

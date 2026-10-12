@@ -1,7 +1,7 @@
 # Portfólio Lucas Kenzo — memória do projeto
 
 Site pessoal (portfólio + currículo) para `https://lucaskenz.github.io/` (site de usuário do GitHub Pages).
-Leia também `docs/HISTORICO.md` (resumo da construção e próximos passos), `docs/DECISIONS.md` e `docs/PROGRESS.md` (só acrescentar).
+Leia primeiro `docs/HISTORICO.md` (tudo o que foi feito, armadilhas conhecidas e notas para versões futuras), `docs/DECISIONS.md` e `docs/PROGRESS.md` (só acrescentar).
 
 ## Regras
 - **Publicado** em https://lucaskenz.github.io/ (repositório público `LucasKenz/LucasKenz.github.io`, desde 10/10/2026, por ordem do usuário). Novo envio só com ordem explícita, sempre por `bash scripts/publicar.sh "mensagem"`: ele copia a árvore de `main` para a branch `publico` (histórico próprio e limpo) e envia. **Nunca** dar push de `main`: o histórico local tem imagens de terceiros (`referencias/`).
@@ -12,7 +12,7 @@ Leia também `docs/HISTORICO.md` (resumo da construção e próximos passos), `d
 - Commits em português, pequenos, por fase.
 
 ## Stack
-Astro 7 (estático) · React 19 só nas ilhas 3D (`client:visible`) · Tailwind 4 (tokens em `src/styles/global.css`) · TypeScript estrito · Geist auto-hospedada (@fontsource) · pnpm.
+Astro 7 (estático) · React 19 só nas ilhas 3D (`client:visible`) · Tailwind 4 (tokens em `src/styles/global.css`) · TypeScript estrito · Geist auto-hospedada (@fontsource) · pnpm · Python 3.14 (pandas, scikit-learn) nas análises, venv em `private/.venv` (rodar com `env -u PYTHONPATH ... python -s`).
 
 ## Onde fica cada coisa
 - `content/` — fonte única de dados (perfil, experiência, projetos, lab, habilidades, cursos). Textos bilíngues `{ pt, en }`. Site e PDFs leem daqui.
@@ -20,6 +20,9 @@ Astro 7 (estático) · React 19 só nas ilhas 3D (`client:visible`) · Tailwind 
 - `src/i18n/ui.ts` — textos de interface e helpers de data/rota.
 - `public/media/` — mídia otimizada (vídeo mp4/webm, webp).
 - `docs/` — referências, F0, decisões, progresso, capturas, Lighthouse.
+- `analises/` — scripts Python das análises de dados → `content/lab-dados/*.json`; textos e fichas em `content/lab-historias/`.
+- `src/lab/` — cenas 3D por slug; `src/lab/dados/` (`Barras3D`, `Mini3D`); carregamento em `src/lab/comum/Adiado.tsx`.
+- `private/dados/` — bases públicas baixadas (~3,7 GB, ignoradas), por `scripts/baixar-dados.sh`.
 
 ## Comandos
 - `pnpm dev` (porta 4321) · `pnpm build` (site + PDFs do CV + cartões OG) · `pnpm preview` (4322) · `pnpm typecheck` · `pnpm test`

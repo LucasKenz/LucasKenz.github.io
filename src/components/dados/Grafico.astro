@@ -9,7 +9,7 @@ const { g, lang } = Astro.props;
 const loc = lang === 'pt' ? 'pt-BR' : 'en-US';
 const t = (x: { pt: string; en: string } | string) => (typeof x === 'string' ? x : x[lang]);
 function fmt(v: number | null | undefined, f: Formato): string {
-  if (v === null || v === undefined || !Number.isFinite(v)) return '—';
+  if (v === null || v === undefined || !Number.isFinite(v)) return 'n/d';
   const n = (k: number, x = v) => x.toLocaleString(loc, { minimumFractionDigits: k, maximumFractionDigits: k });
   switch (f) {
     case 'int': return v.toLocaleString(loc, { maximumFractionDigits: 0 });

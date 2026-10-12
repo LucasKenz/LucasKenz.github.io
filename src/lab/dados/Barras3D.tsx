@@ -6,6 +6,7 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { MedidorFps, useCelular, useDebug, useMenosMovimento } from '../comum/Fps';
 import { Dpr, Pos, useModo, useQualidade } from '../comum/Pos';
 import { matrizes, type Matriz } from './matrizes';
+import { SoNaTela } from '../comum/SoNaTela';
 
 // 3D bar field for the data projects: one rounded bar per cell of the project's matrix, height and
 // colour by value (one-hue sequential ramp), bars rise with a critically damped spring when the scene
@@ -126,6 +127,7 @@ export default function Barras3D({ lang, slug }: { lang: Lang; slug?: string }) 
         role="img"
         aria-label={`${m.titulo[lang]} (${m.eixos[lang]})`}
       >
+        <SoNaTela />
         <Dpr valor={leve ? 1 : dpr} />
         <color attach="background" args={['#0b1226']} />
         <fog attach="fog" args={['#0b1226', dist * 1.6, dist * 3.2]} />
