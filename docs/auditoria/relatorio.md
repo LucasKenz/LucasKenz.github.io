@@ -1,6 +1,6 @@
 # Auditoria automática
 
-Gerado por `scripts/auditar.mjs` em 2026-10-10 21:39 sobre `dist/`.
+Gerado por `scripts/auditar.mjs` em 2026-10-11 00:02 sobre `dist/`.
 Páginas: 37 · temas claro/escuro · larguras 1440 e 390 · axe (WCAG 2.2 AA + boas práticas) · sem JS em 360 px.
 
 ## Falhas (0)
@@ -36,7 +36,7 @@ Nenhum.
 / light 390: 0 violações axe
 / dark 1440: 0 violações axe
 / dark 390: 0 violações axe
-/ sem JS: 3162 caracteres visíveis no main
+/ sem JS: 3188 caracteres visíveis no main
 /404.html light 1440: 0 violações axe
 /404.html light 390: 0 violações axe
 /404.html dark 1440: 0 violações axe
@@ -51,12 +51,12 @@ Nenhum.
 /curriculo/ light 390: 0 violações axe
 /curriculo/ dark 1440: 0 violações axe
 /curriculo/ dark 390: 0 violações axe
-/curriculo/ sem JS: 10050 caracteres visíveis no main
+/curriculo/ sem JS: 10042 caracteres visíveis no main
 /en/ light 1440: 0 violações axe
 /en/ light 390: 0 violações axe
 /en/ dark 1440: 0 violações axe
 /en/ dark 390: 0 violações axe
-/en/ sem JS: 2883 caracteres visíveis no main
+/en/ sem JS: 2909 caracteres visíveis no main
 /en/contato/ light 1440: 0 violações axe
 /en/contato/ light 390: 0 violações axe
 /en/contato/ dark 1440: 0 violações axe
@@ -66,7 +66,7 @@ Nenhum.
 /en/curriculo/ light 390: 0 violações axe
 /en/curriculo/ dark 1440: 0 violações axe
 /en/curriculo/ dark 390: 0 violações axe
-/en/curriculo/ sem JS: 9151 caracteres visíveis no main
+/en/curriculo/ sem JS: 9143 caracteres visíveis no main
 /en/lab/ light 1440: 0 violações axe
 /en/lab/ light 390: 0 violações axe
 /en/lab/ dark 1440: 0 violações axe
@@ -121,12 +121,12 @@ Nenhum.
 /en/projetos/ light 390: 0 violações axe
 /en/projetos/ dark 1440: 0 violações axe
 /en/projetos/ dark 390: 0 violações axe
-/en/projetos/ sem JS: 1637 caracteres visíveis no main
+/en/projetos/ sem JS: 1636 caracteres visíveis no main
 /en/projetos/mover/ light 1440: 0 violações axe
 /en/projetos/mover/ light 390: 0 violações axe
 /en/projetos/mover/ dark 1440: 0 violações axe
 /en/projetos/mover/ dark 390: 0 violações axe
-/en/projetos/mover/ sem JS: 3117 caracteres visíveis no main
+/en/projetos/mover/ sem JS: 3116 caracteres visíveis no main
 /en/projetos/onepage/ light 1440: 0 violações axe
 /en/projetos/onepage/ light 390: 0 violações axe
 /en/projetos/onepage/ dark 1440: 0 violações axe
@@ -196,12 +196,12 @@ Nenhum.
 /projetos/ light 390: 0 violações axe
 /projetos/ dark 1440: 0 violações axe
 /projetos/ dark 390: 0 violações axe
-/projetos/ sem JS: 1691 caracteres visíveis no main
+/projetos/ sem JS: 1690 caracteres visíveis no main
 /projetos/mover/ light 1440: 0 violações axe
 /projetos/mover/ light 390: 0 violações axe
 /projetos/mover/ dark 1440: 0 violações axe
 /projetos/mover/ dark 390: 0 violações axe
-/projetos/mover/ sem JS: 3154 caracteres visíveis no main
+/projetos/mover/ sem JS: 3153 caracteres visíveis no main
 /projetos/onepage/ light 1440: 0 violações axe
 /projetos/onepage/ light 390: 0 violações axe
 /projetos/onepage/ dark 1440: 0 violações axe

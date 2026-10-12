@@ -11,6 +11,7 @@ import { superficie } from './ondas';
 import { MedidorFps, useCelular, useDebug, useMenosMovimento } from '../comum/Fps';
 import { Dpr, Pos, useModo, useQualidade } from '../comum/Pos';
 import { rng } from '../cidade/gerador';
+import { SoNaTela } from '../comum/SoNaTela';
 
 type Lang = 'pt' | 'en';
 const txt = {
@@ -233,6 +234,7 @@ export default function Agua({ lang }: { lang: Lang }) {
         role="img"
         aria-label={lang === 'pt' ? 'Barco a vela navegando em água cristalina perto de uma ilha de areia' : 'Sailboat cruising clear water near a sandy island'}
       >
+        <SoNaTela />
         <Dpr valor={leve ? 1 : dpr} />
         {monitor(
           <>

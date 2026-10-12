@@ -22,7 +22,7 @@ const i = lab.findIndex((l) => l.slug === item.slug);
 const n2 = (k: number) => String(k + 1).padStart(2, '0');
 const rolavel = item.slug === 'lentes';
 ---
-<Base lang={lang} title={`${item.nome[lang]} — Lab · Lucas Kenzo`} description={item.frase[lang]} imagem={`/media/lab-${item.slug}.webp`}>
+<Base lang={lang} title={`${item.nome[lang]} | Lab · Lucas Kenzo`} description={item.frase[lang]} imagem={`/media/lab-${item.slug}.webp`}>
   <div class="lab">
     <LabTopo lang={lang} voltar={{ href: `${base}/lab#sim-${item.slug}`, label: lang === 'pt' ? 'Seleção' : 'Select' }} marca={`LAB<b>·</b>${n2(i)}`} />
     <main id="conteudo" class:list={['sim', { rolavel }]}>

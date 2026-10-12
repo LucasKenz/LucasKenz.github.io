@@ -19,18 +19,20 @@ const dataUri = async (arquivo, tipo) => `data:${tipo};base64,${(await readFile(
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const desc = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 
-const fonte = await dataUri('node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2', 'font/woff2');
-const fonteMono = await dataUri('node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2', 'font/woff2');
+const fonte = await dataUri('node_modules/@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2', 'font/woff2');
+const fonteMono = await dataUri('node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2', 'font/woff2');
+const fonteMonoForte = await dataUri('node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2', 'font/woff2');
 const foto = await dataUri('public/media/perfil.webp', 'image/webp');
 
 function cartao({ rota, kicker, titulo, descricao, imagem, escuro, lang }) {
   const c = escuro
     ? { papel: '#0a0f1e', grade: '#141d33', tinta: '#e8ecf6', fraco: '#a1abc6', linha: '#24304f', acento: '#7a9bff' }
     : { papel: '#f4f3ef', grade: '#e4e1d8', tinta: '#14161b', fraco: '#565c68', linha: '#d9d6cc', acento: '#2f5bea' };
-  const tam = titulo.length > 28 ? 64 : titulo.length > 16 ? 80 : 96;
+  const tam = titulo.length > 24 ? 58 : titulo.length > 14 ? 72 : 88;
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><style>
-  @font-face { font-family: G; src: url(${fonte}) format('woff2'); font-weight: 100 900; }
-  @font-face { font-family: M; src: url(${fonteMono}) format('woff2'); font-weight: 100 900; }
+  @font-face { font-family: G; src: url(${fonte}) format('woff2'); font-weight: 100 700; }
+  @font-face { font-family: M; src: url(${fonteMono}) format('woff2'); font-weight: 400; }
+  @font-face { font-family: M; src: url(${fonteMonoForte}) format('woff2'); font-weight: 600; }
   * { box-sizing: border-box; margin: 0; }
   body { width: 1200px; height: 630px; overflow: hidden; font-family: G; color: ${c.tinta}; background: ${c.papel};
     background-image: linear-gradient(${c.grade} 1px, transparent 1px), linear-gradient(90deg, ${c.grade} 1px, transparent 1px);
@@ -69,7 +71,7 @@ for await (const arquivo of paginas(DIST)) {
   const html = await readFile(arquivo, 'utf8');
   const pegar = (re) => desc(html.match(re)?.[1] ?? '');
   const tituloPagina = pegar(/<title>([^<]*)<\/title>/);
-  const [cabeca, ...resto] = tituloPagina.replace(/ · Lucas Kenzo$/, '').split(' — ');
+  const [cabeca, ...resto] = tituloPagina.replace(/ · Lucas Kenzo$/, '').split(' | ');
   const lang = pegar(/<html lang="([^"]+)"/).startsWith('en') ? 'en' : 'pt';
   const caminhoImagem = pegar(/data-og-imagem="([^"]+)"/);
   const chave = rel.join('-') || 'inicio';
@@ -77,7 +79,7 @@ for await (const arquivo of paginas(DIST)) {
     cartao({
       rota: `/${rel.join('/')}`.replace(/^\/$/, ''),
       titulo: cabeca,
-      kicker: resto.join(' — '),
+      kicker: resto.join(' | '),
       descricao: pegar(/<meta name="description" content="([^"]*)"/),
       imagem: caminhoImagem ? await dataUri(join('public', caminhoImagem), 'image/webp') : null,
       escuro: rel.includes('lab'),

@@ -51,7 +51,7 @@ const resumo = `${perfil.resumo[lang]} ${perfil.disponibilidade[lang]}`;
     <Secao class="cv-secao">{pt ? 'Experiência profissional' : 'Experience'}</Secao>
     {experiencias.map((e) => (
       <div class="cv-item">
-        <Item class="cv-item-t"><strong>{e.cargo[lang]} — {e.org}</strong> <span>| {mes(e.inicio, lang)} – {mes(e.fim, lang)}</span></Item>
+        <Item class="cv-item-t"><strong>{e.cargo[lang]} · {e.org}</strong> <span>| {mes(e.inicio, lang)} – {mes(e.fim, lang)}</span></Item>
         <ul>{e.bullets.filter((b) => !b.areas || b.areas.includes(area)).map((b) => <li>{b.text[lang]}</li>)}</ul>
       </div>
     ))}
@@ -70,7 +70,7 @@ const resumo = `${perfil.resumo[lang]} ${perfil.disponibilidade[lang]}`;
   <section>
     <Secao class="cv-secao">{pt ? 'Formação e idiomas' : 'Education and languages'}</Secao>
     <div class="cv-item">
-      <Item class="cv-item-t"><strong>{formacao.curso[lang]} — {formacao.instituicao}</strong> <span>| {mes(formacao.inicio, lang)} – {mes(formacao.fim, lang)}</span></Item>
+      <Item class="cv-item-t"><strong>{formacao.curso[lang]} · {formacao.instituicao}</strong> <span>| {mes(formacao.inicio, lang)} – {mes(formacao.fim, lang)}</span></Item>
       <ul>
         <li>{formacao.media[lang]}</li>
         <li>{idiomas[lang]}</li>

@@ -131,7 +131,7 @@ semana = {
 superficie = df[df.util == 1].groupby(['mes', 'hora']).carga.mean().unstack().round(0)
 
 saida = {
-    'fonte': {'carga': 'ONS — Curva de carga horária 2025, subsistema Sudeste/Centro-Oeste', 'clima': 'INMET — estações A701 (Mirante de Santana) e A771 (Interlagos), 2025'},
+    'fonte': {'carga': 'ONS: Curva de carga horária 2025, subsistema Sudeste/Centro-Oeste', 'clima': 'INMET: estações A701 (Mirante de Santana) e A771 (Interlagos), 2025'},
     'cobertura': cobertura,
     'horas': int(len(df)),
     'perfil': perfil,

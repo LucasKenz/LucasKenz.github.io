@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Canvas, createPortal, useFrame, useThree } from '@react-three/fiber';
 import { RoundedBox, useFBO } from '@react-three/drei';
 import * as THREE from 'three';
+import { SoNaTela } from '../comum/SoNaTela';
 
 // Real 3D viewfinder: the scene is rendered with depth, then every pixel is blurred by its own
 // circle of confusion, computed from its depth with the same thin-lens formula as optica.ts:
@@ -174,6 +175,7 @@ export default function Visor3D({ f, N, s, lang }: Props) {
       role="img"
       aria-label={lang === 'pt' ? 'Visor 3D da câmera com desfoque calculado pelo círculo de confusão' : '3D camera viewfinder with blur computed from the circle of confusion'}
     >
+      <SoNaTela />
       <color attach="background" args={['#1a2238']} />
       <hemisphereLight args={['#dfe8ff', '#3a2a22', 0.8]} />
       <directionalLight position={[1.5, 3, -6]} intensity={2.4} color="#fff1dc" castShadow shadow-mapSize={[1024, 1024]} />

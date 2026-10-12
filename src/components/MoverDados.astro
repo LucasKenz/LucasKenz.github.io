@@ -293,7 +293,7 @@ const kpis = [
                         <th scope="row">{M.metricas[c.m as keyof typeof M.metricas][lang]}</th>
                         <td>{f(c.r9, 2)} {c.unidade}</td>
                         <td><b>{f(c.r10, 2)} {c.unidade}</b></td>
-                        <td class:list={[melhorou ? 'md-bom' : 'md-ruim']}>{melhorou ? '▲' : '▼'} {c.r9 ? `${f(((c.r10 - c.r9) / c.r9) * 100, 0)} %` : '—'}</td>
+                        <td class:list={[melhorou ? 'md-bom' : 'md-ruim']}>{melhorou ? '▲' : '▼'} {c.r9 ? `${f(((c.r10 - c.r9) / c.r9) * 100, 0)} %` : 'n/d'}</td>
                       </tr>
                     );
                   })}

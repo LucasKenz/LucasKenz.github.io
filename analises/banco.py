@@ -114,7 +114,7 @@ hoje = X.dropna().iloc[[-1]]
 base_prev = r(hoje.nivel.iloc[0] + final.predict(hoje)[0], 2)
 
 saida = {
-    'fonte': 'Banco Central do Brasil — SGS (séries ' + ', '.join(str(c) for c in SERIES) + ')',
+    'fonte': 'Banco Central do Brasil: SGS (séries ' + ', '.join(str(c) for c in SERIES) + ')',
     'meses': meses,
     'historico': historico,
     'macro': macro,

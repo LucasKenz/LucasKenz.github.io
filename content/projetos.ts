@@ -5,7 +5,7 @@ export const projetos: Projeto[] = [
   {
     slug: 'mover',
     cv: {
-      titulo: { pt: 'TCC MOVER — Gêmeo digital de caminhão autônomo (multinacional do setor automotivo)', en: 'MOVER capstone — Digital twin of an autonomous truck (multinational automotive company)' },
+      titulo: { pt: 'TCC MOVER: gêmeo digital de caminhão autônomo (multinacional do setor automotivo)', en: 'MOVER capstone: digital twin of an autonomous truck (multinational automotive company)' },
       periodo: { pt: '2025 – 2026', en: '2025 – 2026' },
       bullets: [
         { pt: 'Desenvolvi de ponta a ponta, em Python no simulador CARLA 0.9.16, a navegação de um caminhão autônomo no campus: percepção com YOLO, LiDAR e câmeras; fusão GNSS + IMU com filtro de Kalman; controle Pure Pursuit.', en: 'Built end to end the truck’s navigation in Python on the CARLA 0.9.16 simulator: perception with YOLO, LiDAR and cameras; GNSS + IMU fusion with a Kalman filter; Pure Pursuit control.' },
@@ -41,7 +41,7 @@ export const projetos: Projeto[] = [
         pt: 'Caminhão MOVER dando a volta no anel viário da maquete 3D do campus',
         en: 'MOVER truck driving around the ring road of the 3D campus model',
       },
-      legenda: { pt: 'Fig. 1 — anel viário, 784 m', en: 'Fig. 1 — ring road, 784 m' },
+      legenda: { pt: 'Fig. 1: anel viário, 784 m', en: 'Fig. 1: ring road, 784 m' },
     },
     demoUrl: 'https://lucaskenz.github.io/mover-campus-3d-site/',
     apresentacaoUrl: 'https://lucaskenz.github.io/mover-campus-3d-site/?apresentacao=1',
@@ -158,7 +158,7 @@ export const projetos: Projeto[] = [
   {
     slug: 'giteam',
     cv: {
-      titulo: { pt: 'GiTeam — Plataforma de IA para revisão de código', en: 'GiTeam — AI code review platform' },
+      titulo: { pt: 'GiTeam: plataforma de IA para revisão de código', en: 'GiTeam: AI code review platform' },
       periodo: { pt: 'jan 2025 – mai 2025', en: 'Jan 2025 – May 2025' },
       bullets: [
         { pt: 'Desenvolvi a lógica de agentes de IA (OpenAI e Anthropic) que analisaram mais de 1.000 Pull Requests e Issues do GitHub e postaram as revisões automaticamente.', en: 'Wrote the AI agent logic (OpenAI and Anthropic) that reviewed 1,000+ GitHub pull requests and issues and posted the reviews automatically.' },
@@ -368,7 +368,7 @@ export const projetos: Projeto[] = [
   {
     slug: 'sptrans',
     cv: {
-      titulo: { pt: 'Reconhecimento facial para controle de acesso — SPTrans', en: 'Face recognition for access control — SPTrans' },
+      titulo: { pt: 'Reconhecimento facial para controle de acesso (SPTrans)', en: 'Face recognition for access control (SPTrans)' },
       periodo: { pt: 'jun 2024 – mai 2025', en: 'Jun 2024 – May 2025' },
       bullets: [
         { pt: 'Liderei o front-end em React Native de um app e site com 6 telas, prototipados no Figma, num time de 4 pessoas.', en: 'Led the React Native front end of a 6-screen app and website, prototyped in Figma, in a team of 4.' },
@@ -399,7 +399,7 @@ export const projetos: Projeto[] = [
   {
     slug: 'feedit',
     cv: {
-      titulo: { pt: 'FEEDIT — Líder de projeto — Centro Universitário São Camilo', en: 'FEEDIT — Project lead — Centro Universitário São Camilo' },
+      titulo: { pt: 'FEEDIT: líder de projeto, Centro Universitário São Camilo', en: 'FEEDIT: project lead, Centro Universitário São Camilo' },
       periodo: { pt: 'fev 2024 – mai 2024', en: 'Feb 2024 – May 2024' },
       bullets: [
         { pt: 'Liderei um time de 4 pessoas em 4 sprints e entreguei um app funcional de nutrição no estilo "bichinho virtual" (tamagotchi).', en: 'Led a team of 4 through 4 sprints and delivered a working nutrition app in a virtual-pet (tamagotchi) style.' },
