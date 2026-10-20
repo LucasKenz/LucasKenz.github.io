@@ -302,12 +302,25 @@ const kpis = [
             </div>
           )}
 
+          {s.numeros && s.id !== 'detector' && (
+            <div class="md-stats">
+              {s.numeros.map((n) => (
+                <div><b>{n.v}</b><span>{n.r[lang]}</span>
+                  {n.medidor !== undefined && <div class="md-meter" aria-hidden="true"><i style={`width:${n.medidor}%`}></i></div>}</div>
+              ))}
+            </div>
+          )}
+
           {s.id === 'detector' && (
             <div class="md-stats">
               <div><b>{av.detector.achadas}/{av.detector.lombadasNaVolta}</b><span>{R.revocacao[lang]} · {f((av.detector.achadas / av.detector.lombadasNaVolta) * 100, 0)} %</span>
                 <div class="md-meter" aria-hidden="true"><i style={`width:${(av.detector.achadas / av.detector.lombadasNaVolta) * 100}%`}></i></div></div>
               <div><b>{av.detector.perto}/{av.detector.eventos}</b><span>{R.precisao[lang]} · {f((av.detector.perto / av.detector.eventos) * 100, 0)} %</span>
                 <div class="md-meter" aria-hidden="true"><i style={`width:${(av.detector.perto / av.detector.eventos) * 100}%`}></i></div></div>
+              {(s.numeros ?? []).map((n) => (
+                <div><b>{n.v}</b><span>{n.r[lang]}</span>
+                  {n.medidor !== undefined && <div class="md-meter" aria-hidden="true"><i style={`width:${n.medidor}%`}></i></div>}</div>
+              ))}
             </div>
           )}
         </figure>
