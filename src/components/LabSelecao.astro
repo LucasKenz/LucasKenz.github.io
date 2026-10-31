@@ -12,6 +12,7 @@ const { lang } = Astro.props;
 const base = lang === 'pt' ? '' : '/en';
 const poster = (slug: string) => (fs.existsSync(`public/media/lab-${slug}.webp`) ? `/media/lab-${slug}.webp` : null);
 const n2 = (i: number) => String(i + 1).padStart(2, '0');
+const link = (l: (typeof lab)[number]) => l.href ?? `${base}/lab/${l.slug}`;
 ---
 <Base
   lang={lang}
@@ -30,7 +31,7 @@ const n2 = (i: number) => String(i + 1).padStart(2, '0');
           const p = poster(l.slug);
           return (
             <article class:list={['sel-item', { ativo: i === 0 }]} id={`sim-${l.slug}`} data-item={i} data-marca={l.nome[lang].split(' ')[0].toUpperCase()}>
-              <a class="sel-arte" href={`${base}/lab/${l.slug}`} tabindex="-1" aria-hidden="true">
+              <a class="sel-arte" href={link(l)} tabindex="-1" aria-hidden="true">
                 {p ? <img src={p} alt="" width="1280" height="800" loading={i === 0 ? 'eager' : 'lazy'} /> : <span class="block h-full w-full bg-gradient-to-br from-[#1b2a55] to-[#070b17]"></span>}
               </a>
               <div class="sel-texto">
@@ -38,7 +39,7 @@ const n2 = (i: number) => String(i + 1).padStart(2, '0');
                 <h2 class="sel-nome">{l.nome[lang]}</h2>
                 <p class="sel-frase">{l.frase[lang]}</p>
                 <p class="sel-tec">{l.tecnica[lang]}</p>
-                <a class="sel-entrar" href={`${base}/lab/${l.slug}`}>{lang === 'pt' ? 'Entrar' : 'Enter'} <span aria-hidden="true">→</span></a>
+                <a class="sel-entrar" href={link(l)}>{lang === 'pt' ? 'Entrar' : 'Enter'} <span aria-hidden="true">→</span></a>
               </div>
             </article>
           );

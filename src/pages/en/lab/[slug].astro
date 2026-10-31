@@ -3,7 +3,7 @@ import { lab } from '@content/lab';
 import LabPagina from '@/components/LabPagina.astro';
 
 export function getStaticPaths() {
-  return lab.map((item) => ({ params: { slug: item.slug }, props: { item } }));
+  return lab.filter((item) => !item.href).map((item) => ({ params: { slug: item.slug }, props: { item } }));
 }
 const { item } = Astro.props;
 ---

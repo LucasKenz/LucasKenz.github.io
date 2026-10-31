@@ -98,6 +98,8 @@ export interface LabItem {
   frase: T;
   tecnica: T;
   status: 'pronto' | 'em-construcao';
+  /** Página estática própria (em public/), fora da rota /lab/[slug]. */
+  href?: string;
 }
 
 export interface Curso {

@@ -1,0 +1,326 @@
+{
+ "_meta": {
+  "descricao": "Propriedades dos materiais usados no cálculo de quantitativos. Densidades de referência de engenharia; normas típicas para o uso (o projeto real pode especificar outras).",
+  "precos": "Preços de ordem de grandeza em US$ (fornecido e instalado, referência 2024-2026), estimados para fins didáticos. Não incluem projeto, engenharia, gestão, testes, transporte especial, contingência nem a fabricação de óptica e instrumentos além do indicado. O custo oficial do projeto é da ordem de US$ 2 bilhões.",
+  "cambio_brl": {
+   "valor": 5.4,
+   "nota": "Câmbio de referência US$ 1 = R$ 5,40 (estimado, out/2026)."
+  }
+ },
+ "aco_estrutural": {
+  "nome": "Aço estrutural (chapas e perfis soldados)",
+  "spec": "ASTM A572 Gr.50 / A992",
+  "densidade": 7850,
+  "unidade": "t",
+  "cor": "#5d86ff",
+  "confidence": "estimado",
+  "nota": "Norma típica para estruturas soldadas pesadas; a especificação do GMT não foi publicada.",
+  "preco": {
+   "usd": 6000,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Aço fabricado, soldado, pintado e montado (estruturas pesadas)."
+  }
+ },
+ "aco_usinado": {
+  "nome": "Aço usinado (pistas e mancais)",
+  "spec": "Aço forjado/laminado usinado, AISI 4140 ou equivalente",
+  "densidade": 7850,
+  "unidade": "t",
+  "cor": "#8ea6ff",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 25000,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Forjado/laminado com usinagem de precisão."
+  }
+ },
+ "aco_trilho": {
+  "nome": "Trilho de aço",
+  "spec": "Trilho de ponte rolante DIN 536 A150",
+  "densidade": 7850,
+  "unidade": "t",
+  "cor": "#a3b0c9",
+  "confidence": "oficial",
+  "fonte": "hms2024",
+  "preco": {
+   "usd": 8000,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Trilho fornecido e instalado com alinhamento de precisão."
+  }
+ },
+ "aco_inox": {
+  "nome": "Aço inoxidável",
+  "spec": "AISI 304/316",
+  "densidade": 8000,
+  "unidade": "t",
+  "cor": "#c8d0dc",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 12000,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Chapas e perfis inox fabricados."
+  }
+ },
+ "concreto": {
+  "nome": "Concreto estrutural",
+  "spec": "fck 40 MPa (C40), cimento Portland",
+  "densidade": 2400,
+  "unidade": "m³",
+  "cor": "#b9b6b0",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 450,
+   "por": "m³",
+   "confidence": "estimado",
+   "nota": "Concreto C40 lançado com forma, em obra remota de montanha."
+  }
+ },
+ "armadura": {
+  "nome": "Aço de armadura",
+  "spec": "CA-50 / ASTM A615 Gr.60",
+  "densidade": 7850,
+  "unidade": "t",
+  "cor": "#9a6b4f",
+  "confidence": "estimado",
+  "nota": "Calculado por taxa de armadura (kg/m³ de concreto) declarada na peça.",
+  "preco": {
+   "usd": 2500,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Aço CA-50 cortado, dobrado e montado."
+  }
+ },
+ "vidro_e6": {
+  "nome": "Vidro borossilicato Ohara E6",
+  "spec": "Ohara E6, baixa expansão térmica (~2,8 ppm/K)",
+  "densidade": 2180,
+  "unidade": "kg",
+  "cor": "#7fd0e6",
+  "confidence": "artigo",
+  "fonte": "overview2016",
+  "preco": {
+   "usd": 1000,
+   "por": "kg",
+   "confidence": "estimado",
+   "nota": "Espelho pronto: fundição, geração e polimento. O vidro bruto é uma fração pequena desse valor."
+  }
+ },
+ "zerodur": {
+  "nome": "Vitrocerâmica Zerodur",
+  "spec": "Schott Zerodur, expansão ~0 ± 0,1 ppm/K",
+  "densidade": 2530,
+  "unidade": "kg",
+  "cor": "#e0a96d",
+  "confidence": "oficial",
+  "fonte": "status2026",
+  "preco": {
+   "usd": 3000,
+   "por": "kg",
+   "confidence": "estimado",
+   "nota": "Casca de Zerodur desbastada a 2 mm e polida; o bloco bruto custa bem menos."
+  }
+ },
+ "aluminio": {
+  "nome": "Alumínio",
+  "spec": "Liga 6061-T6 / 5083 (chapas e perfis)",
+  "densidade": 2700,
+  "unidade": "t",
+  "cor": "#c9ced6",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 9000,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Alumínio fabricado e montado."
+  }
+ },
+ "cobre": {
+  "nome": "Cobre (bobinas de motores)",
+  "spec": "Cobre eletrolítico",
+  "densidade": 8960,
+  "unidade": "kg",
+  "cor": "#b87333",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 15,
+   "por": "kg",
+   "confidence": "estimado",
+   "nota": "Cobre de bobinas (já embutido no preço dos motores quando houver)."
+  }
+ },
+ "painel": {
+  "nome": "Painel isolado de revestimento",
+  "spec": "Sanduíche aço pré-pintado + núcleo PIR 100 mm (~16 kg/m²)",
+  "densidade_area": 16,
+  "unidade": "m²",
+  "cor": "#f1efe9",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 120,
+   "por": "m²",
+   "confidence": "estimado",
+   "nota": "Painel sanduíche fornecido e instalado."
+  }
+ },
+ "pintura": {
+  "nome": "Pintura anticorrosiva",
+  "spec": "Epóxi + poliuretano, ~250 µm (ISO 12944 C3)",
+  "unidade": "m²",
+  "cor": "#2c5cc5",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 35,
+   "por": "m²",
+   "confidence": "estimado",
+   "nota": "Sistema epóxi + poliuretano aplicado."
+  }
+ },
+ "aluminizacao": {
+  "nome": "Revestimento refletivo de alumínio",
+  "spec": "Alumínio evaporado/pulverizado ~100 nm",
+  "unidade": "m²",
+  "cor": "#e8edf3",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 2000,
+   "por": "m²",
+   "confidence": "estimado",
+   "nota": "Campanha de aluminização na câmara do cume (rateada por m²)."
+  }
+ },
+ "tubo_aco": {
+  "nome": "Tubo de aço estrutural",
+  "spec": "Tubo circular ASTM A500 Gr.C / A252",
+  "unidade": "m",
+  "cor": "#7d8794",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 0,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Já incluído no preço por tonelada do aço estrutural."
+  }
+ },
+ "atuador": {
+  "nome": "Atuadores",
+  "spec": "Pneumáticos (M1) / bobina de voz (ASM) / lineares",
+  "unidade": "un",
+  "cor": "#ffc21a",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 8000,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Média entre atuadores pneumáticos do M1 e bobinas de voz do ASM."
+  }
+ },
+ "sensor": {
+  "nome": "Sensores",
+  "spec": "Capacitivos / encoders / células de carga",
+  "unidade": "un",
+  "cor": "#ffd770",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 1500,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Sensor com eletrônica de leitura."
+  }
+ },
+ "motor": {
+  "nome": "Motorredutores e motores",
+  "spec": "Motores elétricos com redutor/inversor",
+  "unidade": "un",
+  "cor": "#ff9b3d",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 25000,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Motorredutor industrial com inversor."
+  }
+ },
+ "roda": {
+  "nome": "Rodas de aço",
+  "spec": "Aço forjado temperado",
+  "unidade": "un",
+  "cor": "#8a929e",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 15000,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Roda forjada com mancal."
+  }
+ },
+ "parafuso": {
+  "nome": "Parafusos de alta resistência",
+  "spec": "ASTM F3125 A490 / ISO 10.9",
+  "unidade": "un",
+  "cor": "#5b6270",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 25,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Parafuso estrutural de alta resistência com porca e arruela."
+  }
+ },
+ "componentes": {
+  "nome": "Conjuntos mecatrônicos / ópticos",
+  "spec": "Óptica, detectores, eletrônica, criostatos",
+  "unidade": "un",
+  "cor": "#3fd18b",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 5000000,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Valor genérico; instrumentos e lançadores usam um valor próprio por peça (ver nota da peça)."
+  }
+ },
+ "porta_enrolar": {
+  "nome": "Portas de enrolar comerciais",
+  "spec": "Porta de enrolar industrial motorizada",
+  "unidade": "un",
+  "cor": "#a8b2cc",
+  "confidence": "oficial",
+  "fonte": "hms2024",
+  "preco": {
+   "usd": 30000,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Porta industrial motorizada instalada."
+  }
+ },
+ "cabo": {
+  "nome": "Cabos e mangueiras",
+  "spec": "Energia, fibra óptica, refrigerante",
+  "unidade": "m",
+  "cor": "#6b7280",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 60,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Cabos e mangueiras instalados."
+  }
+ },
+ "laser": {
+  "nome": "Laser de sódio",
+  "spec": "Laser 589 nm (classe ~20 W)",
+  "unidade": "un",
+  "cor": "#ffb000",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 1500000,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Laser de sódio de ~20 W, faixa de preço de sistemas comerciais."
+  }
+ }
+}

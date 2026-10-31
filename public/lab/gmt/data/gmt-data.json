@@ -1,0 +1,213 @@
+{
+  "_meta": {
+    "descricao": "Fonte única de verdade da página GMT. Cada valor tem fonte e confiança: oficial (GMTO/parceiro), artigo (SPIE/arXiv/imprensa técnica) ou estimado (ordem de grandeza, com premissa em 'nota').",
+    "atualizado": "2026-10-30",
+    "fontes": {
+      "sef2026": { "titulo": "Bigelow et al., The GMT Site, Enclosure, and Facilities: 2026 Design and Construction Update (SPIE 2026)", "url": "https://giantmagellan.org/wp-content/uploads/2026/10/GMT-SEF-2026-Design-Construction-Update.pdf" },
+      "status2026": { "titulo": "Burgett et al., The Giant Magellan Telescope Project in 2026: Status and Plan Forward (SPIE 2026)", "url": "https://giantmagellan.org/wp-content/uploads/2026/10/GMT-Project-2026-Status-and-Plan-Forward.pdf" },
+      "hms2024": { "titulo": "Bigelow et al., The Giant Magellan Telescope Enclosure (Heavy Movable Structures Symposium, 2024)", "url": "https://heavymovablestructures.org/wp-content/uploads/2024/12/The-Giant-Magellan-Telescope-Enclosure-1.pdf" },
+      "site2010": { "titulo": "Thomas-Osip et al., Giant Magellan Telescope Site Testing Summary (SPIE 7733, 2010; arXiv:1101.2340)", "url": "https://arxiv.org/abs/1101.2340" },
+      "overview2016": { "titulo": "McCarthy et al., Overview and status of the Giant Magellan Telescope project (SPIE 9906, 2016)", "url": "https://www.giantmagellan.org/wp-content/uploads/2021/11/Overview-and-status-of-the-Giant-Magellan-Telescope-Project-.pdf" },
+      "asm2021": { "titulo": "GMT adaptive secondary mirrors subsystem final design", "url": "https://giantmagellan.org/wp-content/uploads/2021/11/GMT-adaptive-secondary-mirrors-subsystem-final-design.pdf" },
+      "usp2019": { "titulo": "GMT/IAG-USP: contrato para desenho e construção da estrutura do telescópio (2019)", "url": "https://www.gmt.iag.usp.br/noticia/telescopio-gigante-magalhaes-assina-contrato-para-desenho-e-construcao-da-estrutura-do" },
+      "wiki": { "titulo": "Wikipedia: Giant Magellan Telescope (usada só para conferência cruzada)", "url": "https://en.wikipedia.org/wiki/Giant_Magellan_Telescope" },
+      "enr": { "titulo": "ENR: A Place to Study Eternity: Building the Giant Magellan Telescope", "url": "https://www.enr.com/articles/59264-a-place-to-study-eternity-building-the-giant-magellan-telescope" },
+      "lgsf2013": { "titulo": "d'Orgeville et al., GMT Laser Guide Star Facility (AO4ELT3, 2013)", "url": "https://ui.adsabs.harvard.edu/abs/2013aoel.confE..14D/abstract" },
+      "m1cell": { "titulo": "U. Arizona: testes da célula de suporte do espelho primário do GMT", "url": "https://news.arizona.edu/news/testing-begins-u-giant-magellan-telescopes-high-tech-mirror-support-structure" },
+      "calculo": { "titulo": "Cálculo próprio (atmosfera padrão ISA / óptica de difração)", "url": "" }
+    }
+  },
+
+  "local": {
+    "nome": { "valor": "Cerro Las Campanas, Observatório Las Campanas (LCO), região de Coquimbo, Chile", "fonte": "hms2024", "confidence": "oficial" },
+    "altitude_m": { "valor": 2516, "fonte": "wiki", "confidence": "artigo", "nota": "hms2024 dá 2.515 m; sef2026 e hms2024 também dizem ~2.500 m." },
+    "latitude": { "valor": -29.0483, "fonte": "wiki", "confidence": "artigo" },
+    "longitude": { "valor": -70.6836, "fonte": "wiki", "confidence": "artigo" },
+    "distancia_la_serena_km": { "valor": 160, "fonte": "hms2024", "confidence": "oficial" },
+    "temperatura_extremos_C": { "valor": [-5, 25], "fonte": "site2010", "confidence": "artigo" },
+    "temperatura_mediana_mensal_C": { "valor": [7, 14], "fonte": "site2010", "confidence": "artigo" },
+    "umidade_relativa_mediana_pct": { "valor": 35, "fonte": "site2010", "confidence": "artigo" },
+    "fracao_fotometrica": { "valor": 0.64, "fonte": "site2010", "confidence": "artigo" },
+    "fracao_espectroscopica": { "valor": [0.75, 0.80], "fonte": "site2010", "confidence": "artigo" },
+    "pwv_mediana_mm": { "valor": 3.7, "fonte": "site2010", "confidence": "artigo" },
+    "pressao_Pa": { "valor": 74532, "fonte": "calculo", "confidence": "estimado", "nota": "Atmosfera padrão ISA a 2.516 m." },
+    "densidade_ar_kg_m3": { "valor": 0.92, "faixa": [0.904, 0.951], "fonte": "calculo", "confidence": "estimado", "nota": "ρ = p/(R·T), p ISA a 2.516 m, T de 0 a 14 °C (medianas noturnas do site). 0,92 kg/m³ a 10 °C." },
+    "sismicidade": { "valor": "Uma das áreas de maior sismicidade do mundo; acelerações de 3–5 g previstas em M1/M2 sem isolamento", "fonte": "overview2016", "confidence": "artigo" }
+  },
+
+  "vento": {
+    "_nota": "Estatística noturna (céu limpo e parcialmente limpo) medida em torre de 10 m no próprio Co. Las Campanas, 2005–2010.",
+    "percentis_m_s": { "valor": { "p10": 1.3, "p25": 3.6, "p50": 6.3, "p75": 9.8, "p90": 13.4, "p95": 15.6, "p97": 17.4, "p99": 19.7 }, "fonte": "site2010", "confidence": "artigo" },
+    "direcao_predominante": { "valor": "NE", "graus": 45, "fonte": "site2010", "confidence": "artigo", "nota": "Distribuição bimodal: maior parte do tempo de NE; ~20% do tempo do lado oposto (SW)." },
+    "direcao_secundaria": { "valor": "SW", "graus": 225, "fracao": 0.20, "fonte": "site2010", "confidence": "artigo" },
+    "rosa_16": { "valor": [0.035, 0.09, 0.2, 0.09, 0.03, 0.02, 0.025, 0.035, 0.05, 0.08, 0.18, 0.08, 0.035, 0.02, 0.015, 0.02], "fonte": "site2010", "confidence": "estimado", "nota": "Frações por setor de 22,5° a partir do N (horário). Reconstruída para o gráfico a partir das direções predominante (NE) e secundária (SW) publicadas; não é a tabela original." },
+    "sazonalidade": { "valor": "Ventos mais fortes no fim do inverno austral", "fonte": "site2010", "confidence": "artigo" },
+    "limite_operacional_magellan_m_s": { "valor": 15.6, "fonte": "site2010", "confidence": "artigo" },
+    "limite_operacional_gmt_m_s": { "valor": 17.4, "fonte": "site2010", "confidence": "artigo", "nota": "Percentil 97: requisito de perder < 3% do tempo limpo por vento. Usado como limite de fechamento do domo." },
+    "tempestade_projeto_m_s": { "valor": 50, "fonte": "calculo", "confidence": "estimado", "nota": "Não encontrei a velocidade de sobrevivência do enclosure. Premissa: ordem de grandeza usada em projetos de ELTs em cumes andinos (rajada de 3 s com período de retorno de 50 anos ~45–55 m/s). Trocar se aparecer o valor do FDR da IDOM." },
+    "rajada_fator": { "valor": 1.5, "fonte": "calculo", "confidence": "estimado", "nota": "Fator de rajada típico (rajada de 3 s / média de 10 min) em terreno aberto." },
+    "rugosidade_z0_m": { "valor": 0.05, "fonte": "calculo", "confidence": "estimado", "nota": "Terreno rochoso árido sem vegetação alta (classe de rugosidade 1)." },
+    "altura_medicao_m": { "valor": 10, "fonte": "site2010", "confidence": "artigo" },
+    "cfd_impacto": { "valor": "Forma do enclosure, portas, para-vento e respiros otimizados por CFD + túnel de vento + túnel de água; impacto previsto na qualidade de imagem eliminado em 99% das condições noturnas de vento", "fonte": "sef2026", "confidence": "oficial" },
+    "modelo_tunel_escala": { "valor": "1:120", "fonte": "artigo", "confidence": "artigo", "url": "https://www.researchgate.net/publication/258718719_GMT_Enclosure_Wind_and_Thermal_Study" }
+  },
+
+  "seeing": {
+    "dimm_percentis_arcsec": { "valor": { "p10": 0.42, "p25": 0.50, "p50": 0.63, "p75": 0.79, "p90": 0.99 }, "fonte": "site2010", "confidence": "artigo", "nota": "Co. Las Campanas, FWHM a 500 nm." },
+    "camada_solo_percentis_arcsec": { "valor": { "p10": 0.17, "p25": 0.27, "p50": 0.38, "p75": 0.52, "p90": 0.71 }, "espessura_m": 399, "fonte": "site2010", "confidence": "artigo" },
+    "atmosfera_livre_percentis_arcsec": { "valor": { "p10": 0.24, "p25": 0.32, "p50": 0.45, "p75": 0.63, "p90": 0.85 }, "fonte": "site2010", "confidence": "artigo" },
+    "fracao_camada_solo": { "valor": 0.65, "fonte": "site2010", "confidence": "artigo" },
+    "requisito_mediana_arcsec": { "valor": 0.65, "meta": 0.5, "fonte": "site2010", "confidence": "artigo" },
+    "r0_500nm_mediana_m": { "valor": 0.16, "fonte": "calculo", "confidence": "estimado", "nota": "r0 = 0,98·λ/seeing com seeing 0,63\" e λ = 500 nm." },
+    "correlacao_vento": { "valor": "Fraca; seeing piora só com vento forte. Vento também ajuda a lavar o ar quente do domo.", "fonte": "site2010", "confidence": "artigo" }
+  },
+
+  "optica": {
+    "segmentos_m1": { "valor": 7, "fonte": "sef2026", "confidence": "oficial" },
+    "diametro_segmento_m": { "valor": 8.417, "nominal": 8.4, "fonte": "wiki", "confidence": "artigo" },
+    "abertura_efetiva_m": { "valor": 25.4, "fonte": "sef2026", "confidence": "oficial", "nota": "usp2019 cita 24,5 m (valor antigo/erro de digitação); usamos 25,4 m." },
+    "area_coletora_m2": { "valor": 368, "fonte": "wiki", "confidence": "artigo", "nota": "Área geométrica de 7 discos de 8,417 m = 389 m²; a diferença é o furo do segmento central e a sombra do M2." },
+    "razao_focal_m1": { "valor": 0.71, "por_segmento": 2.14, "fonte": "wiki", "confidence": "artigo" },
+    "razao_focal_gregoriana": { "valor": 8.2, "variantes": [8.16, 8.34], "fonte": "wiki", "confidence": "artigo", "nota": "status2026 cita feixe F/8.3 no testbed de AO." },
+    "escala_focal_arcsec_mm": { "valor": 0.997, "fonte": "wiki", "confidence": "artigo" },
+    "campo_de_visao_arcmin": { "valor": 20, "fonte": "status2026", "confidence": "oficial" },
+    "faixa_espectral_um": { "valor": [0.32, 25], "fonte": "hms2024", "confidence": "oficial" },
+    "difracao_1um_arcsec": { "valor": 0.0099, "fonte": "calculo", "confidence": "estimado", "nota": "1,22·λ/D com D = 25,4 m." },
+    "resolucao_vs_hubble": { "valor": "~10× mais nítido que o Hubble no infravermelho", "fonte": "usp2019", "confidence": "oficial" },
+    "vidro_m1": { "valor": "Ohara E6 (borossilicato de baixa expansão)", "fonte": "overview2016", "confidence": "artigo" },
+    "vidro_por_segmento_kg": { "valor": 20000, "fonte": "overview2016", "confidence": "artigo" },
+    "massa_segmento_t": { "valor": 17, "faixa": [16, 18], "fonte": "wiki", "confidence": "estimado", "nota": "Wikipedia diz 18 t; 20 t de vidro entram no forno e parte é removida na usinagem. Usamos 17 t." },
+    "estrutura_m1": { "valor": "Favo de mel (honeycomb) fundido por rotação (spin-casting) no forno rotativo do Richard F. Caris Mirror Lab (Univ. do Arizona)", "fonte": "overview2016", "confidence": "artigo" },
+    "erro_superficie_nm_rms": { "valor": 19, "fonte": "overview2016", "confidence": "artigo", "nota": "Segmento 1, sobre a abertura livre." },
+    "status_segmentos_2026": { "valor": "3 concluídos; 4 fundidos e em fabricação (S5 em polimento)", "fonte": "status2026", "confidence": "oficial" },
+    "fundicoes": { "valor": [2005, 2012, 2013, 2015, 2017, 2021, 2023], "fonte": "wiki", "confidence": "artigo" },
+    "m2_tipos": { "valor": "ASMS (secundário adaptativo) e FSMS (secundário de apontamento rápido, 7 × 1,1 m, para comissionamento)", "fonte": "status2026", "confidence": "oficial" },
+    "m2_diametro_total_m": { "valor": 3.2, "fonte": "wiki", "confidence": "artigo" }
+  },
+
+  "asm": {
+    "segmentos": { "valor": 7, "fonte": "asm2021", "confidence": "oficial" },
+    "diametro_casca_m": { "valor": 1.05, "fonte": "status2026", "confidence": "oficial" },
+    "espessura_casca_mm": { "valor": 2, "fonte": "status2026", "confidence": "oficial" },
+    "material_casca": { "valor": "Zerodur (Schott), polido pela Safran-Reosc; 98% do bloco de ~100 mm é removido", "fonte": "status2026", "confidence": "oficial" },
+    "atuadores_por_segmento": { "valor": 675, "fonte": "asm2021", "confidence": "oficial" },
+    "atuadores_total": { "valor": 4725, "fonte": "calculo", "confidence": "estimado", "nota": "7 × 675." },
+    "tipo_atuador": { "valor": "Motores de bobina (voice coil) sem contato + sensores capacitivos contra um corpo de referência de Zerodur", "fonte": "asm2021", "confidence": "oficial" },
+    "taxa_controle_hz": { "valor": 2000, "fonte": "wiki", "confidence": "artigo", "nota": "status2026: controlador das pseudo-cascas a 2.100 Hz; hexápode posicionador a 7 Hz." },
+    "hexapode_banda_hz": { "valor": 7, "fonte": "status2026", "confidence": "oficial" },
+    "fabricante": { "valor": "AdOptica (Itália)", "fonte": "status2026", "confidence": "oficial" }
+  },
+
+  "montagem": {
+    "tipo": { "valor": "Altazimutal compacta com C-rings de elevação e trilho duplo de azimute", "fonte": "overview2016", "confidence": "artigo" },
+    "massa_com_espelhos_t": { "valor": 2100, "fonte": "usp2019", "confidence": "oficial" },
+    "massa_estrutura_mecanica_t": { "valor": 1800, "fonte": "usp2019", "confidence": "oficial" },
+    "aco_estrutural_t": { "valor": 1300, "fonte": "usp2019", "confidence": "oficial" },
+    "altura_m": { "valor": 39, "fonte": "wiki", "confidence": "artigo" },
+    "trilho_azimute_diametro_m": { "valor": 21.5, "fonte": "status2026", "confidence": "oficial" },
+    "trilho_azimute_massa_t": { "valor": 172, "fonte": "status2026", "confidence": "oficial" },
+    "trilho_azimute_largura_m": { "valor": 2.4, "fonte": "status2026", "confidence": "oficial" },
+    "trilho_azimute_segmentos": { "valor": 8, "fonte": "status2026", "confidence": "oficial" },
+    "planicidade_trilho_um": { "valor": { "global": 200, "local": 20 }, "fonte": "status2026", "confidence": "oficial" },
+    "filme_oleo_mancal_um": { "valor": 50, "fonte": "usp2019", "confidence": "oficial" },
+    "contrato": { "valor": "US$ 135 milhões; projeto OHB Digital Connect (ex-MT Mechatronics, Mainz); fabricação Ingersoll Machine Tools (Rockford, EUA)", "fonte": "usp2019", "confidence": "oficial" },
+    "estacoes_instrumentos": { "valor": "GIR (rotador de instrumentos gregorianos), GIS (estação de gravidade invariante), DG (3: 2 grandes + 1 pequeno), FP (3), AP, IP; até 10 instrumentos simultâneos", "fonte": "status2026", "confidence": "oficial" },
+    "amortecimento_sismico": { "valor": "EDS (Earthquake Damping System) no azimute para cargas verticais", "fonte": "status2026", "confidence": "oficial" },
+    "frequencia_natural_hz": { "valor": 4, "fonte": "calculo", "confidence": "estimado", "nota": "Não publicado nas fontes lidas. Premissa: primeiro modo de rotor travado de ELTs alt-az de 2.000 t fica em 3–5 Hz." },
+    "amortecimento_estrutural": { "valor": 0.02, "fonte": "calculo", "confidence": "estimado", "nota": "Razão de amortecimento usual em análise de jitter de telescópios (1–2%)." },
+    "limite_elevacao_graus": { "valor": [25, 90], "fonte": "calculo", "confidence": "estimado", "nota": "Faixa típica de observação; o limite exato (incl. posição de manutenção a 0°) não foi encontrado." }
+  },
+
+  "celula_m1": {
+    "atuadores_suporte": { "valor": 160, "fonte": "m1cell", "confidence": "artigo", "nota": "Contagem da célula de teste; atuadores pneumáticos de 1 e 3 eixos." },
+    "hardpoints": { "valor": 6, "fonte": "status2026", "confidence": "oficial", "nota": "6 atuadores lineares controlam os 6 graus de liberdade do segmento." },
+    "controle_termico": { "valor": "Ventilação forçada com trocadores de calor mantém o vidro na temperatura do ar (evita mirror seeing)", "fonte": "status2026", "confidence": "oficial" },
+    "teste_optica_ativa": { "valor": "Concluído em março de 2025 com o segmento S3", "fonte": "status2026", "confidence": "oficial" }
+  },
+
+  "enclosure": {
+    "altura_total_m": { "valor": 65, "fonte": "sef2026", "confidence": "oficial" },
+    "diametro_superior_m": { "valor": 61, "fonte": "sef2026", "confidence": "oficial" },
+    "altura_inferior_fixa_m": { "valor": 12, "fonte": "hms2024", "confidence": "oficial" },
+    "altura_superior_rotativa_m": { "valor": 52, "fonte": "hms2024", "confidence": "oficial" },
+    "massa_rotativa_t": { "valor": 5660, "fonte": "sef2026", "confidence": "oficial", "nota": "Evoluiu com o projeto: 4.800 t (resumo hms2024), 5.500 t (corpo hms2024), ~5.660 t (sef2026)." },
+    "andares_equivalentes": { "valor": 22, "fonte": "enr", "confidence": "artigo" },
+    "trilho_raios_m": { "valor": [27.675, 29.525], "fonte": "hms2024", "confidence": "oficial" },
+    "trilho_tipo": { "valor": "Trilho duplo DIN A150", "fonte": "hms2024", "confidence": "oficial" },
+    "bogies_rotacao": { "valor": 33, "nota": "33 pares de bogies motorizados e complacentes", "fonte": "hms2024", "confidence": "oficial" },
+    "tempo_volta_min": { "valor": 4, "fonte": "hms2024", "confidence": "oficial" },
+    "portas_tipo": { "valor": "Duas portas bipartidas em 'L'", "fonte": "hms2024", "confidence": "oficial" },
+    "portas_altura_m": { "valor": 46, "fonte": "hms2024", "confidence": "oficial" },
+    "portas_vao_m": { "valor": { "vertical": 47, "horizontal": 50 }, "fonte": "hms2024", "confidence": "oficial" },
+    "portas_massa_total_t": { "valor": 667, "fonte": "hms2024", "confidence": "oficial", "nota": "O mesmo texto também cita ~500 t por porta; usamos 667 t combinadas." },
+    "portas_bogies": { "valor": 8, "fonte": "hms2024", "confidence": "oficial" },
+    "para_vento": { "valor": { "largura_m": 27, "altura_m": 30, "massa_t": 164, "porosidade": 0.25 }, "fonte": "hms2024", "confidence": "oficial" },
+    "respiros": { "valor": 300, "fonte": "hms2024", "confidence": "oficial", "nota": "'Mais de 300' respiros com portas de enrolar comerciais. Fontes mais antigas citam 92." },
+    "ponte_rolante_t": { "valor": 75, "fonte": "sef2026", "confidence": "oficial" },
+    "projetista": { "valor": "IDOM (Bilbao, Espanha); FDR em maio de 2024", "fonte": "sef2026", "confidence": "oficial" },
+    "vida_util_anos": { "valor": 50, "fonte": "sef2026", "confidence": "oficial" }
+  },
+
+  "pier": {
+    "diametro_m": { "valor": 22, "fonte": "wiki", "confidence": "artigo" },
+    "altura_m": { "valor": 12, "fonte": "hms2024", "confidence": "estimado", "nota": "Assumido igual à altura do enclosure inferior (~12 m), onde fica o piso de observação." },
+    "isolamento_sismico": { "valor": "24 pêndulos de atrito com fusíveis; deslocamento livre de até 700 mm num sismo", "fonte": "enr", "confidence": "artigo" },
+    "espessura_parede_m": { "valor": 1.5, "fonte": "calculo", "confidence": "estimado", "nota": "Ordem de grandeza para pier cilíndrico de concreto de 22 m que leva 2.100 t + cargas sísmicas." },
+    "taxa_armadura_kg_m3": { "valor": 150, "fonte": "calculo", "confidence": "estimado", "nota": "Taxa típica de estruturas de concreto armado sismorresistentes pesadas (100–200 kg/m³)." }
+  },
+
+  "lgs": {
+    "lasers": { "valor": 6, "fonte": "lgsf2013", "confidence": "artigo" },
+    "comprimento_onda_nm": { "valor": 589, "fonte": "lgsf2013", "confidence": "artigo", "nota": "Linha D do sódio." },
+    "altura_camada_sodio_km": { "valor": 90, "fonte": "lgsf2013", "confidence": "artigo" },
+    "asterismo_arcmin": { "valor": { "LTAO": 1, "LGLAO": 7 }, "fonte": "lgsf2013", "confidence": "artigo" },
+    "lancamento": { "valor": "Lançadores na borda do M1, distribuídos em volta do primário", "fonte": "lgsf2013", "confidence": "artigo" },
+    "potencia_por_laser_W": { "valor": 20, "fonte": "calculo", "confidence": "estimado", "nota": "Não confirmado para o GMT; 20 W é a classe dos lasers de sódio atuais (ESO/Keck)." },
+    "projetista": { "valor": "Australian National University (ANU); delta-PDR em outubro de 2024", "fonte": "status2026", "confidence": "oficial" }
+  },
+
+  "instrumentos": [
+    { "id": "gclef", "nome": "G-CLEF", "tipo": "Espectrógrafo echelle visível de alta precisão de velocidade radial (exoplanetas)", "estacao": "GIS", "fonte": "status2026", "confidence": "oficial" },
+    { "id": "gmacs", "nome": "GMACS", "tipo": "Espectrógrafo multiobjeto visível, R ~1.000–6.000, campo 6,5' × 7'; parceria do Instituto Steiner (São Paulo)", "estacao": "DG", "fonte": "status2026", "confidence": "oficial" },
+    { "id": "gmtnirs", "nome": "GMTNIRS", "tipo": "Espectrógrafo infravermelho de alta resolução, bandas J–M (1–5 µm) numa exposição", "estacao": "DG", "fonte": "status2026", "confidence": "oficial" },
+    { "id": "gmtifs", "nome": "GMTIFS", "tipo": "Imageador e espectrógrafo de campo integral limitado por difração, 0,96–2,4 µm", "estacao": "DG", "fonte": "status2026", "confidence": "oficial" },
+    { "id": "manifest", "nome": "MANIFEST", "tipo": "Alimentador robótico de fibras para todo o campo de 20'", "estacao": "FP", "fonte": "status2026", "confidence": "oficial" },
+    { "id": "gmagaox", "nome": "GMagAO-X", "tipo": "Óptica adaptativa extrema para exoplanetas em luz refletida", "estacao": "FP", "fonte": "status2026", "confidence": "oficial" },
+    { "id": "comcam", "nome": "ComCam", "tipo": "Câmera de comissionamento, campo de 6', 360–950 nm", "estacao": "DG", "fonte": "status2026", "confidence": "oficial" }
+  ],
+
+  "modelo": {
+    "_nota": "Premissas do modelo didático de vento, jitter e imagem. Nenhum destes valores é publicado pelo GMTO para o GMT; servem para a ordem de grandeza.",
+    "weibull": { "valor": { "k": 1.59, "c": 7.93 }, "fonte": "calculo", "confidence": "estimado", "nota": "Ajuste aos percentis de vento do site (p25, p50, p90 e p97 batem com erro < 0,3 m/s)." },
+    "cd_domo": { "valor": 0.6, "fonte": "calculo", "confidence": "estimado", "nota": "Cilindro rugoso em número de Reynolds alto (supercrítico)." },
+    "cd_placa": { "valor": 1.2, "fonte": "calculo", "confidence": "estimado", "nota": "Placa plana ou treliça normal ao vento (espelho, topo, pernas)." },
+    "area_topo_m2": { "valor": 30, "fonte": "calculo", "confidence": "estimado", "nota": "Área frontal do anel do topo + ASM + hexápodes (medida no modelo 3D, arredondada)." },
+    "area_pernas_m2": { "valor": 67, "fonte": "calculo", "confidence": "estimado", "nota": "6 pernas × 0,9 m × ~25 m, com 50% de sombreamento entre elas." },
+    "massa_modal_topo_t": { "valor": 40, "fonte": "calculo", "confidence": "estimado", "nota": "Massa modal efetiva do conjunto topo + M2 no 1º modo lateral." },
+    "sensibilidade_m2_arcsec_um": { "valor": 0.02, "fonte": "calculo", "confidence": "estimado", "nota": "Movimento de imagem por mícron de deslocamento lateral do M2 (decentragem + inclinação do topo), para um Gregoriano f/0,71 → f/8,2." },
+    "racine_espelho": { "valor": 0.4, "fonte": "artigo", "confidence": "artigo", "url": "https://ui.adsabs.harvard.edu/abs/1991PASP..103.1020R/abstract", "nota": "Racine et al. (1991): seeing do espelho ≈ 0,4″ · ΔT^1,2 (ΔT em K, ar parado)." },
+    "racine_domo": { "valor": 0.1, "fonte": "artigo", "confidence": "artigo", "url": "https://ui.adsabs.harvard.edu/abs/1991PASP..103.1020R/abstract", "nota": "Racine et al. (1991): seeing do domo ≈ 0,1″ · ΔT^1,2." },
+    "pitch_atuadores_m": { "valor": 0.287, "fonte": "calculo", "confidence": "estimado", "nota": "Espaçamento dos 675 atuadores de cada ASM projetado no segmento de 8,4 m: 8,4 / √(675·4/π)." },
+    "atraso_ao_s": { "valor": 0.001, "fonte": "calculo", "confidence": "estimado", "nota": "Dois quadros a 2 kHz." },
+    "vento_alto_m_s": { "valor": 22, "fonte": "calculo", "confidence": "estimado", "nota": "Vento típico das camadas altas (corrente de jato) usado no τ0." },
+    "L0_m": { "valor": 25, "fonte": "calculo", "confidence": "estimado", "nota": "Escala externa da turbulência (von Kármán), valor típico de sítios chilenos." }
+  },
+  "cronologia": [
+    { "ano": 2005, "evento": "Fundição do 1º segmento do M1", "fonte": "wiki", "confidence": "artigo" },
+    { "ano": 2012, "evento": "Detonação e nivelamento do cume de Las Campanas", "fonte": "sef2026", "confidence": "oficial" },
+    { "ano": 2015, "evento": "Início das obras do GMT no local", "fonte": "sef2026", "confidence": "oficial" },
+    { "ano": 2019, "evento": "Fim da escavação em rocha do pier e das fundações; contrato da estrutura (US$ 135 mi)", "fonte": "sef2026", "confidence": "oficial" },
+    { "ano": 2021, "evento": "Redes enterradas, prédio e tanque de água concluídos", "fonte": "sef2026", "confidence": "oficial" },
+    { "ano": 2023, "evento": "Fundição do 7º segmento; início da fabricação da montagem (julho)", "fonte": "status2026", "confidence": "oficial" },
+    { "ano": 2024, "evento": "Revisão final de projeto (FDR) do enclosure, maio", "fonte": "sef2026", "confidence": "oficial" },
+    { "ano": 2025, "evento": "Teste de óptica ativa com S3 (março); NSF move o GMT para a Fase de Projeto Final (junho)", "fonte": "status2026", "confidence": "oficial" },
+    { "ano": 2027, "evento": "FDR do sistema pela NSF (previsto, meados do ano)", "fonte": "status2026", "confidence": "oficial" },
+    { "ano": 2028, "evento": "Retomada das obras no cume e contrato do enclosure (previsto)", "fonte": "sef2026", "confidence": "oficial" },
+    { "ano": 2032, "evento": "Primeira luz (estimativa: 'início dos anos 2030')", "fonte": "wiki", "confidence": "estimado" }
+  ],
+
+  "projeto": {
+    "custo_estimado_usd": { "valor": 2000000000, "fonte": "wiki", "confidence": "artigo" },
+    "parceiros": { "valor": "16 universidades e instituições dos EUA, Austrália, Brasil, Israel, Coreia do Sul e Taiwan, com o Chile como país-sede; no Brasil, FAPESP/USP", "fonte": "sef2026", "confidence": "oficial" }
+  }
+}

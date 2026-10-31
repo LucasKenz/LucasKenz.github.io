@@ -39,7 +39,7 @@ const rolavel = item.slug === 'lentes';
         </div>
       </div>
       <nav class="sim-outras" aria-label={lang === 'pt' ? 'Outras simulações' : 'Other simulations'}>
-        {lab.map((l, k) => <a href={`${base}/lab/${l.slug}`} aria-current={l.slug === item.slug ? 'page' : undefined} aria-label={l.nome[lang]}>{n2(k)}</a>)}
+        {lab.map((l, k) => <a href={l.href ?? `${base}/lab/${l.slug}`} aria-current={l.slug === item.slug ? 'page' : undefined} aria-label={l.nome[lang]}>{n2(k)}</a>)}
       </nav>
 
       {item.slug === 'lentes'

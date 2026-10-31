@@ -130,4 +130,15 @@ export const lab: LabItem[] = [
     tecnica: { pt: 'ondas de Gerstner · cáusticas · bloom', en: 'Gerstner waves · caustics · bloom' },
     status: 'pronto',
   },
+  {
+    slug: 'gmt',
+    href: '/lab/gmt/',
+    nome: { pt: 'Telescópio Gigante Magalhães', en: 'Giant Magellan Telescope' },
+    frase: {
+      pt: 'O GMT em 3D: como funciona, como o vento borra a imagem e cada estrutura isolada com materiais, quantitativos e custo estimado.',
+      en: 'The GMT in 3D: how it works, how wind blurs the image, and every structure on its own with materials, quantities and estimated cost (page in Portuguese).',
+    },
+    tecnica: { pt: 'Three.js · vento e óptica adaptativa · BOM com fontes', en: 'Three.js · wind and adaptive optics · sourced BOM' },
+    status: 'pronto',
+  },
 ];

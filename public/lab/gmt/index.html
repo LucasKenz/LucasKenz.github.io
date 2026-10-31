@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Telescópio Gigante Magalhães | Lab · Lucas Kenzo</title>
+<meta name="description" content="O GMT em 3D: engenharia, vento e o que ele faz com a imagem, e cada estrutura isolada com materiais e quantitativos. Números reais com fonte.">
+<meta property="og:title" content="Telescópio Gigante Magalhães | Lab · Lucas Kenzo">
+<meta property="og:description" content="Engenharia, dados e arquitetura do GMT numa simulação 3D com fontes.">
+<meta property="og:image" content="https://lucaskenz.github.io/media/lab-gmt.webp">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<a class="pular" href="#painel">Pular para os controles</a>
+
+<div id="palco" aria-hidden="true"></div>
+<div id="rotulos3d" class="rotulos"></div>
+<div id="rotulosPeca" class="rotulos" hidden></div>
+
+<!-- ============ topo ============ -->
+<header class="topo">
+  <a class="marca" href="/lab#sim-gmt" title="Voltar ao Lab">LAB<b>·</b>LK</a>
+  <h1 class="titulo">Telescópio Gigante Magalhães</h1>
+  <nav class="abas" aria-label="Modos">
+    <div class="grupo-abas" role="group" aria-label="Engenharia">
+      <span class="grupo-nome">Engenharia</span>
+      <button type="button" data-modo="3d" aria-pressed="true"><kbd>1</kbd> 3D</button>
+      <button type="button" data-modo="pessoa" aria-pressed="false"><kbd>2</kbd> Pessoa</button>
+      <button type="button" data-modo="vento" aria-pressed="false"><kbd>3</kbd> Vento</button>
+    </div>
+    <div class="grupo-abas" role="group" aria-label="Arquitetura">
+      <span class="grupo-nome">Arquitetura</span>
+      <button type="button" data-modo="catalogo" aria-pressed="false"><kbd>4</kbd> Catálogo</button>
+      <button type="button" data-modo="bom" aria-pressed="false"><kbd>5</kbd> BOM</button>
+    </div>
+    <button type="button" class="aba-fontes" data-modo="fontes" aria-pressed="false">Fontes</button>
+  </nav>
+  <button type="button" class="btn-painel" id="btnPainel" aria-controls="painel" aria-expanded="true" title="Mostrar/ocultar controles">☰</button>
+</header>
+
+<!-- ============ painel lateral de controles ============ -->
+<aside id="painel" class="painel vidro" aria-label="Controles" tabindex="-1">
+  <!-- 3D -->
+  <section data-para="3d">
+    <h2>Apontamento</h2>
+    <label class="faixa">Azimute <output id="oAz">0°</output><input type="range" id="az" min="0" max="360" step="1" value="20"></label>
+    <label class="faixa">Elevação <output id="oEl">60°</output><input type="range" id="el" min="25" max="90" step="1" value="60"></label>
+    <p class="dica">Clique no céu para apontar o telescópio para aquela estrela.</p>
+    <label class="caixa"><input type="checkbox" id="sync" checked> Domo acompanha o telescópio</label>
+
+    <h2>Domo</h2>
+    <label class="caixa"><input type="checkbox" id="corte" checked> Corte do domo (ver por dentro)</label>
+    <div class="linha-btn">
+      <button type="button" id="btnPortas">Fechar portas</button>
+      <button type="button" id="btnCapas">Fechar capas do M1</button>
+    </div>
+    <label class="faixa">Persianas de ventilação <output id="oVent">50%</output><input type="range" id="vent" min="0" max="100" value="50"></label>
+    <label class="faixa">Para-vento <output id="oTela">0%</output><input type="range" id="tela" min="0" max="100" value="0"></label>
+
+    <h2>Cena</h2>
+    <label class="sel">Hora
+      <select id="hora"><option value="0">Noite</option><option value="0.5">Crepúsculo</option><option value="1">Dia</option></select>
+    </label>
+    <label class="caixa"><input type="checkbox" id="lasers" checked> Lasers de estrela-guia (LGS)</label>
+    <div class="linha-btn">
+      <button type="button" id="btnExplodir"><kbd>E</kbd> Vista explodida</button>
+      <button type="button" id="btnTour">▶ Tour guiado</button>
+    </div>
+  </section>
+
+  <!-- PESSOA -->
+  <section data-para="pessoa" hidden>
+    <h2>Perspectiva humana</h2>
+    <p class="dica">Clique na cena para andar. <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> movem, mouse olha, <kbd>Shift</kbd> corre, <kbd>Esc</kbd> solta o mouse. No celular, use o joystick e arraste para olhar.</p>
+    <p class="dica">Olhos a 1,70 m. A porta do domo fica no lado sul; rampas levam ao piso de observação (12 m) e às passarelas internas.</p>
+    <div class="linha-btn">
+      <button type="button" id="irFora">Platô (fora)</button>
+      <button type="button" id="irPiso">Piso de observação</button>
+      <button type="button" id="irPassarela">Passarela alta</button>
+    </div>
+    <label class="caixa"><input type="checkbox" id="ventoAndando"> Partículas de vento</label>
+    <label class="caixa"><input type="checkbox" id="som"> Som do vento</label>
+  </section>
+
+  <!-- VENTO -->
+  <section data-para="vento" hidden>
+    <h2>Cenário (dados de Las Campanas)</h2>
+    <div class="cenarios" id="cenarios"></div>
+    <label class="faixa">Velocidade a 10 m <output id="oU">6,3 m/s</output><input type="range" id="U" min="0" max="60" step="0.1" value="6.3"></label>
+    <div class="rosa-ctrl">
+      <canvas id="rosaCtrl" width="120" height="120" aria-label="Direção do vento (clique para escolher)"></canvas>
+      <label class="faixa">Vem de <output id="oDir">45° (NE)</output><input type="range" id="dir" min="0" max="359" value="45"></label>
+    </div>
+    <label class="faixa">Turbulência <output id="oTurb">12%</output><input type="range" id="turb" min="0" max="40" value="12"></label>
+    <label class="caixa"><input type="checkbox" id="domoAberto" checked> Domo aberto</label>
+    <label class="faixa">Persianas <output id="oVent2">50%</output><input type="range" id="vent2" min="0" max="100" value="50"></label>
+    <label class="faixa">Para-vento <output id="oTela2">0%</output><input type="range" id="tela2" min="0" max="100" value="0"></label>
+    <label class="faixa">Abertura do domo em relação ao vento <output id="oRel">180°</output><input type="range" id="rel" min="-180" max="180" value="180"></label>
+    <label class="faixa">Elevação do telescópio <output id="oEl2">60°</output><input type="range" id="el2" min="25" max="90" value="60"></label>
+    <label class="faixa">Temperatura do ar <output id="oT">10 °C</output><input type="range" id="T" min="-5" max="25" value="10"></label>
+    <label class="faixa">ΔT espelho − ar <output id="oDTm">0,3 K</output><input type="range" id="dTm" min="0" max="2" step="0.05" value="0.3"></label>
+    <label class="faixa">ΔT ar do domo − fora <output id="oDTd">0,8 K</output><input type="range" id="dTd" min="0" max="3" step="0.05" value="0.8"></label>
+    <h2>Visualização</h2>
+    <div class="chips">
+      <label><input type="checkbox" id="vPlano"> Plano de corte (2D)</label>
+      <label><input type="checkbox" id="vPart"> Partículas 3D</label>
+      <label><input type="checkbox" id="vLinhas" checked> Tubos de corrente 3D</label>
+      <label><input type="checkbox" id="vVolume"> Volume 3D (CFD)</label>
+      <label><input type="checkbox" id="vSetas"> Vetores</label>
+      <label><input type="checkbox" id="vPressao"> Pressão na superfície</label>
+      <label><input type="checkbox" id="vHoriz"> Plano horizontal</label>
+    </div>
+    <label class="faixa">Posição do plano vertical <output id="oOff">0 m</output><input type="range" id="off" min="-60" max="60" value="0"></label>
+    <label class="faixa">Altura do plano horizontal <output id="oAlt">40 m</output><input type="range" id="alt" min="2" max="90" value="40"></label>
+    <p class="dica metodo">Modelo didático: fluxo potencial em torno do domo + perfil logarítmico + esteira com vórtices de Strouhal (St ≈ 0,2) + turbulência sintética de Kraichnan. Não é CFD de engenharia. <a href="#fontes/metodo">Como funciona</a></p>
+  </section>
+
+  <section class="sempre">
+    <label class="sel">Qualidade
+      <select id="qualidade"><option value="baixa">Baixa</option><option value="media">Média</option><option value="alta">Alta</option></select>
+    </label>
+    <p class="fps" id="fps" aria-live="off"></p>
+  </section>
+</aside>
+
+<!-- ============ navegação (3D e vento) ============ -->
+<div id="nav" class="nav vidro" role="group" aria-label="Navegação da câmera">
+  <button type="button" data-nav="girarE" title="Girar para a esquerda" aria-label="Girar para a esquerda">⟲</button>
+  <button type="button" data-nav="cima" title="Mover para cima (↑)" aria-label="Mover para cima">▲</button>
+  <button type="button" data-nav="girarD" title="Girar para a direita" aria-label="Girar para a direita">⟳</button>
+  <button type="button" data-nav="esq" title="Mover para a esquerda (←)" aria-label="Mover para a esquerda">◀</button>
+  <button type="button" data-nav="inicio" title="Voltar à vista inicial" aria-label="Voltar à vista inicial">⌂</button>
+  <button type="button" data-nav="dir" title="Mover para a direita (→)" aria-label="Mover para a direita">▶</button>
+  <button type="button" data-nav="afastar" title="Afastar (−)" aria-label="Afastar">−</button>
+  <button type="button" data-nav="baixo" title="Mover para baixo (↓)" aria-label="Mover para baixo">▼</button>
+  <button type="button" data-nav="aproximar" title="Aproximar (+)" aria-label="Aproximar">+</button>
+  <p class="nav-dica">Arraste para girar · <b>Shift</b> ou botão direito + arrastar para mover · roda do mouse aproxima onde você aponta</p>
+</div>
+
+<!-- ============ card de subsistema ============ -->
+<section id="card" class="card vidro" aria-live="polite" hidden>
+  <button type="button" class="fechar" id="fecharCard" aria-label="Fechar">×</button>
+  <p class="card-num" id="cardNum"></p>
+  <h2 id="cardNome"></h2>
+  <p class="card-funcao" id="cardFuncao"></p>
+  <canvas id="previa" class="previa" width="640" height="380" aria-label="Animação demonstrando a função"></canvas>
+  <p class="previa-legenda" id="previaLegenda"></p>
+  <p class="card-peca" id="cardPeca" hidden></p>
+  <dl class="dados" id="cardDados"></dl>
+  <div class="linha-btn">
+    <button type="button" id="btnFoco"><kbd>F</kbd> Focar</button>
+    <button type="button" id="btnAbrirPeca">Abrir na Arquitetura →</button>
+  </div>
+</section>
+
+<!-- ============ narração do tour ============ -->
+<div id="narracao" class="narracao vidro" hidden>
+  <p id="narracaoTexto"></p>
+  <button type="button" id="pararTour">Parar tour</button>
+</div>
+
+<!-- ============ resultados do vento ============ -->
+<section id="resultados" class="resultados vidro" hidden aria-label="Resultados da simulação de vento">
+  <h2>Como o vento afeta o que vemos</h2>
+  <div class="nums" id="nums"></div>
+  <h3>O que o telescópio vê</h3>
+  <div class="imagens">
+    <figure><canvas id="imgIdeal" width="256" height="256"></canvas><figcaption>Limite de difração (25,4 m)</figcaption></figure>
+    <figure><canvas id="imgSemAO" width="256" height="256"></canvas><figcaption>Vento + turbulência, sem AO</figcaption></figure>
+    <figure><canvas id="imgComAO" width="256" height="256"></canvas><figcaption>ASM ativo (óptica adaptativa)</figcaption></figure>
+  </div>
+  <div class="linha-sel">
+    <label class="sel">Alvo <select id="alvo"><option value="estrela">Estrela</option><option value="binaria">Binária (0,05″)</option><option value="aglomerado">Aglomerado</option><option value="galaxia">Galáxia</option></select></label>
+    <label class="sel">Banda <select id="banda"><option value="1.25">J (1,25 µm)</option><option value="1.65">H (1,65 µm)</option><option value="2.2" selected>K (2,2 µm)</option></select></label>
+    <label class="caixa"><input type="checkbox" id="longa"> Exposição longa</label>
+  </div>
+  <p class="psf-num" id="psfNum"></p>
+  <h3>Séries e estatística</h3>
+  <div class="graficos">
+    <figure><canvas id="gVel" width="560" height="200"></canvas><figcaption>Velocidade (m/s) × tempo</figcaption></figure>
+    <figure><canvas id="gForca" width="560" height="200"></canvas><figcaption>Força (kN) × tempo</figcaption></figure>
+    <figure><canvas id="gJitter" width="560" height="200"></canvas><figcaption>Erro de apontamento (″) × tempo</figcaption></figure>
+    <figure><canvas id="gSeeing" width="560" height="200"></canvas><figcaption>Seeing total × vento (modelo)</figcaption></figure>
+    <figure><canvas id="gRosa" width="280" height="280"></canvas><figcaption>Rosa dos ventos (noites limpas)</figcaption></figure>
+    <figure><canvas id="gHist" width="280" height="280"></canvas><figcaption>Histograma (Weibull ajustada)</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ primeira pessoa ============ -->
+<div id="fpsUi" class="fps-ui" hidden>
+  <canvas id="minimapa" width="180" height="180" aria-label="Mini-mapa"></canvas>
+  <p id="posicao" class="posicao"></p>
+  <div id="joystick" class="joystick" aria-hidden="true"><span></span></div>
+  <p id="travar" class="travar">Clique para andar</p>
+  <div class="mira" aria-hidden="true"></div>
+</div>
+
+<!-- ============ catálogo ============ -->
+<section id="catalogo" class="sobreposicao" hidden aria-label="Catálogo de estruturas">
+  <div class="sob-cab">
+    <h2>Catálogo de estruturas</h2>
+    <p>Uma entrada por <em>tipo</em> de peça. Peças repetidas são modeladas uma vez e multiplicadas pela quantidade. Clique para abrir o visualizador.</p>
+    <div class="filtros">
+      <input type="search" id="busca" placeholder="Buscar peça…" aria-label="Buscar peça">
+      <div class="chips" id="filtroSistema"></div>
+    </div>
+  </div>
+  <div class="grade-cat" id="gradeCat"></div>
+</section>
+
+<!-- ============ visualizador de peça ============ -->
+<section id="visor" class="visor" hidden aria-label="Visualizador de peça">
+  <div class="visor-barra vidro">
+    <button type="button" id="vVoltar">← Catálogo</button>
+    <button type="button" id="vAnt" aria-label="Peça anterior">‹</button>
+    <button type="button" id="vProx" aria-label="Próxima peça">›</button>
+    <div class="modos-visor" role="group" aria-label="Modo de exibição">
+      <button type="button" data-vm="solido" aria-pressed="true">Sólido</button>
+      <button type="button" data-vm="arame" aria-pressed="false">Arame</button>
+      <button type="button" data-vm="raiox" aria-pressed="false">Raio-X</button>
+      <button type="button" data-vm="corte" aria-pressed="false">Corte</button>
+      <button type="button" data-vm="explodida" aria-pressed="false">Explodida</button>
+    </div>
+    <label class="faixa curta" id="corteCtl" hidden>Plano <input type="range" id="corteX" min="-1" max="1" step="0.01" value="0"></label>
+    <button type="button" id="vModelo">Ver no modelo completo</button>
+  </div>
+  <div class="pip-moldura" aria-hidden="true"><span>Posição no telescópio</span></div>
+  <aside class="visor-card vidro" id="visorCard"></aside>
+</section>
+
+<!-- ============ BOM ============ -->
+<section id="bom" class="sobreposicao" hidden aria-label="Bill of Materials">
+  <div class="sob-cab">
+    <h2>Bill of Materials: obra inteira</h2>
+    <p>Soma de todos os materiais de todas as estruturas do catálogo (por peça × quantidade). Massas calibradas pelo valor pesquisado quando ele existe. Custos estimados em ordem de grandeza, com preços unitários de mercado (fornecido e instalado).</p>
+    <div class="linha-btn"><button type="button" id="csv">Exportar CSV</button><button type="button" id="imprimir">Imprimir / PDF</button></div>
+  </div>
+  <div class="bom-corpo">
+    <div class="comparacoes" id="comparacoes"></div>
+    <div class="tabela-rolo"><table class="tabela" id="tabBom"></table></div>
+    <h3>Composição por sistema</h3>
+    <canvas id="gSistemas" width="900" height="260"></canvas>
+    <h3>Linha do tempo</h3>
+    <ol class="tempo" id="linhaTempo"></ol>
+  </div>
+</section>
+
+<!-- ============ fontes ============ -->
+<section id="fontes" class="sobreposicao" hidden aria-label="Fontes e metodologia">
+  <div class="sob-cab"><h2>Fontes e metodologia</h2></div>
+  <div class="fontes-corpo" id="fontesCorpo"></div>
+</section>
+
+<!-- ============ carregamento ============ -->
+<div id="carregando" class="carregando" role="status">
+  <div>
+    <p class="car-marca">LAB<b>·</b>LK</p>
+    <h2>Telescópio Gigante Magalhães</h2>
+    <div class="barra"><span id="barra"></span></div>
+    <p id="carEtapa">Carregando dados…</p>
+    <p class="car-frase">Sete espelhos de 8,4 m, cada um com cerca de 17 toneladas de vidro, vão trabalhar como um só espelho de 25,4 m.</p>
+  </div>
+</div>
+<div id="semWebgl" class="carregando" hidden>
+  <div><h2>Seu navegador não tem WebGL 2</h2><p>Esta página precisa de aceleração gráfica. Tente um navegador atualizado (Chrome, Edge, Firefox ou Safari 15+) ou ative a aceleração de hardware.</p><p><a href="/lab">← Voltar ao Lab</a></p></div>
+</div>
+<div id="aviso" class="aviso" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
