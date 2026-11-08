@@ -141,4 +141,15 @@ export const lab: LabItem[] = [
     tecnica: { pt: 'Three.js · vento e óptica adaptativa · BOM com fontes', en: 'Three.js · wind and adaptive optics · sourced BOM' },
     status: 'pronto',
   },
+  {
+    slug: 'curato',
+    href: '/curato/',
+    nome: { pt: 'Curato', en: 'Curato' },
+    frase: {
+      pt: 'Protótipo de Design Estratégico: até 4 pessoas escolhem um filme juntas e assistem em sincronia, cada uma na sua casa.',
+      en: 'Strategic Design prototype: up to 4 people pick a film together and watch it in sync, each from their own home (page in Portuguese).',
+    },
+    tecnica: { pt: 'WebRTC · vídeo sincronizado · chat de voz', en: 'WebRTC · synced video · voice chat' },
+    status: 'pronto',
+  },
 ];

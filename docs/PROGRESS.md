@@ -93,3 +93,8 @@
 - Pedido do usuário: cenas 3D do Lab pesavam no celular mesmo com a pessoa lendo o texto abaixo. Sem mexer em nenhum elemento da página.
 - Novo `src/lab/comum/SoNaTela.tsx` dentro de cada `<Canvas>` (Agua, Cidade, Barras3D, Mover, Robo, Visor3D): `IntersectionObserver` + `visibilitychange` trocam o `frameloop` para `'never'` quando a cena sai da tela ou a aba fica oculta, e voltam ao original quando ela reaparece. A cena continua montada (estado preservado), só os frames param. `Mini3D` já usa `frameloop="demand"` e ficou de fora.
 - Verificação: typecheck 0 erros, 15/15 testes, conferido no `pnpm dev` pelo usuário.
+
+## 2026-11-08 · Lab: card do protótipo Curato (enviado de outro computador)
+- Pedido do usuário: link para o protótipo Curato (projeto de Design Estratégico) como card no Lab. O protótipo mora no repositório próprio `LucasKenz/curato`, publicado em https://lucaskenz.github.io/curato/.
+- Novo item `curato` em `content/lab.ts` com `href: '/curato/'` (igual ao GMT, sem rota `/lab/[slug]`) e capa `public/media/lab-curato.webp` (1280 × 800, captura do início do protótipo).
+- Enviado direto para `origin/main` a partir de um clone novo, em outro computador, sem passar por `scripts/publicar.sh`. Antes do próximo envio, trazer este commit para a `main` local e alinhar a `publico` (ver mensagem do commit), senão o card some e o push da `publico` é recusado.
