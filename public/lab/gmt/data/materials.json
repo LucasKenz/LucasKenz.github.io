@@ -322,5 +322,79 @@
    "confidence": "estimado",
    "nota": "Laser de sódio de ~20 W, faixa de preço de sistemas comerciais."
   }
+ },
+ "cabo_energia": {
+  "nome": "Cabo de energia",
+  "spec": "Cabo de cobre 0,6/1 kV, isolação EPR/XLPE, bitola média (estimado)",
+  "unidade": "m",
+  "kg_m": 1.2,
+  "cor": "#e2733a",
+  "confidence": "estimado",
+  "nota": "Massa linear de um cabo de potência de bitola média (~3×35 mm²).",
+  "preco": {
+   "usd": 85,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Cabo de potência fornecido e lançado, com terminações. Valor de partida para o sandbox; o usuário pode trocar pelo preço do cliente."
+  }
+ },
+ "cabo_fibra": {
+  "nome": "Cabo de fibra óptica",
+  "spec": "Cabo multifibra monomodo/multimodo, uso interno/externo",
+  "unidade": "m",
+  "kg_m": 0.08,
+  "cor": "#3fd18b",
+  "confidence": "estimado",
+  "nota": "Cabo de 24–48 fibras.",
+  "preco": {
+   "usd": 12,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Fibra lançada, sem as fusões e os distribuidores. Valor de partida para o sandbox; o usuário pode trocar pelo preço do cliente."
+  }
+ },
+ "cabo_dados": {
+  "nome": "Cabo de dados e sinal",
+  "spec": "Par trançado blindado / cabo de instrumentação",
+  "unidade": "m",
+  "kg_m": 0.1,
+  "cor": "#5d86ff",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 18,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Cabo de sinal lançado e identificado. Valor de partida para o sandbox; o usuário pode trocar pelo preço do cliente."
+  }
+ },
+ "mangueira_refrigerante": {
+  "nome": "Mangueira de refrigerante",
+  "spec": "Mangueira flexível para glicol/CO₂, com isolamento térmico",
+  "unidade": "m",
+  "kg_m": 2.5,
+  "cor": "#56c7e8",
+  "confidence": "estimado",
+  "nota": "Inclui o fluido e o isolamento.",
+  "preco": {
+   "usd": 110,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Linha de refrigerante instalada, com isolamento. Valor de partida para o sandbox; o usuário pode trocar pelo preço do cliente."
+  }
+ },
+ "eletrocalha": {
+  "nome": "Eletrocalha (bandeja de cabos)",
+  "spec": "Bandeja perfurada de aço galvanizado ou inox, com tampa",
+  "unidade": "m²",
+  "densidade_area": 14,
+  "cor": "#9aa3b5",
+  "confidence": "estimado",
+  "nota": "Área = largura × comprimento do trecho.",
+  "preco": {
+   "usd": 95,
+   "por": "m²",
+   "confidence": "estimado",
+   "nota": "Bandeja fornecida e instalada com suportes. Valor de partida para o sandbox; o usuário pode trocar pelo preço do cliente."
+  }
  }
 }

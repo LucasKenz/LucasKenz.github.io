@@ -42,6 +42,7 @@
       <span class="grupo-nome">Arquitetura</span>
       <button type="button" data-modo="catalogo" aria-pressed="false"><kbd>4</kbd> Catálogo</button>
       <button type="button" data-modo="bom" aria-pressed="false"><kbd>5</kbd> BOM</button>
+      <button type="button" data-modo="sandbox" aria-pressed="false"><kbd>6</kbd> Sandbox</button>
     </div>
     <button type="button" class="aba-fontes" data-modo="fontes" aria-pressed="false">Fontes</button>
   </nav>
@@ -125,6 +126,114 @@
     <p class="dica metodo">Modelo didático: fluxo potencial em torno do domo + perfil logarítmico + esteira com vórtices de Strouhal (St ≈ 0,2) + turbulência sintética de Kraichnan. Não é CFD de engenharia. <a href="#fontes/metodo">Como funciona</a></p>
   </section>
 
+  <!-- SANDBOX -->
+  <section data-para="sandbox" hidden class="sb">
+    <h2>Projeto</h2>
+    <label class="campo">Nome <input type="text" id="sbNome" maxlength="140" autocomplete="off"></label>
+    <label class="campo">Autor <input type="text" id="sbAutor" maxlength="140" autocomplete="off" placeholder="opcional"></label>
+    <div class="linha-btn">
+      <button type="button" id="sbDesfazer" title="Desfazer (Ctrl+Z)" aria-label="Desfazer">↶ Desfazer</button>
+      <button type="button" id="sbRefazer" title="Refazer (Ctrl+Shift+Z)" aria-label="Refazer">↷ Refazer</button>
+      <button type="button" id="sbNovo">Novo</button>
+    </div>
+    <label class="caixa"><input type="checkbox" id="sbCorte" checked> Corte do domo (ver por dentro)</label>
+
+    <h2>Ferramenta</h2>
+    <div class="chips sb-ferr" role="group" aria-label="Ferramenta">
+      <button type="button" data-ferr="navegar" aria-pressed="true">Navegar</button>
+      <button type="button" data-ferr="cabo" aria-pressed="false">Cabo</button>
+      <button type="button" data-ferr="adicionar" aria-pressed="false">Adicionar peça</button>
+      <button type="button" data-ferr="selecionar" aria-pressed="false">Selecionar</button>
+    </div>
+
+    <div data-ferr-painel="navegar">
+      <p class="dica">Gire, aproxime e explore o modelo. Escolha uma ferramenta para editar. Tudo o que você muda aparece em cor; o resto fica em cinza.</p>
+    </div>
+
+    <div data-ferr-painel="cabo" hidden>
+      <label class="sel">Tipo <select id="sbCat"></select></label>
+      <div class="sb-grade2">
+        <label class="campo">Cabos no feixe <input type="number" id="sbFeixe" min="1" max="500" step="1" value="1"></label>
+        <label class="campo">Folga (%) <input type="number" id="sbFolga" min="0" max="200" step="1" value="10"></label>
+      </div>
+      <label class="sel">Sistema <select id="sbSis"></select></label>
+      <label class="campo">Nome do trecho <input type="text" id="sbCaboNome" maxlength="140" placeholder="ex.: energia GIR → plataforma"></label>
+      <label class="caixa"><input type="checkbox" id="sbCalha"> Com eletrocalha</label>
+      <label class="campo" id="sbCalhaL" hidden>Largura da eletrocalha (cm) <input type="number" id="sbCalhaLarg" min="5" max="200" step="5" value="30"></label>
+      <div class="sb-grade2">
+        <label class="caixa"><input type="checkbox" id="sbGrade"> Grade de 0,5 m</label>
+        <label class="caixa"><input type="checkbox" id="sbOrto"> Só eixos (ortogonal)</label>
+      </div>
+      <p class="sb-status" id="sbCaboStatus" aria-live="polite">Clique numa superfície do modelo para pôr o primeiro ponto.</p>
+      <div class="linha-btn">
+        <button type="button" id="sbCaboOk"><kbd>Enter</kbd> Concluir trecho</button>
+        <button type="button" id="sbCaboVolta"><kbd>⌫</kbd> Desfazer ponto</button>
+        <button type="button" id="sbCaboCancela"><kbd>Esc</kbd> Cancelar</button>
+      </div>
+      <details class="sb-det">
+        <summary>Orçar sem desenhar</summary>
+        <p class="dica">Digite o comprimento do caminho e escolha onde ele fica. O trecho aparece como um marcador.</p>
+        <div class="sb-grade2">
+          <label class="campo">Comprimento (m) <input type="number" id="sbCaboL" min="0.1" max="100000" step="0.5" value="50"></label>
+          <label class="campo">Onde <select id="sbCaboSub"></select></label>
+        </div>
+        <div class="linha-btn"><button type="button" id="sbCaboDigitar">Adicionar trecho</button></div>
+      </details>
+    </div>
+
+    <div data-ferr-painel="adicionar" hidden>
+      <label class="campo">Buscar peça <input type="search" id="sbBusca" placeholder="ex.: passarela" autocomplete="off"></label>
+      <label class="sel">Peça <select id="sbPeca"></select></label>
+      <label class="campo">Giro em torno do eixo vertical (°) <input type="number" id="sbGiro" min="-360" max="360" step="15" value="0"></label>
+      <p class="dica">Clique numa superfície do modelo para colocar a peça. Ela entra no BOM como se já fizesse parte da base. Depois, use <b>Selecionar</b> para mover ou girar.</p>
+    </div>
+
+    <div data-ferr-painel="selecionar" hidden>
+      <p class="dica" id="sbSelVazio">Clique numa peça do modelo para selecioná-la.</p>
+      <div id="sbSel" hidden></div>
+    </div>
+
+    <details class="sb-det" id="sbPlantaDet">
+      <summary>Planta (prédios e plataformas)</summary>
+      <label class="sel">Peça <select id="sbPlantaPeca"></select></label>
+      <div id="sbPlantaCampos"></div>
+      <p class="sb-status" id="sbPlantaArea"></p>
+      <div class="linha-btn"><button type="button" id="sbPlantaReset">Voltar ao original</button></div>
+    </details>
+
+    <details class="sb-det" id="sbPrecosDet">
+      <summary>Preços do cliente</summary>
+      <p class="dica">Troque o preço unitário de qualquer material. Campo vazio = preço base. Vale só para este projeto.</p>
+      <label class="campo">Câmbio (R$ por US$) <input type="number" id="sbCambio" min="0.01" max="1000" step="0.01"></label>
+      <input type="search" id="sbPrecoBusca" placeholder="Filtrar materiais…" aria-label="Filtrar materiais" autocomplete="off">
+      <div class="tabela-rolo sb-precos"><table class="tabela" id="sbPrecos"></table></div>
+    </details>
+
+    <details class="sb-det" id="sbEdDet" open>
+      <summary>Edições <span id="sbEdN"></span></summary>
+      <ol class="sb-lista" id="sbLista"></ol>
+    </details>
+
+    <details class="sb-det" id="sbExpDet">
+      <summary>Exportar, importar, comparar</summary>
+      <div class="linha-btn sb-exp">
+        <button type="button" id="sbExpJson">Projeto (.gmt.json)</button>
+        <button type="button" id="sbExpLink">Copiar link</button>
+        <button type="button" id="sbExpCsv">BOM editado (CSV)</button>
+        <button type="button" id="sbExpRel">Relatório (PDF)</button>
+        <button type="button" id="sbExpGlb">Modelo 3D (.glb)</button>
+        <button type="button" id="sbExpPng">Imagem (.png)</button>
+      </div>
+      <label class="campo" id="sbLinkCampo" hidden>Link do projeto <input type="text" id="sbLink" readonly></label>
+      <div class="linha-btn">
+        <button type="button" id="sbImportar">Importar projeto…</button>
+        <button type="button" id="sbComparar">Comparar com arquivo…</button>
+      </div>
+      <input type="file" id="sbArquivo" accept=".json,.gmt.json,application/json" hidden>
+      <p class="dica">Você também pode arrastar um arquivo <code>.gmt.json</code> para a página.</p>
+    </details>
+  </section>
+
   <section class="sempre">
     <label class="sel">Qualidade
       <select id="qualidade"><option value="baixa">Baixa</option><option value="media">Média</option><option value="alta">Alta</option></select>
@@ -193,6 +302,24 @@
     <figure><canvas id="gSeeing" width="560" height="200"></canvas><figcaption>Seeing total × vento (modelo)</figcaption></figure>
     <figure><canvas id="gRosa" width="280" height="280"></canvas><figcaption>Rosa dos ventos (noites limpas)</figcaption></figure>
     <figure><canvas id="gHist" width="280" height="280"></canvas><figcaption>Histograma (Weibull ajustada)</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ resultados do sandbox ============ -->
+<section id="sbRes" class="sb-res vidro" hidden aria-label="Impacto das edições do Sandbox">
+  <div class="sb-res-cab">
+    <h2>Impacto da sua versão</h2>
+    <button type="button" id="sbResMin" aria-expanded="true" aria-controls="sbResCorpo" title="Recolher/expandir">▾</button>
+  </div>
+  <p class="sb-manchete" id="sbManchete" aria-live="polite"></p>
+  <div id="sbResCorpo">
+    <div class="nums sb-nums" id="sbNums"></div>
+    <h3>Base × editado</h3>
+    <div class="tabela-rolo"><table class="tabela" id="sbTabMet"></table></div>
+    <h3>Custo por sistema</h3>
+    <div class="tabela-rolo"><table class="tabela" id="sbTabSis"></table></div>
+    <div id="sbComp" hidden></div>
+    <p class="dica">Custos em ordem de grandeza (US$, fornecido e instalado). Tudo o que é criado ou reprecificado aqui é <b>estimado</b>.</p>
   </div>
 </section>
 

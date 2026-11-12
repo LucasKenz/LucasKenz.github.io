@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { PECAS, PECA, construir } from '../model/parts.js';
+import { PECAS_BASE, PECA, construir } from '../model/parts.js';
 import { humano } from '../model/visual.js';
 import { SUB, sisDaPeca } from '../model/subsistemas.js';
 import { htmlQuantitativos } from './bom.js';
@@ -224,7 +224,7 @@ export function criarVisor({ renderer, M, modeloCompleto, cenaCompleta, ocultarN
   // ---------- controles ----------
   document.querySelectorAll('[data-vm]').forEach((b) => b.addEventListener('click', () => aplicarModo(b.dataset.vm)));
   $('corteX').addEventListener('input', (e) => { plano.constant = +e.target.value * tamanho * 0.55; });
-  const ordem = () => PECAS.map((p) => p.id);
+  const ordem = () => PECAS_BASE.map((p) => p.id);
   $('vAnt').addEventListener('click', () => { const o = ordem(); abrir(o[(o.indexOf(id) - 1 + o.length) % o.length]); });
   $('vProx').addEventListener('click', () => { const o = ordem(); abrir(o[(o.indexOf(id) + 1) % o.length]); });
   $('vVoltar').addEventListener('click', aoVoltar);

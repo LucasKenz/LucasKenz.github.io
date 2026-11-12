@@ -526,15 +526,49 @@ async function iniciar() {
   const cinzas = new Map();
   let fogOrig = scene.fog, camSalva = null;
 
+  /** Cena "de pós-processador" (Vento e Sandbox): modelo cinza, fundo claro, sem céu, terreno nem lasers. */
+  function cenaClara(ligar) {
+    if (ligar) {
+      fogOrig = scene.fog;
+      modoCinza(modelo.raiz, true, cinzas);
+      scene.background = new THREE.Color(0xdfe3e8);
+      scene.fog = null;
+      sitio.ceu.visible = sitio.estrelas.visible = sitio.terrenoGrupo.visible = false;
+      sitio.setHora(1); renderer.toneMappingExposure = 1;
+      lasers.grupo.visible = false;
+    } else {
+      modoCinza(modelo.raiz, false, cinzas);
+      scene.background = null; scene.fog = fogOrig;
+      sitio.ceu.visible = sitio.estrelas.visible = sitio.terrenoGrupo.visible = true;
+      sitio.setHora(hora); renderer.toneMappingExposure = hora < 0.25 ? 1.15 : 1;
+      lasers.grupo.visible = $('lasers').checked;
+    }
+  }
+
+  // Sandbox: carregado sob demanda na primeira vez que a aba abre
+  let sandbox = null, sandboxCarregando = null;
+  function obterSandbox() {
+    sandboxCarregando ??= import('./sandbox/sandbox.js').then((m) => {
+      sandbox = m.criarSandbox({ renderer, scene, camera, controls, composer, modelo });
+      window.__sandbox = sandbox; // usado pelos testes de navegador
+      return sandbox;
+    });
+    return sandboxCarregando;
+  }
+
   function irPara(novo, sub = null) {
     if (novo === 'peca' && !PECA[sub]) novo = 'catalogo';
     const anterior = modo;
-    if (anterior === novo && novo !== 'peca') { if (novo === 'vento' && sub) aplicarCenario(sub, false); return; }
+    if (anterior === novo && novo !== 'peca') {
+      if (novo === 'vento' && sub) aplicarCenario(sub, false);
+      if (novo === 'sandbox' && sub) obterSandbox().then((s) => s.ativar(true, sub));
+      return;
+    }
     modo = novo;
     const aba = novo === 'peca' ? 'catalogo' : novo;
     document.querySelectorAll('[data-modo]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.modo === aba)));
     document.querySelectorAll('#painel section[data-para]').forEach((s) => { s.hidden = s.dataset.para !== novo; });
-    $('painel').hidden = !['3d', 'pessoa', 'vento'].includes(novo);
+    $('painel').hidden = !['3d', 'pessoa', 'vento', 'sandbox'].includes(novo);
     for (const [m, id] of Object.entries(SOBREPOSICOES)) $(id).hidden = m !== novo;
     document.body.dataset.modo = novo;
 
@@ -545,13 +579,14 @@ async function iniciar() {
       controls.enabled = true;
       if (camSalva) { camera.position.copy(camSalva[0]); controls.target.copy(camSalva[1]); camera.fov = 45; camera.updateProjectionMatrix(); }
     }
+    if (anterior === 'sandbox') {
+      sandbox?.ativar(false);
+      $('sbRes').hidden = true;
+      cenaClara(false);
+    }
     if (anterior === 'vento') {
       camera.clearViewOffset();
-      modoCinza(modelo.raiz, false, cinzas);
-      scene.background = null; scene.fog = fogOrig;
-      sitio.ceu.visible = sitio.estrelas.visible = sitio.terrenoGrupo.visible = true;
-      sitio.setHora(hora); renderer.toneMappingExposure = hora < 0.25 ? 1.15 : 1;
-      lasers.grupo.visible = $('lasers').checked;
+      cenaClara(false);
       $('resultados').hidden = true;
       escala.hidden = true;
       rajada = null;
@@ -560,7 +595,7 @@ async function iniciar() {
     if (anterior !== 'pessoa' || novo !== 'pessoa') vis.mostrar(false);
 
     // entrada no novo modo
-    controls.enabled = ['3d', 'vento'].includes(novo);
+    controls.enabled = ['3d', 'vento', 'sandbox'].includes(novo);
     modelo.setCorte($('corte').checked && novo !== 'pessoa');
     if (novo !== '3d') { paineis.pararTour(); paineis.fechar(); paineis.atualizarHotspots(false); hover(null); }
     if (novo === 'pessoa') {
@@ -570,14 +605,13 @@ async function iniciar() {
       vis.opcoes({ plano: false, part: true, linhas: false, volume: false, setas: false, pressao: false, horiz: false });
       vis.mostrar($('ventoAndando').checked);
     }
+    if (novo === 'sandbox') {
+      cenaClara(true);
+      obterSandbox().then((s) => { if (modo === 'sandbox') s.ativar(true, sub); })
+        .catch((e) => { console.error(e); aviso(`Erro ao abrir o Sandbox: ${e.message}`); });
+    }
     if (novo === 'vento') {
-      fogOrig = scene.fog;
-      modoCinza(modelo.raiz, true, cinzas);
-      scene.background = new THREE.Color(0xdfe3e8);
-      scene.fog = null;
-      sitio.ceu.visible = sitio.estrelas.visible = sitio.terrenoGrupo.visible = false;
-      sitio.setHora(1); renderer.toneMappingExposure = 1;
-      lasers.grupo.visible = false;
+      cenaClara(true);
       vis.opcoes(Object.fromEntries(Object.entries(opcVis).map(([idEl, chave]) => [chave, $(idEl).checked])));
       vis.mostrar(true);
       $('resultados').hidden = false;
@@ -597,6 +631,7 @@ async function iniciar() {
 
     // hash
     const h = novo === 'peca' ? `#arquitetura/${sub}` : novo === 'vento' && sub ? `#vento/${sub}` : `#${novo}`;
+    // (o link do Sandbox, #sandbox/<projeto>, é lido pelo próprio Sandbox, que depois limpa o hash)
     if (!location.hash.startsWith(h)) history.replaceState(null, '', h);
   }
 
@@ -631,12 +666,13 @@ async function iniciar() {
   document.querySelectorAll('[data-modo]').forEach((b) => b.addEventListener('click', () => irPara(b.dataset.modo)));
 
   function rotear() {
-    const [m, sub] = decodeURIComponent(location.hash.slice(1)).split('/');
+    const [m, ...resto] = decodeURIComponent(location.hash.slice(1)).split('/');
+    const sub = resto.join('/') || undefined;
     if (m === 'arquitetura' && sub) return irPara('peca', sub);
     if (m === 'arquitetura') return irPara('catalogo');
     if (m === '3d' && sub) { irPara('3d'); paineis.abrir(sub, null, true); return; }
     if (m === 'fontes') { irPara('fontes'); if (sub) requestAnimationFrame(() => document.getElementById(sub)?.scrollIntoView()); return; }
-    if (['3d', 'pessoa', 'vento', 'catalogo', 'bom'].includes(m)) return irPara(m, sub);
+    if (['3d', 'pessoa', 'vento', 'catalogo', 'bom', 'sandbox'].includes(m)) return irPara(m, sub);
     irPara('3d');
   }
   addEventListener('hashchange', rotear);
@@ -690,11 +726,11 @@ async function iniciar() {
   if (innerWidth <= 820) { $('painel').classList.add('fechado'); $('btnPainel').setAttribute('aria-expanded', 'false'); }
 
   addEventListener('keydown', (e) => {
-    if (e.target.closest('input[type="search"], input[type="text"], select, textarea') || e.ctrlKey || e.metaKey || e.altKey) return;
-    const atalhos = { Digit1: '3d', Digit2: 'pessoa', Digit3: 'vento', Digit4: 'catalogo', Digit5: 'bom' };
+    if (e.target.closest('input[type="search"], input[type="text"], input[type="number"], select, textarea') || e.ctrlKey || e.metaKey || e.altKey) return;
+    const atalhos = { Digit1: '3d', Digit2: 'pessoa', Digit3: 'vento', Digit4: 'catalogo', Digit5: 'bom', Digit6: 'sandbox' };
     if (atalhos[e.code]) { irPara(atalhos[e.code]); return; }
     if (e.code === 'KeyH') document.body.classList.toggle('ui-oculta');
-    if ((modo === '3d' || modo === 'vento') && !e.target.closest('input, button')) {
+    if ((modo === '3d' || modo === 'vento' || modo === 'sandbox') && !e.target.closest('input, button')) {
       const teclaNav = { ArrowLeft: 'esq', ArrowRight: 'dir', ArrowUp: 'cima', ArrowDown: 'baixo', Equal: 'aproximar', NumpadAdd: 'aproximar', Minus: 'afastar', NumpadSubtract: 'afastar' }[e.code];
       if (teclaNav) { e.preventDefault(); navegar(teclaNav, 0.5); return; }
     }

@@ -1,6 +1,6 @@
 // Catálogo: uma entrada por TIPO de peça, com miniatura renderizada, busca e filtro por sistema.
 import * as THREE from 'three';
-import { PECAS, SISTEMAS, construir } from '../model/parts.js';
+import { PECAS_BASE as PECAS, SISTEMAS, construir } from '../model/parts.js';
 import { esc, selo } from '../data.js';
 import { fmt } from '../util.js';
 

@@ -98,3 +98,8 @@
 - Pedido do usuário: link para o protótipo Curato (projeto de Design Estratégico) como card no Lab. O protótipo mora no repositório próprio `LucasKenz/curato`, publicado em https://lucaskenz.github.io/curato/.
 - Novo item `curato` em `content/lab.ts` com `href: '/curato/'` (igual ao GMT, sem rota `/lab/[slug]`) e capa `public/media/lab-curato.webp` (1280 × 800, captura do início do protótipo).
 - Enviado direto para `origin/main` a partir de um clone novo, em outro computador, sem passar por `scripts/publicar.sh`. Antes do próximo envio, trazer este commit para a `main` local e alinhar a `publico` (ver mensagem do commit), senão o card some e o push da `publico` é recusado.
+
+## 2026-11-12 · Lab GMT: aba Sandbox (edição, quantitativos, custo e exportação)
+- Sincronização antes do envio: a `main` local recebeu os commits MOVER, GMT e Curato de `origin/main` (cherry-pick, árvore idêntica à publicada) e a `publico` foi alinhada com `origin/main`, como pedia a nota de 08/11.
+- `public/lab/gmt/` atualizado a partir de `LucasKenz/gmt-telescopio-3d` (commit `38aa4a7`): nova aba Sandbox (atalho 6, `#sandbox`) para traçar cabos, adicionar/mover/remover peças, mudar quantidades, planta e preços do cliente, com base × editado em m, m², massa e custo; exporta `.gmt.json`, link, CSV, relatório, `.glb` e `.png`. Guia em `docs/07-sandbox.md` daquele repositório.
+- Verificação: `astro check` 0 erros, 15/15 testes, `pnpm build` ok (PDFs do CV regerados e descartados), `dist/lab/gmt` testado com `ferramentas/sandbox.mjs` (TUDO OK, sem erros no console).

@@ -640,10 +640,16 @@ export const PECAS = [
     funcao: 'Plataforma no disco de azimute para instrumentos e equipamentos que não giram em elevação.',
     descricao: 'Grade de piso sobre pilares tubulares com guarda-corpo.', fabricacao: 'Aço galvanizado.', fornecedor: 'OHB/Ingersoll.',
     curiosidade: 'O GMT pode ter até 10 instrumentos montados ao mesmo tempo.',
-    build() {
+    parametros: [
+      { chave: 'largura_m', nome: 'Largura', un: 'm', min: 3, max: 14, passo: 0.5, padrao: 6 },
+      { chave: 'profundidade_m', nome: 'Profundidade', un: 'm', min: 3, max: 10, passo: 0.5, padrao: 5 },
+    ],
+    areaPlanta: (op = {}) => (op.largura_m ?? 6) * (op.profundidade_m ?? 5),
+    build(d, op = {}) {
+      const L = op.largura_m ?? 6, P = op.profundidade_m ?? 5;
       const p = [];
-      for (const x of [-2.8, 2.8]) for (const z of [-2.3, 2.3]) p.push(tuboEntre(V(x, 0, z), V(x, 2.4, z), 0.12, 0.008, M.amarelo, 'aco_estrutural', 'pilares', 10));
-      return grupo(mk(caixa(6, 0.08, 5, 0, 2.44, 0), M.grade, 'aco_estrutural', 'piso'), p, corrimao(V(-3, 2.48, 2.5), V(3, 2.48, 2.5), M.amarelo, 4));
+      for (const x of [-(L / 2 - 0.2), L / 2 - 0.2]) for (const z of [-(P / 2 - 0.2), P / 2 - 0.2]) p.push(tuboEntre(V(x, 0, z), V(x, 2.4, z), 0.12, 0.008, M.amarelo, 'aco_estrutural', 'pilares', 10));
+      return grupo(mk(caixa(L, 0.08, P, 0, 2.44, 0), M.grade, 'aco_estrutural', 'piso'), p, corrimao(V(-L / 2, 2.48, P / 2), V(L / 2, 2.48, P / 2), M.amarelo, Math.max(2, Math.round((L * 4) / 6))));
     },
   },
   {
@@ -926,10 +932,17 @@ export const PECAS = [
     fabricacao: 'Concreto + estrutura metálica + painéis.', fornecedor: 'Projeto IDOM (60% em maio de 2026; FDR previsto para nov. 2026).',
     curiosidade: 'Cresceu desde 2024 com lições da fábrica de revestimento do Observatório Rubin.',
     taxa: 100,
-    extras: [['painel', 2600, 'calculo', 'estimado', 'Fachadas e cobertura (estimado).']],
-    build() {
+    parametros: [
+      { chave: 'area_m2', nome: 'Área do térreo', un: 'm²', min: 800, max: 6000, passo: 50, padrao: 2450 },
+      { chave: 'altura_m', nome: 'Pé-direito do térreo', un: 'm', min: 4, max: 16, passo: 0.5, padrao: 10 },
+    ],
+    // área de planta: térreo + bloco superior (24 × 24 m)
+    areaPlanta: (op = {}) => (op.area_m2 ?? 2450) + 24 * 24,
+    extras: (op = {}) => [['painel', 2600 * escalaPredio(70, 35, 10, op), 'calculo', 'estimado', 'Fachadas e cobertura (estimado; acompanha a área e a altura do bloco).']],
+    build(d, op = {}) {
+      const k = Math.sqrt((op.area_m2 ?? 2450) / 2450), h = op.altura_m ?? 10;
       return predio([
-        [70, 10, 35, 0, 0], [24, 8, 24, 18, 10],
+        [70 * k, h, 35 * k, 0, 0], [24, 8, 24, 18 * k, h],
       ]);
     },
   },
@@ -940,8 +953,16 @@ export const PECAS = [
     descricao: 'Prédio técnico ligado ao enclosure pelo túnel de utilidades (SUT).', fabricacao: 'Concreto + estrutura metálica.', fornecedor: 'Projeto IDOM.',
     curiosidade: 'Fica afastado para que o calor das máquinas não chegue ao ar em volta do telescópio.',
     taxa: 100,
-    extras: [['painel', 900, 'calculo', 'estimado']],
-    build() { return predio([[30, 7, 15, 0, 0]]); },
+    parametros: [
+      { chave: 'area_m2', nome: 'Área', un: 'm²', min: 150, max: 2000, passo: 25, padrao: 450 },
+      { chave: 'altura_m', nome: 'Altura', un: 'm', min: 3, max: 14, passo: 0.5, padrao: 7 },
+    ],
+    areaPlanta: (op = {}) => op.area_m2 ?? 450,
+    extras: (op = {}) => [['painel', 900 * escalaPredio(30, 15, 7, op), 'calculo', 'estimado']],
+    build(d, op = {}) {
+      const k = Math.sqrt((op.area_m2 ?? 450) / 450);
+      return predio([[30 * k, op.altura_m ?? 7, 15 * k, 0, 0]]);
+    },
   },
   {
     id: 'torre-ambiental', nome: 'Torre de monitoramento ambiental', sistema: 'Apoio', sub: 'apoio',
@@ -977,9 +998,91 @@ export const PECAS = [
       );
     },
   },
+
+  // ------------------------------- SANDBOX -------------------------------
+  // Peças paramétricas criadas no Sandbox. Ficam fora do catálogo (oculto) e só entram na obra
+  // quando um projeto do Sandbox as usa; aí passam pelo mesmo cálculo de todas as outras.
+  {
+    id: 'trecho-cabo', nome: 'Trecho de cabos', sistema: 'Instrumentação', sub: 'instrumentos', oculto: true,
+    qtd: [0, 'usuario', 'estimado', 'Definido no Sandbox.'],
+    funcao: 'Cabos de energia, fibra, dados ou linhas de refrigerante lançados ao longo de um caminho do modelo.',
+    descricao: 'Feixe de cabos ao longo de uma polilinha. Comprimento cobrado = caminho × cabos no feixe × (1 + folga).',
+    fabricacao: 'Cabos lançados em eletrocalha ou presos à estrutura.', fornecedor: '—', curiosidade: 'Peça criada no Sandbox.',
+    extras: (op = {}) => {
+      const c = CATEGORIAS_CABO[op.categoria] ?? CATEGORIAS_CABO.energia;
+      const L = comprimentoCabo(op), feixe = op.feixe ?? 1, folga = op.folga_pct ?? 0;
+      return [[c.mat, L * feixe * (1 + folga / 100), 'usuario', 'estimado', `${feixe} cabo(s) × ${L.toFixed(1)} m de caminho + ${folga}% de folga.`]];
+    },
+    build(d, op = {}) {
+      const c = CATEGORIAS_CABO[op.categoria] ?? CATEGORIAS_CABO.energia;
+      // raio só visual (os cabos não têm malha medida: comprimento e massa saem dos extras)
+      const r = 0.1 + 0.025 * Math.sqrt(op.feixe ?? 1);
+      return caminho(op, (a, b) => tuboEntre(a, b, r, r, matCabo(c.cor), null, 'cabos', 10), r);
+    },
+  },
+  {
+    id: 'eletrocalha', nome: 'Eletrocalha', sistema: 'Instrumentação', sub: 'instrumentos', oculto: true,
+    qtd: [0, 'usuario', 'estimado', 'Definido no Sandbox.'],
+    funcao: 'Bandeja que suporta e protege um trecho de cabos.',
+    descricao: 'Bandeja de aço ao longo do caminho do cabo. Área = largura × comprimento.',
+    fabricacao: 'Chapa perfurada galvanizada ou inox.', fornecedor: '—', curiosidade: 'Peça criada no Sandbox.',
+    extras: (op = {}) => [['eletrocalha', (op.largura_m ?? 0.3) * comprimentoCabo(op), 'usuario', 'estimado', `${((op.largura_m ?? 0.3) * 100).toFixed(0)} cm × ${comprimentoCabo(op).toFixed(1)} m.`]],
+    build(d, op = {}) {
+      const w = op.largura_m ?? 0.3;
+      return caminho(op, (a, b) => {
+        const L = a.distanceTo(b);
+        const m = mk(caixa(w, L, 0.04, 0, L / 2, -0.12), matCabo('#9aa3b5'), null, 'bandeja');
+        alinhar(m, a, b);
+        return m;
+      }, 0);
+    },
+  },
 ];
 
+/** Escala da fachada + cobertura de um bloco de prédio quando a área e a altura mudam (1 no tamanho original). */
+function escalaPredio(w0, d0, h0, op) {
+  const A0 = w0 * d0, k = Math.sqrt((op.area_m2 ?? A0) / A0), h = op.altura_m ?? h0;
+  const w = w0 * k, d = d0 * k;
+  return (2 * (w + d) * h + w * d) / (2 * (w0 + d0) * h0 + w0 * d0);
+}
+
+// ---------- cabos (Sandbox) ----------
+export const CATEGORIAS_CABO = {
+  energia: { nome: 'Energia', mat: 'cabo_energia', cor: '#e2733a' },
+  fibra: { nome: 'Fibra óptica', mat: 'cabo_fibra', cor: '#3fd18b' },
+  dados: { nome: 'Dados e sinal', mat: 'cabo_dados', cor: '#5d86ff' },
+  refrigerante: { nome: 'Refrigerante', mat: 'mangueira_refrigerante', cor: '#56c7e8' },
+};
+/** Comprimento do caminho (m): soma dos segmentos, ou o valor digitado (comprimento_m) quando não há desenho. */
+export function comprimentoCabo(op = {}) {
+  if (op.comprimento_m != null) return Math.max(0, +op.comprimento_m || 0);
+  const p = op.pontos ?? [];
+  let L = 0;
+  for (let i = 1; i < p.length; i++) L += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1], p[i][2] - p[i - 1][2]);
+  return L;
+}
+const matsCabo = new Map();
+function matCabo(cor) {
+  if (!matsCabo.has(cor)) matsCabo.set(cor, new THREE.MeshStandardMaterial({ color: cor, roughness: 0.55, metalness: 0.1, emissive: cor, emissiveIntensity: 0.25 }));
+  return matsCabo.get(cor);
+}
+/** Grupo com um segmento por par de pontos (e juntas esféricas). Sem pontos, desenha um trecho simbólico vertical. */
+function caminho(op, seg, rJunta) {
+  let pts = (op.pontos ?? []).map((p) => V(p[0], p[1], p[2]));
+  if (pts.length < 2) pts = [V(0, 0, 0), V(0, Math.min(6, Math.max(0.5, comprimentoCabo(op))), 0)];
+  const g = grupo();
+  for (let i = 1; i < pts.length; i++) if (pts[i].distanceTo(pts[i - 1]) > 1e-4) g.add(seg(pts[i - 1], pts[i]));
+  if (rJunta > 0) for (let i = 1; i < pts.length - 1; i++) {
+    const s = mk(new THREE.SphereGeometry(rJunta, 10, 8), g.children[0]?.material ?? matCabo('#888888'), null, 'junta');
+    s.position.copy(pts[i]);
+    g.add(s);
+  }
+  return g;
+}
+
 export const PECA = Object.fromEntries(PECAS.map((p) => [p.id, p]));
+/** Peças da base de arquitetura (sem as paramétricas do Sandbox). */
+export const PECAS_BASE = PECAS.filter((p) => !p.oculto);
 export const SISTEMAS = ['Fundação', 'Montagem', 'Óptica', 'Instrumentação', 'Enclosure', 'Apoio'];
 
 /** Constrói a peça e marca cada malha com o id do tipo. */

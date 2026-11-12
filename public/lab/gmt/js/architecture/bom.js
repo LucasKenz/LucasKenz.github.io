@@ -1,11 +1,12 @@
 // Quantitativos por peça (medidos na malha) e Bill of Materials da obra inteira.
-import { PECAS, PECA, SISTEMAS, construir } from '../model/parts.js';
+import { PECAS_BASE as PECAS, PECA, SISTEMAS, construir } from '../model/parts.js';
 import { medirPeca } from '../model/geom.js';
 import { materiais, dados, selo, esc, val } from '../data.js';
 import { fmt, fmtA } from '../util.js';
 import { barras, SERIES } from '../ui/charts.js';
 
-const cache = new Map();
+const cache = new Map();      // quantitativos da base (sem opções nem contexto)
+const cacheMed = new Map();   // medições da malha por id + opções
 const ORDEM_CONF = { oficial: 0, artigo: 1, estimado: 2 };
 const pior = (a, b) => (ORDEM_CONF[a] >= ORDEM_CONF[b] ? a : b);
 
@@ -17,8 +18,26 @@ const PRECO_COMPONENTES = {
   'lancador-lgs': [1.5e6, 'Telescópio lançador, óptica de transferência e diagnóstico.'],
 };
 
-/** Preço unitário (US$) de um material na unidade em que ele é cobrado. */
-const precoDe = (mat) => materiais()[mat]?.preco ?? null;
+/**
+ * Preço unitário (US$) de um material na unidade em que ele é cobrado.
+ * ctx.precos (preços do cliente, vindos de um projeto do Sandbox) tem prioridade sobre materials.json.
+ */
+export const precoDe = (mat, ctx = null) => ctx?.precos?.[mat] ?? materiais()[mat]?.preco ?? null;
+
+/** Chave estável de um objeto de opções (para cache). */
+const chave = (o) => (o && Object.keys(o).length ? JSON.stringify(o, Object.keys(o).sort()) : '');
+
+/** Mede a malha de uma peça (com opções) uma vez e guarda. */
+function medida(id, opcoes) {
+  const k = `${id}|${chave(opcoes)}`;
+  if (cacheMed.has(k)) return cacheMed.get(k);
+  if (cacheMed.size > 400) cacheMed.clear();
+  const raiz = construir(id, true, opcoes ?? undefined);
+  const med = medirPeca(raiz);
+  raiz.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
+  cacheMed.set(k, med);
+  return med;
+}
 
 /** Formata dinheiro em US$ (mil, mi, bi). */
 export function fmtUSD(x) {
@@ -41,28 +60,36 @@ export function fmtBRL(usd) {
 /**
  * Quantitativo de UMA peça: volume, área e massa por material (medidos na geometria),
  * calibrado pela massa pesquisada quando ela existe, mais os itens contados (extras).
+ *
+ * opcoes: parâmetros da peça (Sandbox: área de um prédio, pontos de um cabo...), passados ao build.
+ * ctx: { precos: {mat: {usd, por}}, trocas: {matOriginal: matNovo} } (Sandbox: preços do cliente e troca de material).
+ * Sem opcoes nem ctx, o resultado é exatamente o da base (e fica em cache).
  */
-export function quantitativos(id) {
-  if (cache.has(id)) return cache.get(id);
+export function quantitativos(id, opcoes = null, ctx = null) {
+  const simples = !chave(opcoes) && !ctx;
+  if (simples && cache.has(id)) return cache.get(id);
   const p = PECA[id], MAT = materiais();
-  const raiz = construir(id, true);
-  const med = medirPeca(raiz);
-  raiz.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
+  const med = medida(id, simples ? null : opcoes);
+  const trocas = ctx?.trocas ?? {};
   const linhas = [];
   let massaModelo = 0;
-  for (const [mat, m] of Object.entries(med)) {
+  for (const [mat0, m] of Object.entries(med)) {
+    const mat = trocas[mat0] && MAT[trocas[mat0]] ? trocas[mat0] : mat0;
     const info = MAT[mat];
     if (!info) continue;
     const massa = info.densidade ? (m.vol * info.densidade) / 1000 : 0; // t
     massaModelo += massa;
-    linhas.push({ mat, vol: m.vol, area: m.area, comprimento: m.comprimento, massa, conf: info.confidence });
+    linhas.push({ mat, vol: m.vol, area: m.area, comprimento: m.comprimento, massa, conf: mat === mat0 ? info.confidence : 'estimado' });
   }
   const pesq = p.pesquisado;
-  const fator = pesq?.massa_t && massaModelo > 0 ? pesq.massa_t / massaModelo : 1;
+  // Peça alterada no Sandbox (outras dimensões ou outro material): mantém o fator de calibração da peça original,
+  // como se a peça modificada já fizesse parte da base.
+  const alterada = !simples && (chave(opcoes) || Object.keys(trocas).length);
+  const fator = alterada && pesq?.massa_t ? quantitativos(id).fator : pesq?.massa_t && massaModelo > 0 ? pesq.massa_t / massaModelo : 1;
   for (const l of linhas) {
     l.massaCal = l.massa * fator;
     // quantidade na unidade de cobrança do material
-    const pr = precoDe(l.mat);
+    const pr = precoDe(l.mat, ctx);
     const base = !pr ? 0 : pr.por === 't' ? l.massaCal : pr.por === 'kg' ? l.massaCal * 1000 : pr.por === 'm³' ? l.vol * fator : pr.por === 'm²' ? l.area : 0;
     l.custo = pr ? base * pr.usd : 0;
   }
@@ -74,24 +101,30 @@ export function quantitativos(id) {
   if (aco > 0) extras.push({ mat: 'pintura', qtd: aco, un: 'm²', massa: 0, fonte: 'calculo', conf: 'estimado', nota: 'Área de aço exposta, medida na malha.' });
   const tubos = linhas.reduce((s, l) => s + (l.comprimento || 0), 0);
   if (tubos > 0) extras.push({ mat: 'tubo_aco', qtd: tubos, un: 'm', massa: 0, fonte: 'calculo', conf: 'estimado', nota: 'Comprimento de tubos medido no modelo (massa já incluída no aço).' });
-  for (const [mat, q, fonte, conf, nota] of p.extras ?? []) {
+  const listaExtras = typeof p.extras === 'function' ? p.extras(opcoes ?? {}) : p.extras ?? [];
+  for (const [mat, q, fonte, conf, nota] of listaExtras) {
     const info = MAT[mat] ?? {};
-    const massa = info.densidade_area ? (q * info.densidade_area) / 1000 : 0;
+    // massa: por área (painéis, eletrocalha) ou por metro (cabos)
+    const massa = info.densidade_area ? (q * info.densidade_area) / 1000 : info.kg_m ? (q * info.kg_m) / 1000 : 0;
     extras.push({ mat, qtd: q, un: info.unidade === 'm²' ? 'm²' : info.unidade ?? 'un', massa, fonte, conf, nota });
   }
   for (const e of extras) {
-    const pr = precoDe(e.mat);
-    if (e.mat === 'componentes' && PRECO_COMPONENTES[id]) {
-      e.custo = e.qtd * PRECO_COMPONENTES[id][0];
-      e.notaPreco = PRECO_COMPONENTES[id][1];
+    const pr = precoDe(e.mat, ctx);
+    const prComp = ctx?.precos?.[`componentes:${id}`];
+    if (e.mat === 'componentes' && (prComp || PRECO_COMPONENTES[id])) {
+      e.custo = e.qtd * (prComp?.usd ?? PRECO_COMPONENTES[id][0]);
+      e.notaPreco = prComp ? 'Preço definido no projeto.' : PRECO_COMPONENTES[id][1];
     } else e.custo = pr ? e.qtd * pr.usd : 0;
   }
   const massaTotal = linhas.reduce((s, l) => s + l.massaCal, 0) + extras.reduce((s, e) => s + e.massa, 0);
   const custo = linhas.reduce((s, l) => s + l.custo, 0) + extras.reduce((s, e) => s + e.custo, 0);
   const r = { id, linhas, extras, massaModelo, fator, pesq, massaTotal, custo };
-  cache.set(id, r);
+  if (simples) cache.set(id, r);
   return r;
 }
+
+/** Itens da obra base: cada tipo de peça do catálogo com a quantidade do registro. */
+export const itensBase = () => PECAS.map((p) => ({ id: p.id, n: p.qtd[0] }));
 
 export function nomeMat(mat) { return materiais()[mat]?.nome ?? mat; }
 export function corMat(mat) { return materiais()[mat]?.cor ?? '#888'; }
@@ -127,8 +160,12 @@ function tituloPreco(mat) {
   return pr ? `${fmtUSD(pr.usd)} por ${pr.por} (estimado). ${pr.nota ?? ''}` : 'Sem preço.';
 }
 
-/** Soma de toda a obra: por material e por sistema. */
-export function totalObra() {
+/**
+ * Soma de toda a obra: por material e por sistema.
+ * itens: [{ id, n, opcoes?, ctx?, sistema?, conf? }] (padrão: a obra base). Cada item passa pelo mesmo
+ * quantitativos() das peças do catálogo; ctxGlobal (preços do cliente) vale para todos os itens.
+ */
+export function totalObra(itens = null, ctxGlobal = null) {
   const porMat = {}, porSis = Object.fromEntries(SISTEMAS.map((s) => [s, 0]));
   const custoSis = Object.fromEntries(SISTEMAS.map((s) => [s, 0]));
   const add = (mat, qtd, un, massa, conf, custo = 0) => {
@@ -136,20 +173,25 @@ export function totalObra() {
     a.qtd += qtd; a.massa += massa; a.custo += custo; a.conf = pior(a.conf, conf);
   };
   const MAT = materiais();
-  for (const p of PECAS) {
-    const q = quantitativos(p.id), n = p.qtd[0];
+  for (const it of itens ?? itensBase()) {
+    const p = PECA[it.id], n = it.n;
+    if (!p || !(n > 0)) continue;
+    const sis = it.sistema && it.sistema in porSis ? it.sistema : p.sistema;
+    const confQ = it.conf ?? p.qtd[2];
+    const ctx = it.ctx || ctxGlobal ? { ...ctxGlobal, ...it.ctx } : null;
+    const q = quantitativos(it.id, it.opcoes ?? null, ctx);
     for (const l of q.linhas) {
       const info = MAT[l.mat];
       const un = info.unidade;
       const qtd = un === 'm³' ? l.vol : un === 'kg' ? l.massaCal * 1000 : l.massaCal;
-      add(l.mat, qtd * n, un === 'kg' ? 'kg' : un === 'm³' ? 'm³' : 't', l.massaCal * n, pior(l.conf, p.qtd[2]), l.custo * n);
-      porSis[p.sistema] += l.massaCal * n;
-      custoSis[p.sistema] += l.custo * n;
+      add(l.mat, qtd * n, un === 'kg' ? 'kg' : un === 'm³' ? 'm³' : 't', l.massaCal * n, pior(l.conf, confQ), l.custo * n);
+      porSis[sis] += l.massaCal * n;
+      custoSis[sis] += l.custo * n;
     }
     for (const e of q.extras) {
-      add(e.mat, e.qtd * n, e.un, e.massa * n, pior(e.conf, p.qtd[2]), e.custo * n);
-      porSis[p.sistema] += e.massa * n;
-      custoSis[p.sistema] += e.custo * n;
+      add(e.mat, e.qtd * n, e.un, e.massa * n, pior(e.conf, confQ), e.custo * n);
+      porSis[sis] += e.massa * n;
+      custoSis[sis] += e.custo * n;
     }
   }
   const massa = Object.values(porMat).reduce((s, m) => s + m.massa, 0);
@@ -194,19 +236,40 @@ export function montarBOM() {
   return T;
 }
 
-export function exportarCSV() {
+/**
+ * CSV do BOM (separador ;, com BOM UTF-8). Sem argumentos, é a obra base.
+ * itens/ctxGlobal: como em totalObra. Itens com `origem` (Sandbox) ganham as colunas origem e edicao_id.
+ */
+export function gerarCSV(itens = null, ctxGlobal = null) {
   const MAT = materiais();
   const q = (s) => `"${String(s).replace(/"/g, '""')}"`;
-  const rows = [['tipo', 'peca', 'sistema', 'quantidade_pecas', 'fonte_quantidade', 'confianca_quantidade', 'material', 'especificacao', 'volume_m3_por_peca', 'area_m2_por_peca', 'massa_t_por_peca', 'massa_t_total', 'qtd_extra_por_peca', 'unidade_extra', 'fator_calibracao', 'custo_usd_por_peca', 'custo_usd_total']];
-  for (const p of PECAS) {
-    const r = quantitativos(p.id), n = p.qtd[0];
-    for (const l of r.linhas) rows.push(['material', p.nome, p.sistema, n, p.qtd[1], p.qtd[2], nomeMat(l.mat), MAT[l.mat]?.spec ?? '', l.vol.toFixed(4), l.area.toFixed(3), l.massaCal.toFixed(4), (l.massaCal * n).toFixed(3), '', '', r.fator.toFixed(3), l.custo.toFixed(0), (l.custo * n).toFixed(0)]);
-    for (const e of r.extras) rows.push(['item', p.nome, p.sistema, n, e.fonte, e.conf, nomeMat(e.mat), MAT[e.mat]?.spec ?? '', '', '', e.massa.toFixed(4), (e.massa * n).toFixed(3), e.qtd.toFixed(3), e.un, '', e.custo.toFixed(0), (e.custo * n).toFixed(0)]);
+  const sandbox = !!itens;
+  const cab = ['tipo', 'peca', 'sistema', 'quantidade_pecas', 'fonte_quantidade', 'confianca_quantidade', 'material', 'especificacao', 'volume_m3_por_peca', 'area_m2_por_peca', 'massa_t_por_peca', 'massa_t_total', 'qtd_extra_por_peca', 'unidade_extra', 'fator_calibracao', 'custo_usd_por_peca', 'custo_usd_total'];
+  const rows = [sandbox ? [...cab, 'origem', 'edicao_id'] : cab];
+  for (const it of itens ?? itensBase()) {
+    const p = PECA[it.id], n = it.n;
+    if (!p) continue;
+    if (sandbox && !(n > 0) && it.origem !== 'removido') continue;
+    const ctx = it.ctx || ctxGlobal ? { ...ctxGlobal, ...it.ctx } : null;
+    const r = quantitativos(it.id, it.opcoes ?? null, ctx);
+    const nome = it.nome ?? p.nome, sis = it.sistema ?? p.sistema;
+    const fonteQ = it.origem && it.origem !== 'base' ? 'usuario' : p.qtd[1], confQ = it.conf ?? p.qtd[2];
+    const fim = sandbox ? [it.origem ?? 'base', it.edicoes ?? ''] : [];
+    for (const l of r.linhas) rows.push(['material', nome, sis, n, fonteQ, confQ, nomeMat(l.mat), MAT[l.mat]?.spec ?? '', l.vol.toFixed(4), l.area.toFixed(3), l.massaCal.toFixed(4), (l.massaCal * n).toFixed(3), '', '', r.fator.toFixed(3), l.custo.toFixed(0), (l.custo * n).toFixed(0), ...fim]);
+    for (const e of r.extras) rows.push(['item', nome, sis, n, e.fonte, e.conf, nomeMat(e.mat), MAT[e.mat]?.spec ?? '', '', '', e.massa.toFixed(4), (e.massa * n).toFixed(3), e.qtd.toFixed(3), e.un, '', e.custo.toFixed(0), (e.custo * n).toFixed(0), ...fim]);
   }
-  const csv = '﻿' + rows.map((r) => r.map(q).join(';')).join('\n');
+  return '\ufeff' + rows.map((r) => r.map(q).join(';')).join('\n');
+}
+
+/** Baixa um texto como arquivo. */
+export function baixar(texto, nome, tipo) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = 'gmt-bom.csv';
+  a.href = URL.createObjectURL(texto instanceof Blob ? texto : new Blob([texto], { type: tipo }));
+  a.download = nome;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+export function exportarCSV() {
+  baixar(gerarCSV(), 'gmt-bom.csv', 'text/csv;charset=utf-8');
 }
