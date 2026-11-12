@@ -1,0 +1,313 @@
+{
+ "_meta": {
+  "descricao": "Biblioteca padrão de materiais do Orçamento 3D. Densidades de referência de engenharia e preços de ordem de grandeza em US$ (fornecido e instalado), copiados da biblioteca do Sandbox do GMT. O pacote de cada projeto pode acrescentar materiais ou substituir estes (chave repetida = vale a do pacote).",
+  "precos": "Preços estimados, para fins de ordem de grandeza. Não incluem projeto, engenharia, gestão, transporte especial nem contingência. Alguns valores foram pensados para obra remota (cume de montanha, no projeto de origem): troque pelos preços do cliente sempre que possível.",
+  "cambio_brl": {
+   "valor": 5.4,
+   "nota": "Câmbio de referência US$ 1 = R$ 5,40 (estimado, out/2026)."
+  },
+  "fontes": {
+   "gmt-sandbox": {
+    "titulo": "Biblioteca de materiais do Sandbox do GMT (gmt-telescopio-3d, data/materials.json, commit 6efe428): densidades de referência e preços estimados",
+    "url": ""
+   }
+  },
+  "origem": "gmt-telescopio-3d, public/lab/gmt/data/materials.json, commit 6efe428"
+ },
+ "concreto": {
+  "nome": "Concreto estrutural",
+  "spec": "fck 40 MPa (C40), cimento Portland",
+  "densidade": 2400,
+  "unidade": "m³",
+  "cor": "#b9b6b0",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 450,
+   "por": "m³",
+   "confidence": "estimado",
+   "nota": "Concreto C40 lançado com forma, em obra remota de montanha."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "armadura": {
+  "nome": "Aço de armadura",
+  "spec": "CA-50 / ASTM A615 Gr.60",
+  "densidade": 7850,
+  "unidade": "t",
+  "cor": "#9a6b4f",
+  "confidence": "estimado",
+  "nota": "Calculado por taxa de armadura (kg/m³ de concreto) declarada na peça.",
+  "preco": {
+   "usd": 2500,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Aço CA-50 cortado, dobrado e montado."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "aco_estrutural": {
+  "nome": "Aço estrutural (chapas e perfis soldados)",
+  "spec": "ASTM A572 Gr.50 / A992",
+  "densidade": 7850,
+  "unidade": "t",
+  "cor": "#5d86ff",
+  "confidence": "estimado",
+  "nota": "Norma típica para estruturas soldadas pesadas; a especificação do GMT não foi publicada.",
+  "preco": {
+   "usd": 6000,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Aço fabricado, soldado, pintado e montado (estruturas pesadas)."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "aco_inox": {
+  "nome": "Aço inoxidável",
+  "spec": "AISI 304/316",
+  "densidade": 8000,
+  "unidade": "t",
+  "cor": "#c8d0dc",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 12000,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Chapas e perfis inox fabricados."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "aluminio": {
+  "nome": "Alumínio",
+  "spec": "Liga 6061-T6 / 5083 (chapas e perfis)",
+  "densidade": 2700,
+  "unidade": "t",
+  "cor": "#c9ced6",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 9000,
+   "por": "t",
+   "confidence": "estimado",
+   "nota": "Alumínio fabricado e montado."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "cobre": {
+  "nome": "Cobre (bobinas de motores)",
+  "spec": "Cobre eletrolítico",
+  "densidade": 8960,
+  "unidade": "kg",
+  "cor": "#b87333",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 15,
+   "por": "kg",
+   "confidence": "estimado",
+   "nota": "Cobre de bobinas (já embutido no preço dos motores quando houver)."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "painel": {
+  "nome": "Painel isolado de revestimento",
+  "spec": "Sanduíche aço pré-pintado + núcleo PIR 100 mm (~16 kg/m²)",
+  "densidade_area": 16,
+  "unidade": "m²",
+  "cor": "#f1efe9",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 120,
+   "por": "m²",
+   "confidence": "estimado",
+   "nota": "Painel sanduíche fornecido e instalado."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "pintura": {
+  "nome": "Pintura anticorrosiva",
+  "spec": "Epóxi + poliuretano, ~250 µm (ISO 12944 C3)",
+  "unidade": "m²",
+  "cor": "#2c5cc5",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 35,
+   "por": "m²",
+   "confidence": "estimado",
+   "nota": "Sistema epóxi + poliuretano aplicado."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "motor": {
+  "nome": "Motorredutores e motores",
+  "spec": "Motores elétricos com redutor/inversor",
+  "unidade": "un",
+  "cor": "#ff9b3d",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 25000,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Motorredutor industrial com inversor."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "sensor": {
+  "nome": "Sensores",
+  "spec": "Capacitivos / encoders / células de carga",
+  "unidade": "un",
+  "cor": "#ffd770",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 1500,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Sensor com eletrônica de leitura."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "parafuso": {
+  "nome": "Parafusos de alta resistência",
+  "spec": "ASTM F3125 A490 / ISO 10.9",
+  "unidade": "un",
+  "cor": "#5b6270",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 25,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Parafuso estrutural de alta resistência com porca e arruela."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "porta_enrolar": {
+  "nome": "Portas de enrolar comerciais",
+  "spec": "Porta de enrolar industrial motorizada",
+  "unidade": "un",
+  "cor": "#a8b2cc",
+  "confidence": "estimado",
+  "fonte": "gmt-sandbox",
+  "preco": {
+   "usd": 30000,
+   "por": "un",
+   "confidence": "estimado",
+   "nota": "Porta industrial motorizada instalada."
+  }
+ },
+ "cabo_energia": {
+  "nome": "Cabo de energia",
+  "spec": "Cabo de cobre 0,6/1 kV, isolação EPR/XLPE, bitola média (estimado)",
+  "unidade": "m",
+  "kg_m": 1.2,
+  "cor": "#e2733a",
+  "confidence": "estimado",
+  "nota": "Massa linear de um cabo de potência de bitola média (~3×35 mm²).",
+  "preco": {
+   "usd": 85,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Cabo de potência fornecido e lançado, com terminações. Valor de partida; troque pelo preço do cliente."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "cabo_fibra": {
+  "nome": "Cabo de fibra óptica",
+  "spec": "Cabo multifibra monomodo/multimodo, uso interno/externo",
+  "unidade": "m",
+  "kg_m": 0.08,
+  "cor": "#3fd18b",
+  "confidence": "estimado",
+  "nota": "Cabo de 24–48 fibras.",
+  "preco": {
+   "usd": 12,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Fibra lançada, sem as fusões e os distribuidores. Valor de partida; troque pelo preço do cliente."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "cabo_dados": {
+  "nome": "Cabo de dados e sinal",
+  "spec": "Par trançado blindado / cabo de instrumentação",
+  "unidade": "m",
+  "kg_m": 0.1,
+  "cor": "#5d86ff",
+  "confidence": "estimado",
+  "preco": {
+   "usd": 18,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Cabo de sinal lançado e identificado. Valor de partida; troque pelo preço do cliente."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "mangueira_refrigerante": {
+  "nome": "Mangueira de refrigerante",
+  "spec": "Mangueira flexível para glicol/CO₂, com isolamento térmico",
+  "unidade": "m",
+  "kg_m": 2.5,
+  "cor": "#56c7e8",
+  "confidence": "estimado",
+  "nota": "Inclui o fluido e o isolamento.",
+  "preco": {
+   "usd": 110,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Linha de refrigerante instalada, com isolamento. Valor de partida; troque pelo preço do cliente."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "eletrocalha": {
+  "nome": "Eletrocalha (bandeja de cabos)",
+  "spec": "Bandeja perfurada de aço galvanizado ou inox, com tampa",
+  "unidade": "m²",
+  "densidade_area": 14,
+  "cor": "#9aa3b5",
+  "confidence": "estimado",
+  "nota": "Área = largura × comprimento do trecho.",
+  "preco": {
+   "usd": 95,
+   "por": "m²",
+   "confidence": "estimado",
+   "nota": "Bandeja fornecida e instalada com suportes. Valor de partida; troque pelo preço do cliente."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "canaleta": {
+  "nome": "Canaleta de piso para cabos",
+  "spec": "Canaleta de concreto pré-moldado ou aço galvanizado com tampa, apoiada no terreno",
+  "unidade": "m",
+  "kg_m": 45,
+  "cor": "#b7a38a",
+  "confidence": "estimado",
+  "nota": "Por metro de caminho (independe do número de cabos).",
+  "preco": {
+   "usd": 60,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Canaleta fornecida e assentada com tampa. Valor de partida; troque pelo preço do cliente."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "vala_cabos": {
+  "nome": "Vala para cabos (escavação e reaterro)",
+  "spec": "Vala de ~0,6 × 0,8 m em rocha alterada, envelope de areia, fita de aviso e reaterro compactado",
+  "unidade": "m",
+  "cor": "#8d7660",
+  "confidence": "estimado",
+  "nota": "Por metro de caminho. Cume rochoso: escavação mais cara que em solo comum.",
+  "preco": {
+   "usd": 140,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Escavação em rocha alterada, areia, eletroduto, reaterro e sinalização. Valor de partida; troque pelo preço do cliente."
+  },
+  "fonte": "gmt-sandbox"
+ },
+ "componentes": {
+  "nome": "Conjuntos e equipamentos (preço por unidade)",
+  "spec": "Peças orçadas por unidade (quadros, máquinas, equipamentos)",
+  "unidade": "un",
+  "cor": "#3fd18b",
+  "confidence": "estimado",
+  "fonte": "gmt-sandbox",
+  "nota": "Sem preço genérico: cada peça com preco_un no pacote usa o seu próprio valor."
+ }
+}

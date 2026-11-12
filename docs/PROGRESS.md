@@ -107,3 +107,7 @@
 ## 2026-11-12 · Lab GMT: Sandbox v2 (cabos pelo chão, catálogo visual, modelos .glb)
 - `public/lab/gmt/` atualizado a partir de `LucasKenz/gmt-telescopio-3d` (commit `6efe428`): terreno no Sandbox com cabos que acompanham o relevo, rota pelo chão das estruturas externas até o enclosure (estrutura, canaleta ou vala), grade de miniaturas para adicionar peças, ícones e chips coloridos, selos "no modelo"/"só orçamento" com filtro, lista dos trechos sem desenho, barras por sistema e importação de modelos 3D `.glb` orçados pelo volume ou por preço.
 - Verificação: `astro check` 0 erros, 15/15 testes, `pnpm build` ok (PDFs do CV regerados e descartados), `dist/lab/gmt` testado com `ferramentas/sandbox.mjs` (TUDO OK, sem erros no console). CSV da base do BOM idêntico ao da versão anterior.
+
+## 2026-11-12 · Lab: Orçamento 3D
+- Novo card no Lab (`content/lab.ts`, `href: '/lab/orcamento-3d/'`, capa `public/media/lab-orcamento-3d.webp` 1280 × 800) e a página copiada de `D:\GitHub Projects\orcamento-3d\public\lab\orcamento-3d` (repositório privado `LucasKenz/orcamento-3d`).
+- Verificação: `astro check` 0 erros, `pnpm test` 15/15, build; no `dist`: `/lab/`, `/lab/orcamento-3d/`, `/lab/gmt/` e `/en/lab/` 200, testes do Orçamento 3D (`ferramentas/orcamento.mjs`) todos OK. Ainda não enviado (`publicar.sh` aguardando ordem).

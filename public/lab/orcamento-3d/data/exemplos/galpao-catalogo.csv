@@ -1,0 +1,6 @@
+﻿id;nome;sistema;material;qtd;massa_t;preco_un;taxa
+pilar;Pilar 40×40;Estrutura;concreto;;;;120
+viga;Viga W310;Estrutura;aco_estrutural;;0,85;;
+laje;Laje de piso (15 cm);Fundação;concreto;;;;60
+telhado;Cobertura em duas águas;Cobertura;;;;;
+quadro;Quadro elétrico;Instalações;;;;12000;

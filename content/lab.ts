@@ -142,6 +142,17 @@ export const lab: LabItem[] = [
     status: 'pronto',
   },
   {
+    slug: 'orcamento-3d',
+    href: '/lab/orcamento-3d/',
+    nome: { pt: 'Orçamento 3D', en: '3D Cost Estimate' },
+    frase: {
+      pt: 'Importe o seu projeto 3D, marque as peças e orce cabos, peças, materiais e preços: base × editado em m, m², massa e custo.',
+      en: 'Import your own 3D project, tag its parts and estimate cables, parts, materials and prices: base vs. edited in m, m², mass and cost (page in Portuguese).',
+    },
+    tecnica: { pt: 'Three.js · glTF, OBJ, FBX, DAE, STL, PLY · quantitativos', en: 'Three.js · glTF, OBJ, FBX, DAE, STL, PLY · quantity take-off' },
+    status: 'pronto',
+  },
+  {
     slug: 'curato',
     href: '/curato/',
     nome: { pt: 'Curato', en: 'Curato' },

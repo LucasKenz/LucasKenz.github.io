@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Orçamento 3D | Lab · Lucas Kenzo</title>
+<meta name="description" content="Importe o projeto 3D (galpão, subestação, prédio, máquina), marque as peças, defina materiais e preços e orce cabos, peças e quantidades: base × editado em m, m², massa e custo.">
+<meta property="og:title" content="Orçamento 3D | Lab · Lucas Kenzo">
+<meta property="og:description" content="Orçamento sobre o seu modelo 3D: peças, cabos, materiais e preços do cliente, com exportação para recalcular.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body data-tela="editor">
+<a class="pular" href="#painel">Pular para os controles</a>
+<div id="palco" aria-hidden="true"></div>
+
+<!-- ============ topo ============ -->
+<header class="topo">
+  <a class="marca" href="/lab" title="Voltar ao Lab">LAB<b>·</b>LK</a>
+  <h1 class="titulo">Orçamento 3D <span id="tituloPacote" class="titulo-pacote"></span></h1>
+  <nav class="acoes" aria-label="Arquivos">
+    <button type="button" id="btnImportar" class="primario">⬆ Importar meu projeto</button>
+    <button type="button" id="btnAbrir">Abrir pacote/projeto (.json)</button>
+    <button type="button" id="btnAjuda">Como preparar seu projeto</button>
+    <button type="button" id="btnExemplo" title="Abrir de novo o galpão de exemplo">Exemplo</button>
+  </nav>
+  <button type="button" class="btn-painel" id="btnPainel" aria-controls="painel" aria-expanded="true" title="Mostrar/ocultar controles">☰</button>
+</header>
+<input type="file" id="arqImportar" multiple hidden accept=".glb,.gltf,.bin,.obj,.mtl,.fbx,.dae,.stl,.ply,.csv,.png,.jpg,.jpeg,.webp">
+<input type="file" id="arqAbrir" hidden accept=".json,application/json">
+
+<!-- ============ editor: painel lateral ============ -->
+<aside id="painel" class="painel vidro sb" aria-label="Editor do orçamento" tabindex="-1">
+  <h2>Pacote</h2>
+  <p class="as-pacote"><b id="edPacoteNome"></b><small id="edPacoteInfo"></small></p>
+  <h2>Orçamento</h2>
+  <label class="campo">Nome <input type="text" id="edNome" maxlength="140" autocomplete="off"></label>
+  <label class="campo">Autor <input type="text" id="edAutor" maxlength="140" autocomplete="off" placeholder="opcional"></label>
+  <div class="linha-btn">
+    <button type="button" id="edDesfazer" title="Desfazer (Ctrl+Z)" aria-label="Desfazer">↶ Desfazer</button>
+    <button type="button" id="edRefazer" title="Refazer (Ctrl+Shift+Z)" aria-label="Refazer">↷ Refazer</button>
+    <button type="button" id="edNovo">Novo</button>
+  </div>
+  <label class="caixa"><input type="checkbox" id="edCores"> Cores originais do modelo</label>
+
+  <h2>Ferramenta</h2>
+  <div class="sb-ferr" role="group" aria-label="Ferramenta">
+    <button type="button" data-ferr="navegar" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M3 12h18 M12 3c2.8 3 2.8 15 0 18 M12 3c-2.8 3-2.8 15 0 18"/></svg><span>Navegar</span></button>
+    <button type="button" data-ferr="cabo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c3 0 4-12 9-12s6 12 9 12"/></svg><span>Cabo</span></button>
+    <button type="button" data-ferr="adicionar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4z M13 13h7v7h-7z M16.5 4v7 M13 7.5h7"/></svg><span>Peça</span></button>
+    <button type="button" data-ferr="modelo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z M3 7l9 5 9-5 M12 12v10"/></svg><span>Modelo 3D</span></button>
+    <button type="button" data-ferr="selecionar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l13 8-6 1.5L9 19z M12 12.5l5 6"/></svg><span>Selecionar</span></button>
+  </div>
+
+  <div data-ferr-painel="navegar">
+    <p class="dica">Gire, aproxime e explore o modelo. Escolha uma ferramenta para editar. O que você muda aparece em cor; o resto fica em cinza (o cenário, fora do orçamento, fica translúcido).</p>
+  </div>
+
+  <div data-ferr-painel="cabo" hidden>
+    <p class="sb-rot">Tipo de cabo</p>
+    <div class="sb-chips-cor" id="edCat" role="group" aria-label="Tipo de cabo"></div>
+    <p class="sb-rot">Instalação</p>
+    <div class="sb-chips-cor sb-inst" id="edInst" role="group" aria-label="Instalação do trecho"></div>
+    <div class="sb-grade2">
+      <label class="campo">Cabos no feixe <input type="number" id="edFeixe" min="1" max="500" step="1" value="1"></label>
+      <label class="campo">Folga (%) <input type="number" id="edFolga" min="0" max="200" step="1" value="10"></label>
+    </div>
+    <label class="sel">Sistema <select id="edSis"></select></label>
+    <label class="campo">Nome do trecho <input type="text" id="edCaboNome" maxlength="140" placeholder="ex.: alimentação do quadro"></label>
+    <label class="caixa"><input type="checkbox" id="edCalha"> Com eletrocalha</label>
+    <label class="campo" id="edCalhaL" hidden>Largura da eletrocalha (cm) <input type="number" id="edCalhaLarg" min="5" max="200" step="5" value="30"></label>
+    <div class="sb-grade2">
+      <label class="caixa"><input type="checkbox" id="edGrade"> Grade de 0,5 m</label>
+      <label class="caixa"><input type="checkbox" id="edOrto"> Só eixos (ortogonal)</label>
+    </div>
+    <p class="sb-status" id="edCaboStatus" aria-live="polite">Clique numa superfície do modelo ou no chão para pôr o primeiro ponto.</p>
+    <div class="linha-btn">
+      <button type="button" id="edCaboOk"><kbd>Enter</kbd> Concluir trecho</button>
+      <button type="button" id="edCaboVolta"><kbd>⌫</kbd> Desfazer ponto</button>
+      <button type="button" id="edCaboCancela"><kbd>Esc</kbd> Cancelar</button>
+    </div>
+    <p class="dica">Dois cliques seguidos no chão: o trecho entre eles acompanha o relevo (um ponto a cada ~2 m).</p>
+    <details class="sb-det" id="edRotaDet">
+      <summary>Rota pelo chão</summary>
+      <p class="dica">Cabo entre os pontos marcados no pacote como origem e destino, seguindo o chão. Usa o tipo, a instalação e o feixe escolhidos acima.</p>
+      <p class="nota-div" id="edRotaVazia" hidden>Este pacote não marcou origens e destinos de rota (passo 5 do assistente). Use "Ponto clicado" como origem ou desenhe com cliques.</p>
+      <label class="sel">Origem <select id="edRotaOrig"></select></label>
+      <label class="sel">Destino <select id="edRotaDest"></select></label>
+      <label class="sel">Traçado <select id="edRotaModo"><option value="reta">Linha reta</option><option value="L">Em "L" (x, depois z)</option></select></label>
+      <div class="linha-btn"><button type="button" id="edRotaGerar">Gerar rota</button></div>
+    </details>
+    <details class="sb-det" id="edSemDet">
+      <summary>Orçar sem desenhar <span id="edSemN"></span></summary>
+      <p class="dica">Digite o comprimento do caminho. O trecho entra no orçamento e aparece no 3D só como um marcador (alfinete).</p>
+      <div class="sb-grade2">
+        <label class="campo">Comprimento (m) <input type="number" id="edCaboL" min="0.1" max="100000" step="0.5" value="50"></label>
+        <label class="campo">Local <input type="text" id="edCaboLocal" maxlength="140" placeholder="opcional"></label>
+      </div>
+      <div class="linha-btn"><button type="button" id="edCaboDigitar">Adicionar trecho</button></div>
+      <ul class="sb-sem" id="edSemLista" aria-label="Trechos sem desenho"></ul>
+    </details>
+  </div>
+
+  <div data-ferr-painel="adicionar" hidden>
+    <input type="search" id="edBusca" placeholder="Buscar peça…" aria-label="Buscar peça" autocomplete="off">
+    <div class="chips sb-chips-sis" id="edPecaSis" role="group" aria-label="Filtrar por sistema"></div>
+    <div class="sb-pecas" id="edPecaGrade" role="group" aria-label="Peças do pacote"></div>
+    <p class="dica" id="edPecaVazia" hidden>Nenhuma peça com esse nome.</p>
+    <input type="hidden" id="edPeca">
+    <p class="sb-status" id="edPecaNome" aria-live="polite"></p>
+    <label class="campo">Giro em torno do eixo vertical (°) <input type="number" id="edGiro" min="-360" max="360" step="15" value="0"></label>
+    <p class="dica">Clique numa superfície do modelo ou no chão para colocar a peça. Ela entra no orçamento como as outras da base. Depois, use <b>Selecionar</b> para mover ou girar.</p>
+  </div>
+
+  <div data-ferr-painel="modelo" hidden>
+    <p class="dica">Traga mais uma estrutura (ex.: um equipamento) em <b>.glb</b>, em metros, até 4 MB. Ela entra no orçamento pelo volume (material) e/ou por um preço por unidade.</p>
+    <div class="linha-btn"><button type="button" id="edGlbImportar">Escolher modelo .glb…</button></div>
+    <input type="file" id="edGlbArquivo" accept=".glb,model/gltf-binary" hidden>
+    <div class="sb-modelos" id="edGlbLista"></div>
+    <div class="sb-grade2">
+      <label class="campo">Escala <input type="number" id="edGlbEscala" min="0.001" max="1000" step="any" value="1"></label>
+      <label class="campo">Quantidade <input type="number" id="edGlbQtd" min="1" max="10000" step="1" value="1"></label>
+    </div>
+    <label class="sel">Material <select id="edGlbMat"></select></label>
+    <div class="sb-grade2">
+      <label class="campo">Preço (US$/un.) <input type="number" id="edGlbPreco" min="0" step="any" placeholder="opcional"></label>
+      <label class="campo">Giro (°) <input type="number" id="edGlbGiro" min="-360" max="360" step="15" value="0"></label>
+    </div>
+    <label class="sel">Sistema <select id="edGlbSis"></select></label>
+    <p class="dica">Clique no modelo ou no chão para colocar. Custo = material × volume medido (só vale para malhas fechadas) e/ou o preço por unidade.</p>
+  </div>
+
+  <div data-ferr-painel="selecionar" hidden>
+    <p class="dica" id="edSelVazio">Clique numa peça do modelo para selecioná-la.</p>
+    <div id="edSel" hidden></div>
+  </div>
+
+  <details class="sb-det" id="edPrecosDet">
+    <summary>Preços do cliente</summary>
+    <p class="dica">Troque o preço unitário de qualquer material ou peça. Campo vazio = preço do pacote. Vale só para este orçamento.</p>
+    <label class="campo">Câmbio (R$ por US$) <input type="number" id="edCambio" min="0.01" max="1000" step="0.01"></label>
+    <input type="search" id="edPrecoBusca" placeholder="Filtrar…" aria-label="Filtrar preços" autocomplete="off">
+    <div class="tabela-rolo sb-precos"><table class="tabela" id="edPrecos"></table></div>
+  </details>
+
+  <details class="sb-det" id="edEdDet" open>
+    <summary>Edições <span id="edEdN"></span></summary>
+    <div class="chips sb-filtro" id="edFiltro" role="group" aria-label="Filtrar edições">
+      <button type="button" data-filtro="todas" aria-pressed="true">Todas</button>
+      <button type="button" data-filtro="modelo" aria-pressed="false">No modelo</button>
+      <button type="button" data-filtro="orcamento" aria-pressed="false">Só orçamento</button>
+    </div>
+    <ol class="sb-lista" id="edLista"></ol>
+  </details>
+
+  <details class="sb-det" id="edExpDet">
+    <summary>Exportar, importar, comparar</summary>
+    <div class="linha-btn sb-exp">
+      <button type="button" id="edExpJson">Projeto (.orc3d.json)</button>
+      <button type="button" id="edExpLink">Copiar link</button>
+      <button type="button" id="edExpCsv">Orçamento (CSV)</button>
+      <button type="button" id="edExpRel">Relatório (PDF)</button>
+      <button type="button" id="edExpGlb">Modelo 3D (.glb)</button>
+      <button type="button" id="edExpPng">Imagem (.png)</button>
+    </div>
+    <label class="campo" id="edLinkCampo" hidden>Link do orçamento <input type="text" id="edLink" readonly></label>
+    <div class="linha-btn">
+      <button type="button" id="edImportar">Importar projeto…</button>
+      <button type="button" id="edComparar">Comparar com arquivo…</button>
+    </div>
+    <p class="dica">O arquivo <code>.orc3d.json</code> leva o pacote e os modelos junto: é ele que você manda para recalcular. O link é curto, mas só abre onde o mesmo pacote já estiver aberto.</p>
+  </details>
+</aside>
+
+<!-- ============ editor: resultados ============ -->
+<section id="edRes" class="sb-res vidro" aria-label="Impacto das edições">
+  <div class="sb-res-cab">
+    <h2>Base × sua versão</h2>
+    <button type="button" id="edResMin" aria-expanded="true" aria-controls="edResCorpo" title="Recolher/expandir">▾</button>
+  </div>
+  <p class="sb-manchete" id="edManchete" aria-live="polite"></p>
+  <div id="edResCorpo">
+    <div class="nums sb-nums" id="edNums"></div>
+    <p class="nota-div" id="edAbertas" hidden></p>
+    <h3>Quantidades: base × editado</h3>
+    <div class="tabela-rolo"><table class="tabela" id="edTabMet"></table></div>
+    <h3>Diferença de custo por sistema</h3>
+    <div class="sb-divs" id="edBarSis"></div>
+    <div id="edComposicao"></div>
+    <details class="sb-det"><summary>Tabela por sistema</summary>
+    <div class="tabela-rolo"><table class="tabela" id="edTabSis"></table></div></details>
+    <div id="edComp" hidden></div>
+    <p class="dica">Custos em ordem de grandeza (US$, fornecido e instalado). Não inclui projeto, engenharia, transporte nem contingência. Tudo o que é criado ou reprecificado aqui é <b>estimado</b>.</p>
+  </div>
+</section>
+
+<!-- ============ assistente ============ -->
+<section id="assist" class="assist vidro" hidden aria-label="Assistente de importação">
+  <div class="as-cab">
+    <h2>Importar meu projeto</h2>
+    <button type="button" id="asFechar" title="Sair do assistente" aria-label="Sair do assistente">×</button>
+  </div>
+  <ol class="as-passos" id="asPassos"></ol>
+  <h3 class="as-titulo" id="asTitulo"></h3>
+  <div id="asCorpo" class="as-corpo sb"></div>
+  <div class="as-nav">
+    <button type="button" id="asVoltar">← Voltar</button>
+    <button type="button" id="asMais" title="Recomeçar com outros arquivos">Outros arquivos…</button>
+    <button type="button" id="asAvancar" class="primario">Avançar →</button>
+  </div>
+  <input type="file" id="asMaisArq" multiple hidden accept=".glb,.gltf,.bin,.obj,.mtl,.fbx,.dae,.stl,.ply,.csv,.json,.png,.jpg,.jpeg,.webp">
+</section>
+
+<!-- ============ ajuda ============ -->
+<section id="ajuda" class="sobreposicao" hidden tabindex="-1" aria-label="Como preparar seu projeto">
+  <div class="ajuda-barra"><button type="button" id="ajudaFechar">← Voltar ao orçamento</button></div>
+  <div id="ajudaCorpo" class="ajuda-corpo"></div>
+</section>
+
+<div id="soltar" class="soltar" aria-hidden="true"><p>Solte os arquivos para importar</p></div>
+<div id="carregando" class="carregando" role="status">
+  <div>
+    <p class="car-marca">LAB<b>·</b>LK</p>
+    <h2>Orçamento 3D</h2>
+    <div class="barra"><span id="barra"></span></div>
+    <p class="car-frase">Abrindo o galpão de exemplo…</p>
+  </div>
+</div>
+<div id="semWebgl" class="carregando" hidden>
+  <div><h2>Seu navegador não tem WebGL 2</h2><p>Esta página precisa de aceleração gráfica. Tente um navegador atualizado (Chrome, Edge, Firefox ou Safari 15+) ou ative a aceleração de hardware.</p><p><a href="/lab">← Voltar ao Lab</a></p></div>
+</div>
+<div id="aviso" class="aviso" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

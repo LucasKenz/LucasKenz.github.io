@@ -1,0 +1,48 @@
+newmtl terreno
+Kd 0.1070 0.1470 0.0685
+Ka 0 0 0
+Ks 0.1 0.1 0.1
+d 1
+illum 2
+
+newmtl concreto
+Kd 0.4851 0.4678 0.4342
+Ka 0 0 0
+Ks 0.1 0.1 0.1
+d 1
+illum 2
+
+newmtl aco_estrutural
+Kd 0.1095 0.2384 1.0000
+Ka 0 0 0
+Ks 0.1 0.1 0.1
+d 1
+illum 2
+
+newmtl telha
+Kd 0.5271 0.5647 0.6308
+Ka 0 0 0
+Ks 0.1 0.1 0.1
+d 1
+illum 2
+
+newmtl pintura_quadro
+Kd 0.8070 0.7605 0.5776
+Ka 0 0 0
+Ks 0.1 0.1 0.1
+d 1
+illum 2
+
+newmtl vegetacao
+Kd 0.0497 0.2747 0.0782
+Ka 0 0 0
+Ks 0.1 0.1 0.1
+d 1
+illum 2
+
+newmtl madeira
+Kd 0.2542 0.1441 0.0685
+Ka 0 0 0
+Ks 0.1 0.1 0.1
+d 1
+illum 2
