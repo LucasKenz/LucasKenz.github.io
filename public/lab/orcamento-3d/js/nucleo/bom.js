@@ -87,8 +87,23 @@ export function quantitativos(base, id, opcoes = null, ctx = null) {
     const massa = info.densidade ? (m.vol * info.densidade) / 1000 : 0; // t
     massaModelo += massa;
     if (m.aberta) aberta = true;
-    linhas.push({ mat, vol: m.vol, area: m.area, comprimento: m.comprimento, massa, aberta: !!m.aberta, conf: mat === mat0 ? info.confidence ?? 'estimado' : 'estimado' });
+    linhas.push({ mat, trocado: mat !== mat0, vol: m.vol, area: m.area, comprimento: m.comprimento, massa, aberta: !!m.aberta, conf: mat === mat0 ? info.confidence ?? 'estimado' : 'estimado' });
   }
+  // quantidades oficiais (IFC): volume e área da peça valem no lugar dos medidos na malha (só a peça do pacote, sem opções)
+  const Q = !chave(opcoes) ? p.quantidades : null;
+  const oficial = Q?.fonte === 'ifc' ? 'oficial' : 'estimado';
+  for (const [campo, chaveQ] of [['vol', 'volume_m3'], ['area', 'area_m2']]) {
+    const tot = linhas.reduce((s, l) => s + l[campo], 0);
+    if (!(Q?.[chaveQ] > 0) || !(tot > 0)) continue;
+    const k = Q[chaveQ] / tot;
+    for (const l of linhas) {
+      l[campo] *= k;
+      if (campo === 'vol') { l.massa *= k; l.aberta = false; }
+      l.conf = l.trocado ? 'estimado' : oficial;
+    }
+    if (campo === 'vol') aberta = false;
+  }
+  massaModelo = linhas.reduce((s, l) => s + l.massa, 0);
   const pesq = p.pesquisado;
   // peça alterada (outras opções ou outro material) mantém o fator de calibração da peça original
   const alterada = !simples && (chave(opcoes) || Object.keys(trocas).length);

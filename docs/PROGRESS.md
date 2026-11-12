@@ -115,3 +115,7 @@
 ## 2026-11-12 · Lab: Orçamento 3D publicado e nota de formatos
 - A entrada anterior (card e página do Orçamento 3D) foi publicada em 12/11 (deploy 43240168909; no ar: `/`, `/lab/`, `/lab/orcamento-3d/`, `/lab/gmt/`, `/curato/`, `/mover-campus-3d-site/` com 200; testes do Orçamento 3D no ar todos OK).
 - Página atualizada: formatos aceitos em texto ao lado do botão "Importar meu projeto" (commit `2565778` do `orcamento-3d`). `astro check` 0 erros, 15/15 testes, build ok.
+
+## 2026-11-12 · Lab: Orçamento 3D, fase 2 (novos formatos)
+- Página copiada de novo do `orcamento-3d` (commit `6f2b766`): lê `.ifc` (web-ifc, com quantidades oficiais), `.step`/`.iges` (occt-import-js), `.3dm` (rhino3dm) e `.dxf` (rotas de cabo); bibliotecas baixadas só sob demanda. Técnica do card atualizada com os formatos.
+- Verificação: `astro check` 0 erros, `pnpm test` 15/15, build; no `dist`: `/`, `/lab/`, `/lab/orcamento-3d/`, `/lab/gmt/` 200 e testes do Orçamento 3D todos OK.

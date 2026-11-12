@@ -44,8 +44,8 @@ kbd { font-family: var(--mono); font-size: .7em; border: 1px solid var(--line); 
 button.primario, .acoes button.primario { background: var(--acc); border-color: var(--acc); color: #0b0d12; font-weight: 700; }
 .acoes button.primario { font-size: .95rem; padding: .4rem .9rem; }
 button.primario:hover { filter: brightness(1.08); color: #0b0d12; }
-.importar { display: grid; justify-items: center; gap: 1px; }
-.formatos { font: .6rem/1.1 var(--mono); color: var(--muted); white-space: nowrap; }
+.importar { display: flex; align-items: center; gap: .45rem; flex: none; }
+.formatos { font: .6rem/1.15 var(--mono); color: var(--muted); width: 15rem; text-align: left; }
 .btn-painel { display: none; background: none; border: 1px solid var(--line); border-radius: 6px; padding: .2rem .6rem; cursor: pointer; }
 
 /* ---------- painel ---------- */
@@ -293,8 +293,7 @@ body[data-tela="assistente"] .painel, body[data-tela="assistente"] .sb-res { dis
   .titulo { flex: 1; font-size: .92rem; }
   .acoes { order: 3; width: 100%; margin: 0; overflow-x: auto; gap: .35rem; scrollbar-width: none; }
   .acoes button { flex: none; }
-  .importar { display: flex; align-items: center; gap: .4rem; flex: none; }
-  .formatos { white-space: normal; width: 12.5rem; text-align: left; }
+  .formatos { width: 14rem; }
   .btn-painel { display: block; }
   .painel { top: auto; bottom: 0; left: 0; right: 0; width: auto; max-height: 46dvh; border-radius: 12px 12px 0 0; }
   .painel.fechado { display: none; }
@@ -310,3 +309,5 @@ body[data-tela="assistente"] .painel, body[data-tela="assistente"] .sb-res { dis
   .nums { grid-template-columns: repeat(2, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+.as-ifc { color: var(--ok); font-family: var(--mono); }
+.as-ifc.off { color: var(--muted); text-decoration: line-through; }

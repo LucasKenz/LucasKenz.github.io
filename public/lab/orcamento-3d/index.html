@@ -30,7 +30,7 @@
   <nav class="acoes" aria-label="Arquivos">
     <span class="importar">
       <button type="button" id="btnImportar" class="primario" aria-describedby="formatosImport">⬆ Importar meu projeto</button>
-      <small id="formatosImport" class="formatos">.glb · .gltf+.bin · .obj+.mtl · .fbx · .dae · .stl · .ply · catálogo .csv · até 25 MB</small>
+      <small id="formatosImport" class="formatos">.glb · .gltf+.bin · .obj+.mtl · .fbx · .dae · .ifc · .step/.iges · .3dm · .stl · .ply · rotas .dxf · catálogo .csv · até 25 MB</small>
     </span>
     <button type="button" id="btnAbrir">Abrir pacote/projeto (.json)</button>
     <button type="button" id="btnAjuda">Como preparar seu projeto</button>
@@ -38,7 +38,7 @@
   </nav>
   <button type="button" class="btn-painel" id="btnPainel" aria-controls="painel" aria-expanded="true" title="Mostrar/ocultar controles">☰</button>
 </header>
-<input type="file" id="arqImportar" multiple hidden accept=".glb,.gltf,.bin,.obj,.mtl,.fbx,.dae,.stl,.ply,.csv,.png,.jpg,.jpeg,.webp">
+<input type="file" id="arqImportar" multiple hidden accept=".glb,.gltf,.bin,.obj,.mtl,.fbx,.dae,.stl,.ply,.ifc,.step,.stp,.iges,.igs,.3dm,.dxf,.csv,.png,.jpg,.jpeg,.webp">
 <input type="file" id="arqAbrir" hidden accept=".json,application/json">
 
 <!-- ============ editor: painel lateral ============ -->
@@ -100,6 +100,21 @@
       <label class="sel">Destino <select id="edRotaDest"></select></label>
       <label class="sel">Traçado <select id="edRotaModo"><option value="reta">Linha reta</option><option value="L">Em "L" (x, depois z)</option></select></label>
       <div class="linha-btn"><button type="button" id="edRotaGerar">Gerar rota</button></div>
+      <h3>Rotas de uma planta (.dxf)</h3>
+      <p class="dica">Linhas e polilinhas de uma camada do DXF viram trechos de cabo, seguindo o chão. X do DXF = x da cena; Y do DXF = −z.</p>
+      <div class="linha-btn"><button type="button" id="edDxfBtn">Importar rotas (.dxf)…</button></div>
+      <input type="file" id="edDxfArq" accept=".dxf" hidden>
+      <div id="edDxf" hidden>
+        <p class="sb-status" id="edDxfInfo"></p>
+        <label class="sel">Camada <select id="edDxfCamada"></select></label>
+        <div class="sb-grade2">
+          <label class="campo">Unidade do DXF <select id="edDxfUn"><option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="pol">pol</option><option value="pe">pé</option></select></label>
+          <span></span>
+          <label class="campo">Deslocar x (m) <input type="number" id="edDxfDx" step="0.5" value="0"></label>
+          <label class="campo">Deslocar z (m) <input type="number" id="edDxfDz" step="0.5" value="0"></label>
+        </div>
+        <div class="linha-btn"><button type="button" id="edDxfCriar">Criar trechos</button></div>
+      </div>
     </details>
     <details class="sb-det" id="edSemDet">
       <summary>Orçar sem desenhar <span id="edSemN"></span></summary>
@@ -220,7 +235,7 @@
     <button type="button" id="asMais" title="Recomeçar com outros arquivos">Outros arquivos…</button>
     <button type="button" id="asAvancar" class="primario">Avançar →</button>
   </div>
-  <input type="file" id="asMaisArq" multiple hidden accept=".glb,.gltf,.bin,.obj,.mtl,.fbx,.dae,.stl,.ply,.csv,.json,.png,.jpg,.jpeg,.webp">
+  <input type="file" id="asMaisArq" multiple hidden accept=".glb,.gltf,.bin,.obj,.mtl,.fbx,.dae,.stl,.ply,.ifc,.step,.stp,.iges,.igs,.3dm,.dxf,.csv,.json,.png,.jpg,.jpeg,.webp">
 </section>
 
 <!-- ============ ajuda ============ -->

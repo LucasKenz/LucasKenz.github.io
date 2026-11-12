@@ -193,6 +193,7 @@ async function receber(arquivos, modo = 'importar') {
   const c = classificar(lista);
   try {
     if (c.modelos.length) { await abrirAssistente(lista); return; }
+    if (c.dxf.length) { mostrar('editor'); await editor.abrirDXF(c.dxf[0]); return; }
     if (c.json.length) {
       const f = c.json[0];
       if (f.size > P.MAX_ARQUIVO) throw new Error(`Arquivo grande demais (máx. ${Math.round(P.MAX_ARQUIVO / 1e6)} MB).`);

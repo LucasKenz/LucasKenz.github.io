@@ -88,7 +88,7 @@ export function preparar(leitura) {
   } else item.unidade = unidadeSugerida(Math.max(t.x, t.y, t.z), leitura.formato);
   item.fatorArquivo = leitura.fator;
   // Z para cima: altura em Z bem maior que em Y, em formatos sem eixo definido
-  item.girar = !leitura.eixoDoArquivo && t.z > 3 * t.y && t.z > 1e-9;
+  item.girar = leitura.zUp ?? (!leitura.eixoDoArquivo && t.z > 3 * t.y && t.z > 1e-9);
   if (c.tris > MAX_TRIS_AVISO) item.avisos.push(`Modelo pesado (${c.tris.toLocaleString('pt-BR')} triângulos; recomendado até 1,5 milhão): a página pode ficar lenta.`);
   aplicarAjuste(item);
   return item;
@@ -208,6 +208,7 @@ export function novoEstado(biblioteca) {
     nome: '', autor: '', cambio: null,
     avisos: [],
     temCatalogo: false,
+    usarQuantidades: true,      // quantidades oficiais do IFC (IfcElementQuantity) valem no lugar da malha
   };
 }
 export const MAT = (estado) => ({ ...estado.biblioteca, ...estado.materiais });
@@ -257,7 +258,12 @@ export function sincronizarCatalogo(estado) {
     if (estado.catalogo.has(id)) continue;
     const obj = porCaminho.get(caminho);
     const det = estado.det.candidatos.find((c) => c.caminho === caminho)?.material ?? '';
-    estado.catalogo.set(id, { id, nome: nomeBonito(id, obj), sistema: estado.sistemas[Math.min(1, estado.sistemas.length - 1)], material: mapearMaterial(det, M) });
+    // camada do Rhino (ou de outro programa) vira sugestão de sistema
+    let camada = null;
+    obj?.traverse((o) => { if (!camada && typeof o.userData?.camada === 'string' && o.userData.camada.trim()) camada = o.userData.camada.trim().slice(0, 40); });
+    if (camada && !estado.sistemas.includes(camada) && estado.sistemas.length < 20 && !/^(default|padrao|padrão|0|layer\s*\d*)$/i.test(camada)) estado.sistemas.push(camada);
+    const sistema = camada && estado.sistemas.includes(camada) ? camada : estado.sistemas[Math.min(1, estado.sistemas.length - 1)];
+    estado.catalogo.set(id, { id, nome: nomeBonito(id, obj), sistema, material: mapearMaterial(det, M) });
   }
 }
 
@@ -314,14 +320,40 @@ export function mapearFaltante(estado, de, para) {
   }
 }
 
+const CAMPOS_Q = ['volume_m3', 'area_m2', 'comprimento_m', 'massa_t'];
+/**
+ * Quantidades oficiais (IFC) por peça: média das cópias, só dos campos presentes em TODAS as cópias.
+ * Devolve Map(id -> { volume_m3?, area_m2?, comprimento_m?, massa_t?, fonte: 'ifc' }).
+ */
+export function quantidadesOficiais(estado) {
+  const { porCaminho } = caminhos(estado.canon.cena);
+  const porId = new Map();
+  for (const [c, id] of estado.marcas) {
+    const o = porCaminho.get(c);
+    let q = null;
+    o?.traverse((x) => { if (!q && x.userData?.quantidades && typeof x.userData.quantidades === 'object') q = x.userData.quantidades; });
+    (porId.has(id) ? porId.get(id) : porId.set(id, []).get(id)).push(q);
+  }
+  const r = new Map();
+  for (const [id, lista] of porId) {
+    if (!lista.length || lista.some((q) => !q)) continue;
+    const m = {};
+    for (const k of CAMPOS_Q) if (lista.every((q) => Number.isFinite(q[k]) && q[k] > 0)) m[k] = lista.reduce((s, q) => s + q[k], 0) / lista.length;
+    if (Object.keys(m).length) r.set(id, { ...m, fonte: 'ifc' });
+  }
+  return r;
+}
+
 /** Pacote final (objeto pronto para validarPacote / salvar). */
 export function montarPacote(estado) {
   const usados = copiasPorPeca(estado);
+  const oficiais = estado.usarQuantidades ? quantidadesOficiais(estado) : new Map();
   const pecas = [];
   for (const p of estado.catalogo.values()) {
     if (!usados.has(p.id) && !(p.qtd > 0)) continue; // peça sem cópia e sem quantidade fica de fora
     const r = { id: p.id, nome: p.nome || p.id, sistema: p.sistema || estado.sistemas[0] };
     for (const k of ['material', 'qtd', 'massa_t', 'taxa', 'preco_un', 'extras', 'descricao']) if (p[k] != null && p[k] !== '' && !(Array.isArray(p[k]) && !p[k].length)) r[k] = p[k];
+    if (oficiais.has(p.id)) r.quantidades = oficiais.get(p.id);
     pecas.push(r);
   }
   if (pecas.length > MAX_PECAS) throw new Error(`Peças demais (${pecas.length}; máx. ${MAX_PECAS}).`);
@@ -359,6 +391,7 @@ export async function automatico(biblioteca, arquivos, opcoes = {}) {
   if (opcoes.unidade || opcoes.girar != null) aplicarAjuste(estado.itens[0], { unidade: opcoes.unidade ?? estado.itens[0].unidade, girar: opcoes.girar ?? estado.itens[0].girar });
   await converterEDetectar(estado);
   if (opcoes.nome) estado.nome = opcoes.nome;
+  if (opcoes.usarQuantidades === false) estado.usarQuantidades = false;
   const { porCaminho, deObjeto } = caminhos(estado.canon.cena);
   const porNome = (nome) => { for (const [c, o] of porCaminho) if (nomeBruto(o) === nome || o.name === nome) return deObjeto.get(o) ?? c; return null; };
   if (opcoes.terreno) estado.terreno = porNome(opcoes.terreno);

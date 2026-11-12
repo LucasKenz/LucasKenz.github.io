@@ -12,22 +12,23 @@ export const FORMATOS_3D = {
   dae: { nome: 'Collada (.dae)', leitor: () => import('./dae.js') },
   stl: { nome: 'STL (.stl)', leitor: () => import('./stl.js') },
   ply: { nome: 'PLY (.ply)', leitor: () => import('./ply.js') },
+  // fase 2: bibliotecas WASM (CDN, versão fixa), com tempo maior
+  ifc: { nome: 'IFC (.ifc)', leitor: () => import('./ifc.js'), tempo: 120000 },
+  step: { nome: 'STEP (.step)', leitor: () => import('./step.js'), tempo: 120000 },
+  stp: { nome: 'STEP (.stp)', leitor: () => import('./step.js'), tempo: 120000 },
+  iges: { nome: 'IGES (.iges)', leitor: () => import('./step.js'), tempo: 120000 },
+  igs: { nome: 'IGES (.igs)', leitor: () => import('./step.js'), tempo: 120000 },
+  '3dm': { nome: 'Rhino (.3dm)', leitor: () => import('./3dm.js'), tempo: 120000 },
 };
 /** Formatos fechados, sem leitor livre no navegador: a ajuda ensina a exportar. */
 export const NAO_LIDOS = {
   skp: 'SketchUp: exporte em .dae (nativo) ou .glb.',
-  rvt: 'Revit: exporte .fbx da vista 3D (ou .ifc, na fase 2).',
+  rvt: 'Revit: exporte .ifc ou .fbx da vista 3D.',
   rfa: 'Revit (família): exporte .fbx.',
   dwg: 'AutoCAD 3D: exporte .fbx ou .dae.',
   max: '3ds Max: exporte .fbx.',
   blend: 'Blender: exporte .glb (com "Propriedades personalizadas").',
-  ifc: 'IFC fica para a fase 2: por enquanto, exporte .fbx ou .glb.',
-  step: 'STEP fica para a fase 2: exporte .stl (uma peça por arquivo) ou .obj.',
-  stp: 'STEP fica para a fase 2: exporte .stl ou .obj.',
-  iges: 'IGES fica para a fase 2: exporte .stl ou .obj.',
-  igs: 'IGES fica para a fase 2: exporte .stl ou .obj.',
-  '3dm': 'Rhino fica para a fase 2: exporte .obj ou .fbx.',
-  dxf: 'DXF 2D fica para a fase 2.',
+  dwf: 'DWF não é lido: exporte .fbx, .ifc ou .dae.',
 };
 export const ext = (nome) => (String(nome).toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? '');
 
@@ -36,12 +37,13 @@ export const ext = (nome) => (String(nome).toLowerCase().match(/\.([a-z0-9]+)$/)
  * catálogos (.csv), JSON (pacote/projeto) e recusados (com o motivo).
  */
 export function classificar(arquivos) {
-  const r = { modelos: [], apoio: new Map(), csv: [], json: [], recusados: [] };
+  const r = { modelos: [], apoio: new Map(), csv: [], json: [], dxf: [], recusados: [] };
   for (const f of arquivos) {
     const e = ext(f.name);
     if (FORMATOS_3D[e]) r.modelos.push(f);
     else if (e === 'csv') r.csv.push(f);
     else if (e === 'json') r.json.push(f);
+    else if (e === 'dxf') r.dxf.push(f);
     else if (e === 'bin' || e === 'mtl' || ehImagem(f.name)) r.apoio.set(f.name.toLowerCase().split(/[\\/]/).pop(), f);
     else if (NAO_LIDOS[e]) r.recusados.push(`${f.name}: formato não lido. ${NAO_LIDOS[e]}`);
     else r.recusados.push(`${f.name}: tipo de arquivo desconhecido.`);
@@ -61,6 +63,6 @@ export async function lerModelo(arquivo, apoio = new Map()) {
   if (!arquivo.size) throw new Error(`${arquivo.name}: arquivo vazio.`);
   for (const f of apoio.values()) if (f.size > MAX_ENTRADA) throw new Error(`${f.name}: arquivo grande demais (máx. 25 MB).`);
   const mod = await F.leitor();
-  const r = await comTempo(mod.ler(arquivo, apoio), 60000, `${arquivo.name}: a leitura passou de 60 s (arquivo grande demais ou corrompido).`);
+  const r = await comTempo(mod.ler(arquivo, apoio), F.tempo ?? 60000, `${arquivo.name}: a leitura passou de ${(F.tempo ?? 60000) / 1000} s (arquivo grande demais ou corrompido).`);
   return { ...r, formato, nome: arquivo.name };
 }

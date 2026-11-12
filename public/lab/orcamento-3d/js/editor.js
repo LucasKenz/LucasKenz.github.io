@@ -13,6 +13,8 @@ import * as P from './nucleo/projeto.js';
 import * as C from './nucleo/calculo.js';
 import * as X from './nucleo/exportar.js';
 import * as MD from './nucleo/modelos.js';
+import { lerDXF, comprimento2D } from './formatos/dxf.js';
+import { UNIDADES } from './formatos/comum.js';
 
 const $ = (id) => document.getElementById(id);
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -513,6 +515,50 @@ export function criarEditor({ renderer, scene, camera, controls, chaoVirtual, ao
     } catch (err) { aviso(err.message); return null; }
   }
 
+  // ---------- rotas de uma planta .dxf ----------
+  let dxf = null;
+  async function abrirDXF(f) {
+    try {
+      if (f.size > 10 * 1024 * 1024) throw new Error('O .dxf é grande demais (máx. 10 MB).');
+      dxf = lerDXF(await f.text());
+      const cams = Object.entries(dxf.camadas).sort((a, b) => b[1].length - a[1].length);
+      $('edDxfCamada').innerHTML = cams.map(([c, ls]) => `<option value="${esc(c)}">${esc(c)} (${ls.length} linha(s), ${fmt(ls.reduce((s, l) => s + comprimento2D(l), 0), 1)} un.)</option>`).join('');
+      const rota = cams.find(([c]) => /rota|cabo|eletr|route|cable/i.test(c));
+      if (rota) $('edDxfCamada').value = rota[0];
+      if (dxf.unidade) $('edDxfUn').value = dxf.unidade;
+      $('edDxfInfo').textContent = `${f.name.slice(0, 60)}: ${cams.length} camada(s)${dxf.unidade ? ` · unidade do arquivo: ${dxf.unidade}` : ' · unidade não informada'}`;
+      $('edDxf').hidden = false;
+      if (ferramenta !== 'cabo') setFerramenta('cabo');
+      $('edRotaDet').open = true;
+      if (dxf.avisos.length) aviso(dxf.avisos.join(' '));
+      return Object.keys(dxf.camadas);
+    } catch (err) { dxf = null; $('edDxf').hidden = true; aviso(err.message); return null; }
+  }
+  /** Cria um trecho de cabo por linha da camada, seguindo o chão (um ponto a cada ~2 m). */
+  function rotasDXF({ camada = $('edDxfCamada').value, unidade = $('edDxfUn').value, dx = +$('edDxfDx').value || 0, dz = +$('edDxfDz').value || 0 } = {}) {
+    if (!dxf?.camadas[camada]) { aviso('Escolha uma camada do .dxf.'); return []; }
+    const f = UNIDADES[unidade]?.fator ?? 1;
+    const cfg = configCabo();
+    const criadas = [];
+    for (const [i, linha] of dxf.camadas[camada].slice(0, 100).entries()) {
+      const xz = linha.map(([X, Y]) => [X * f + dx, -Y * f + dz]);
+      let total = 0;
+      for (let k = 1; k < xz.length; k++) total += Math.hypot(xz[k][0] - xz[k - 1][0], xz[k][1] - xz[k - 1][1]);
+      if (total < 0.1) continue;
+      const passo = Math.max(PASSO_CHAO, total / 290);
+      const pts = [pontoNoChao(...xz[0])];
+      for (let k = 1; k < xz.length; k++) {
+        const [ax, az] = xz[k - 1], [bx, bz] = xz[k];
+        const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / passo));
+        for (let j = 1; j <= n; j++) pts.push(pontoNoChao(ax + ((bx - ax) * j) / n, az + ((bz - az) * j) / n));
+      }
+      const e = addEdicao({ tipo: 'cabo', ...cfg, ancora: 'fixo', pontos: pts.slice(0, 300), rota: { origem: 'DXF', destino: camada }, nome: `${cfg.nome || CATEGORIAS_CABO[cfg.categoria].nome}: ${camada} ${i + 1}` });
+      if (e) criadas.push(e);
+    }
+    aviso(`${criadas.length} trecho(s) de cabo criados a partir da camada "${camada}"`);
+    return criadas;
+  }
+
   // ---------- trechos "orçar sem desenhar" ----------
   function desenharSemDesenho() {
     const eds = projeto.edicoes.filter(C.soOrcamento);
@@ -943,6 +989,9 @@ export function criarEditor({ renderer, scene, camera, controls, chaoVirtual, ao
       $('edInst').querySelectorAll('[data-inst]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     });
     $('edRotaGerar').addEventListener('click', () => gerarRota());
+    $('edDxfBtn').addEventListener('click', () => $('edDxfArq').click());
+    $('edDxfArq').addEventListener('change', async (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) await abrirDXF(f); });
+    $('edDxfCriar').addEventListener('click', () => rotasDXF());
     $('edSemLista').addEventListener('change', (ev) => {
       const li = ev.target.closest('li[data-id]'), e = li && edicao(li.dataset.id);
       if (!e || ev.target.dataset.acao !== 'L') return;
@@ -1176,6 +1225,7 @@ export function criarEditor({ renderer, scene, camera, controls, chaoVirtual, ao
       return comparacao.r;
     },
     gerarRota: (o, d, modo) => gerarRota(o, d, modo),
+    abrirDXF, rotasDXF,
     editar: (e) => addEdicao(e),
     importarGLB: (f) => importarGLB(f),
     setFerramenta,

@@ -89,6 +89,14 @@ export function validarPacote(obj, biblioteca) {
     const taxa = num(q.taxa, 0, 1000, null); if (taxa !== null && taxa > 0) r.taxa = taxa;
     const pu = num(q.preco_un, 0, 1e10, null); if (pu !== null) r.preco_un = pu;
     if (q.descricao) r.descricao = txt(q.descricao, '', 500);
+    if (q.quantidades && typeof q.quantidades === 'object') {
+      const Q = {};
+      for (const [k, max] of [['volume_m3', 1e7], ['area_m2', 1e8], ['comprimento_m', 1e7], ['massa_t', 1e6]]) {
+        const x = num(q.quantidades[k], 0, max, null);
+        if (x !== null && x > 0) Q[k] = x;
+      }
+      if (Object.keys(Q).length) r.quantidades = { ...Q, fonte: q.quantidades.fonte === 'ifc' ? 'ifc' : 'pacote' };
+    }
     if (Array.isArray(q.extras)) {
       const ex = [];
       for (const e of q.extras.slice(0, 20)) {
@@ -200,7 +208,8 @@ export function montarBase(pacote, biblioteca, cena) {
     PECA[p.id] = {
       ...p,
       qtd: [p.qtd ?? n, p.qtd != null ? 'pacote' : 'modelo', 'estimado'],
-      pesquisado: p.massa_t ? { massa_t: p.massa_t, conf: 'estimado', fonte: 'pacote' } : null,
+      pesquisado: p.massa_t ? { massa_t: p.massa_t, conf: 'estimado', fonte: 'pacote' }
+        : p.quantidades?.massa_t ? { massa_t: p.quantidades.massa_t, conf: p.quantidades.fonte === 'ifc' ? 'oficial' : 'estimado', fonte: p.quantidades.fonte } : null,
       extras,
       copias: n,
     };

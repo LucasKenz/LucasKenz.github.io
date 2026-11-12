@@ -149,7 +149,7 @@ export const lab: LabItem[] = [
       pt: 'Importe o seu projeto 3D, marque as peças e orce cabos, peças, materiais e preços: base × editado em m, m², massa e custo.',
       en: 'Import your own 3D project, tag its parts and estimate cables, parts, materials and prices: base vs. edited in m, m², mass and cost (page in Portuguese).',
     },
-    tecnica: { pt: 'Three.js · glTF, OBJ, FBX, DAE, STL, PLY · quantitativos', en: 'Three.js · glTF, OBJ, FBX, DAE, STL, PLY · quantity take-off' },
+    tecnica: { pt: 'Three.js · glTF, OBJ, FBX, DAE, STL, IFC, STEP, 3DM, DXF · quantitativos', en: 'Three.js · glTF, OBJ, FBX, DAE, STL, IFC, STEP, 3DM, DXF · quantity take-off' },
     status: 'pronto',
   },
   {

@@ -45,7 +45,7 @@ export function usarFontes(f) { FONTES = f && typeof f === 'object' ? f : {}; }
 export function selo(conf, chaveFonte) {
   const c = ['oficial', 'artigo', 'estimado'].includes(conf) ? conf : 'estimado';
   const f = chaveFonte ? FONTES[chaveFonte] : null;
-  const titulo = f?.titulo ?? (chaveFonte === 'pacote' ? 'Valor definido no pacote do projeto' : chaveFonte === 'usuario' ? 'Valor definido no projeto' : c);
+  const titulo = f?.titulo ?? (chaveFonte === 'ifc' ? 'Quantidade oficial do arquivo IFC (IfcElementQuantity)' : chaveFonte === 'pacote' ? 'Valor definido no pacote do projeto' : chaveFonte === 'usuario' ? 'Valor definido no projeto' : c);
   return `<span class="conf ${c}" title="${esc(titulo)}">${c}</span>`;
 }
 

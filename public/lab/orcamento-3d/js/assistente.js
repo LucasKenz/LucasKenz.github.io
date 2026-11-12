@@ -178,7 +178,9 @@ export function criarAssistente({ scene, camera, renderer, controls, biblioteca,
 
   function telaCatalogo() {
     const copias = M.copiasPorPeca(estado);
+    const oficiais = M.quantidadesOficiais(estado);
     const lista = [...estado.catalogo.values()].filter((p) => copias.has(p.id) || p.qtd > 0);
+    const txtQ = (q) => [q.volume_m3 && `${fmtA(q.volume_m3)} m³`, q.area_m2 && `${fmtA(q.area_m2)} m²`, q.comprimento_m && `${fmtA(q.comprimento_m)} m`, q.massa_t && `${fmtA(q.massa_t)} t`].filter(Boolean).join(' · ');
     const num = (p, k, passo = 'any') => `<input type="number" min="0" step="${passo}" data-cat="${esc(p.id)}" data-k="${k}" value="${p[k] ?? ''}" aria-label="${k} de ${esc(p.id)}">`;
     const linhas = lista.map((p) => `<tr>
       <td><code>${esc(p.id)}</code><br><small>${fmt(copias.get(p.id) ?? 0, 0)} cópia(s)</small></td>
@@ -187,10 +189,11 @@ export function criarAssistente({ scene, camera, renderer, controls, biblioteca,
       <td><select data-cat="${esc(p.id)}" data-k="material" aria-label="Material de ${esc(p.id)}">${materiaisOpts(p.material)}</select></td>
       <td>${num(p, 'massa_t')}</td><td>${num(p, 'taxa')}</td><td>${num(p, 'preco_un')}</td>
       <td><input type="number" min="0" step="1" data-cat="${esc(p.id)}" data-k="qtd" value="${p.qtd ?? ''}" placeholder="${copias.get(p.id) ?? 0}" aria-label="Quantidade de ${esc(p.id)}"></td>
-      <td>${(p.extras ?? []).map((e) => `<small>${esc(e[0])}: ${fmtA(e[1])}</small>`).join('<br>') || '–'}</td></tr>`).join('');
+      <td>${(p.extras ?? []).map((e) => `<small>${esc(e[0])}: ${fmtA(e[1])}</small>`).join('<br>') || ''}${oficiais.has(p.id) ? `${p.extras?.length ? '<br>' : ''}<small class="as-ifc${estado.usarQuantidades ? '' : ' off'}" title="Quantidade oficial do IFC, por peça">IFC: ${esc(txtQ(oficiais.get(p.id)))}</small>` : ''}${!p.extras?.length && !oficiais.has(p.id) ? '–' : ''}</td></tr>`).join('');
     return `<p>Defina o que cada peça custa. <b>Material</b> mede o volume na malha (× densidade × preço). <b>massa_t</b> calibra a massa por peça. <b>taxa</b> = kg de armadura por m³ de concreto. <b>preco_un</b> = preço por unidade (US$), para equipamentos e malhas abertas. <b>qtd</b> vazia = número de cópias no modelo.</p>
+      ${oficiais.size ? `<label class="caixa"><input type="checkbox" id="asUsarQ" ${estado.usarQuantidades ? 'checked' : ''}> Usar as quantidades oficiais do IFC no lugar da malha (${oficiais.size} peça(s), selo <b>oficial</b>)</label>` : ''}
       <label class="campo">Sistemas (separados por vírgula) <input type="text" id="asSistemas" value="${esc(estado.sistemas.join(', '))}"></label>
-      <div class="tabela-rolo as-cat"><table class="tabela"><thead><tr><th>Id</th><th>Nome</th><th>Sistema</th><th>Material</th><th>massa_t</th><th>taxa</th><th>preco_un</th><th>qtd</th><th>Extras</th></tr></thead><tbody>${linhas || '<tr><td colspan="9">Nenhuma peça marcada.</td></tr>'}</tbody></table></div>
+      <div class="tabela-rolo as-cat"><table class="tabela"><thead><tr><th>Id</th><th>Nome</th><th>Sistema</th><th>Material</th><th>massa_t</th><th>taxa</th><th>preco_un</th><th>qtd</th><th>Extras / oficial</th></tr></thead><tbody>${linhas || '<tr><td colspan="9">Nenhuma peça marcada.</td></tr>'}</tbody></table></div>
       <div class="linha-btn"><button type="button" id="asCsv">Importar catálogo (.csv ou pacote .json)…</button><button type="button" id="asCsvModelo">Baixar modelo de .csv</button></div>
       <input type="file" id="asCsvArq" accept=".csv,.json,text/csv,application/json" hidden>`;
   }
@@ -312,6 +315,7 @@ export function criarAssistente({ scene, camera, renderer, controls, biblioteca,
         for (const p of estado.catalogo.values()) if (!s.includes(p.sistema)) p.sistema = s[0];
         desenhar();
       });
+      if ($('asUsarQ')) $('asUsarQ').onchange = (e) => { estado.usarQuantidades = e.target.checked; desenhar(); };
       $('asCsv').onclick = () => $('asCsvArq').click();
       $('asCsvModelo').onclick = () => baixar(MODELO_CSV, 'catalogo-modelo.csv', 'text/csv;charset=utf-8');
       $('asCsvArq').onchange = async (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) await importarCatalogo(f); };
