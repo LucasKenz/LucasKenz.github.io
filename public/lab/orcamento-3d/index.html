@@ -28,7 +28,10 @@
   <a class="marca" href="/lab" title="Voltar ao Lab">LAB<b>·</b>LK</a>
   <h1 class="titulo">Orçamento 3D <span id="tituloPacote" class="titulo-pacote"></span></h1>
   <nav class="acoes" aria-label="Arquivos">
-    <button type="button" id="btnImportar" class="primario">⬆ Importar meu projeto</button>
+    <span class="importar">
+      <button type="button" id="btnImportar" class="primario" aria-describedby="formatosImport">⬆ Importar meu projeto</button>
+      <small id="formatosImport" class="formatos">.glb · .gltf+.bin · .obj+.mtl · .fbx · .dae · .stl · .ply · catálogo .csv · até 25 MB</small>
+    </span>
     <button type="button" id="btnAbrir">Abrir pacote/projeto (.json)</button>
     <button type="button" id="btnAjuda">Como preparar seu projeto</button>
     <button type="button" id="btnExemplo" title="Abrir de novo o galpão de exemplo">Exemplo</button>

@@ -111,3 +111,7 @@
 ## 2026-11-12 · Lab: Orçamento 3D
 - Novo card no Lab (`content/lab.ts`, `href: '/lab/orcamento-3d/'`, capa `public/media/lab-orcamento-3d.webp` 1280 × 800) e a página copiada de `D:\GitHub Projects\orcamento-3d\public\lab\orcamento-3d` (repositório privado `LucasKenz/orcamento-3d`).
 - Verificação: `astro check` 0 erros, `pnpm test` 15/15, build; no `dist`: `/lab/`, `/lab/orcamento-3d/`, `/lab/gmt/` e `/en/lab/` 200, testes do Orçamento 3D (`ferramentas/orcamento.mjs`) todos OK. Ainda não enviado (`publicar.sh` aguardando ordem).
+
+## 2026-11-12 · Lab: Orçamento 3D publicado e nota de formatos
+- A entrada anterior (card e página do Orçamento 3D) foi publicada em 12/11 (deploy 43240168909; no ar: `/`, `/lab/`, `/lab/orcamento-3d/`, `/lab/gmt/`, `/curato/`, `/mover-campus-3d-site/` com 200; testes do Orçamento 3D no ar todos OK).
+- Página atualizada: formatos aceitos em texto ao lado do botão "Importar meu projeto" (commit `2565778` do `orcamento-3d`). `astro check` 0 erros, 15/15 testes, build ok.
