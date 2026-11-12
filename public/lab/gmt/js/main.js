@@ -549,7 +549,7 @@ async function iniciar() {
   let sandbox = null, sandboxCarregando = null;
   function obterSandbox() {
     sandboxCarregando ??= import('./sandbox/sandbox.js').then((m) => {
-      sandbox = m.criarSandbox({ renderer, scene, camera, controls, composer, modelo });
+      sandbox = m.criarSandbox({ renderer, scene, camera, controls, composer, modelo, sitio });
       window.__sandbox = sandbox; // usado pelos testes de navegador
       return sandbox;
     });

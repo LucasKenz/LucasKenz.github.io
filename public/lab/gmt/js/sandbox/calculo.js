@@ -1,6 +1,7 @@
 // Projeto do Sandbox -> lista de itens -> mesmo totalObra() do BOM. Nenhum cálculo paralelo:
 // cada edição vira um item (tipo de peça + quantidade + opções) como se a peça já existisse na base.
-import { PECA, PECAS_BASE, SISTEMAS, CATEGORIAS_CABO, comprimentoCabo } from '../model/parts.js';
+import { PECA, PECAS_BASE, SISTEMAS, CATEGORIAS_CABO, INSTALACOES, comprimentoCabo } from '../model/parts.js';
+import { obterExterno } from '../model/externos.js';
 import { totalObra, gerarCSV, itensBase } from '../architecture/bom.js';
 import { materiais } from '../data.js';
 import { fmt, fmtA } from '../util.js';
@@ -8,10 +9,20 @@ import { fmt, fmtA } from '../util.js';
 /** Opções da peça trecho-cabo a partir de uma edição "cabo". */
 export function opcoesCabo(e) {
   const o = { categoria: e.categoria, feixe: e.feixe, folga_pct: e.folga_pct };
+  if (e.instalacao && e.instalacao !== 'estrutura') o.instalacao = e.instalacao;
   if (e.pontos?.length >= 2) o.pontos = e.pontos;
   else o.comprimento_m = e.comprimento_m;
   return o;
 }
+/** Opções da peça modelo-externo a partir de uma edição "externo". */
+export function opcoesExterno(e) {
+  const o = { modelo: e.modelo, escala: e.escala };
+  if (e.material) o.material = e.material;
+  if (e.preco_usd != null) o.com_preco = true;
+  return o;
+}
+/** Edição que só entra no orçamento (não tem desenho no 3D). */
+export const soOrcamento = (e) => e.tipo === 'cabo' && !(e.pontos?.length >= 2);
 export function opcoesCalha(e) {
   const o = { largura_m: e.eletrocalha?.largura_m ?? 0.3 };
   if (e.pontos?.length >= 2) o.pontos = e.pontos;
@@ -43,6 +54,12 @@ export function itensDoProjeto(projeto, ignorar = null) {
         const nome = e.nome || `Cabos de ${CATEGORIAS_CABO[e.categoria]?.nome.toLowerCase() ?? 'energia'}`;
         novos.push({ id: 'trecho-cabo', n: 1, opcoes: opcoesCabo(e), sistema: sis, nome, origem: 'adicionado', edicoes: [e.id], conf: 'estimado' });
         if (e.eletrocalha) novos.push({ id: 'eletrocalha', n: 1, opcoes: opcoesCalha(e), sistema: sis, nome: `Eletrocalha · ${nome}`, origem: 'adicionado', edicoes: [e.id], conf: 'estimado' });
+        break;
+      }
+      case 'externo': {
+        // preço informado: um "conjunto" por peça, com preço próprio deste item (mesclado aos preços do cliente)
+        const ctx = e.preco_usd != null ? { precos: { 'componentes:modelo-externo': { usd: e.preco_usd, por: 'un' } } } : undefined;
+        novos.push({ id: 'modelo-externo', n: e.qtd, opcoes: opcoesExterno(e), sistema: e.sistema, nome: e.nome || `Modelo 3D · ${obterExterno(e.modelo)?.nome ?? e.modelo}`, ctx, origem: 'adicionado', edicoes: [e.id], conf: 'estimado' });
         break;
       }
     }
@@ -129,7 +146,9 @@ export function descrever(e) {
     case 'cabo': {
       const L = comprimentoCabo(opcoesCabo(e));
       const c = CATEGORIAS_CABO[e.categoria]?.nome ?? e.categoria;
-      return `${c}: ${fmtA(L)} m de caminho × ${e.feixe} cabo(s)${e.folga_pct ? ` + ${fmt(e.folga_pct, 0)}% de folga` : ''} · ${e.sistema}${e.eletrocalha ? ` · eletrocalha ${fmt(e.eletrocalha.largura_m * 100, 0)} cm` : ''}${e.pontos ? '' : e.subsistema ? ` · em ${e.subsistema}` : ' · sem desenho'}`;
+      const inst = e.instalacao && e.instalacao !== 'estrutura' ? ` · ${INSTALACOES[e.instalacao].nome.toLowerCase()}` : '';
+      const rota = e.rota ? ` · ${e.rota.origem} → ${e.rota.destino}` : '';
+      return `${c}: ${fmtA(L)} m de caminho × ${e.feixe} cabo(s)${e.folga_pct ? ` + ${fmt(e.folga_pct, 0)}% de folga` : ''} · ${e.sistema}${inst}${rota}${e.eletrocalha ? ` · eletrocalha ${fmt(e.eletrocalha.largura_m * 100, 0)} cm` : ''}${e.pontos ? '' : e.subsistema ? ` · em ${e.subsistema}` : ' · sem desenho'}`;
     }
     case 'adicionar': return `Adicionar 1 × ${P(e.peca)}`;
     case 'remover': return `Remover ${e.n ?? 1} × ${P(e.peca)}`;
@@ -140,9 +159,14 @@ export function descrever(e) {
       return `${P(e.peca)}: ${defs.filter((d) => d.chave in e.valores).map((d) => `${d.nome.toLowerCase()} ${fmt(e.valores[d.chave], d.passo < 1 ? 1 : 0)} ${d.un}`).join(', ')}`;
     }
     case 'material': return `${P(e.peca)}: ${MAT[e.de]?.nome ?? e.de} → ${MAT[e.para]?.nome ?? e.para}`;
+    case 'externo': {
+      const m = obterExterno(e.modelo);
+      const custo = [e.material ? `${MAT[e.material]?.nome ?? e.material} pelo volume` : '', e.preco_usd != null ? `US$ ${fmt(e.preco_usd, 0)}/un.` : ''].filter(Boolean).join(' + ') || 'sem custo';
+      return `${e.qtd} × ${m?.nome ?? 'modelo não carregado'} · escala ${fmt(e.escala, e.escala < 1 ? 3 : 1)} · ${custo} · ${e.sistema}`;
+    }
   }
   return e.tipo;
 }
 
-export const ROTULO_TIPO = { cabo: 'Cabo', adicionar: 'Adicionar', remover: 'Remover', mover: 'Mover', quantidade: 'Quantidade', parametro: 'Planta', material: 'Material' };
+export const ROTULO_TIPO = { cabo: 'Cabo', adicionar: 'Adicionar', remover: 'Remover', mover: 'Mover', quantidade: 'Quantidade', parametro: 'Planta', material: 'Material', externo: 'Modelo 3D' };
 export { PECAS_BASE };

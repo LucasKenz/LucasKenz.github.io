@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { setor, tubo, alinhar, placa, prisma } from './geom.js';
 import { DEG } from '../util.js';
+import { obterExterno } from './externos.js';
 
 // ---------- geometria global (metros) ----------
 export const G = {
@@ -1011,13 +1012,31 @@ export const PECAS = [
     extras: (op = {}) => {
       const c = CATEGORIAS_CABO[op.categoria] ?? CATEGORIAS_CABO.energia;
       const L = comprimentoCabo(op), feixe = op.feixe ?? 1, folga = op.folga_pct ?? 0;
-      return [[c.mat, L * feixe * (1 + folga / 100), 'usuario', 'estimado', `${feixe} cabo(s) × ${L.toFixed(1)} m de caminho + ${folga}% de folga.`]];
+      const r = [[c.mat, L * feixe * (1 + folga / 100), 'usuario', 'estimado', `${feixe} cabo(s) × ${L.toFixed(1)} m de caminho + ${folga}% de folga.`]];
+      // instalação no chão: um item por metro de caminho (não depende do número de cabos)
+      const inst = INSTALACOES[op.instalacao];
+      if (inst?.mat) r.push([inst.mat, L, 'usuario', 'estimado', `${inst.nome}: ${L.toFixed(1)} m de caminho.`]);
+      return r;
     },
     build(d, op = {}) {
       const c = CATEGORIAS_CABO[op.categoria] ?? CATEGORIAS_CABO.energia;
+      if (!(op.pontos?.length >= 2)) return marcador(c.cor);
       // raio só visual (os cabos não têm malha medida: comprimento e massa saem dos extras)
       const r = 0.1 + 0.025 * Math.sqrt(op.feixe ?? 1);
-      return caminho(op, (a, b) => tuboEntre(a, b, r, r, matCabo(c.cor), null, 'cabos', 10), r);
+      const g = caminho(op, (a, b) => tuboEntre(a, b, r, r, matCabo(c.cor), null, 'cabos', 10), r);
+      if (INSTALACOES[op.instalacao]?.mat) {
+        // faixa da canaleta/vala sob o cabo
+        const cor = op.instalacao === 'vala' ? '#8d7660' : '#b7a38a';
+        g.add(caminho(op, (a, b) => {
+          // faixa plana e horizontal, logo abaixo do cabo
+          const m = mk(caixa(0.7, 0.06, a.distanceTo(b)), matCabo(cor), null, 'faixa');
+          const y = -r - 0.05;
+          m.position.copy(a).add(b).multiplyScalar(0.5).setY((a.y + b.y) / 2 + y);
+          m.lookAt(b.x, b.y + y, b.z);
+          return m;
+        }, 0));
+      }
+      return g;
     },
   },
   {
@@ -1029,6 +1048,7 @@ export const PECAS = [
     extras: (op = {}) => [['eletrocalha', (op.largura_m ?? 0.3) * comprimentoCabo(op), 'usuario', 'estimado', `${((op.largura_m ?? 0.3) * 100).toFixed(0)} cm × ${comprimentoCabo(op).toFixed(1)} m.`]],
     build(d, op = {}) {
       const w = op.largura_m ?? 0.3;
+      if (!(op.pontos?.length >= 2)) return grupo();
       return caminho(op, (a, b) => {
         const L = a.distanceTo(b);
         const m = mk(caixa(w, L, 0.04, 0, L / 2, -0.12), matCabo('#9aa3b5'), null, 'bandeja');
@@ -1037,7 +1057,46 @@ export const PECAS = [
       }, 0);
     },
   },
+  {
+    id: 'modelo-externo', nome: 'Modelo 3D importado', sistema: 'Apoio', sub: 'apoio', oculto: true,
+    qtd: [0, 'usuario', 'estimado', 'Importado no Sandbox.'],
+    funcao: 'Estrutura trazida de outro programa (.glb) para orçar junto com o telescópio.',
+    descricao: 'Malha importada. Volume e área medidos na malha (o volume só é confiável em malhas fechadas).',
+    fabricacao: '—', fornecedor: '—', curiosidade: 'Peça criada no Sandbox.',
+    // preço informado pelo usuário: um "conjunto" por peça, com o preço vindo do item (ctx.precos['componentes:modelo-externo'])
+    extras: (op = {}) => (op.com_preco ? [['componentes', 1, 'usuario', 'estimado', 'Preço informado no Sandbox.']] : []),
+    build(d, op = {}) {
+      const ext = obterExterno(op.modelo);
+      const g = grupo();
+      if (!ext) {
+        // modelo ainda não carregado (ou ausente): marcador sem material, fora do cálculo e do cache
+        g.add(mk(caixa(1, 1, 1, 0, 0.5, 0), matCabo('#c084fc'), null, 'modelo ausente'));
+        g.userData.semCache = true;
+        return g;
+      }
+      const c = ext.cena.clone(true);
+      c.scale.multiplyScalar(op.escala ?? 1);
+      c.traverse((m) => { if (m.isMesh) { m.userData.mat = op.material ?? null; m.userData.sub = m.name || 'malha'; m.userData.compartilhada = true; } });
+      g.add(c);
+      return g;
+    },
+  },
 ];
+
+/** Tipos de instalação de um trecho de cabo (Sandbox). */
+export const INSTALACOES = {
+  estrutura: { nome: 'Preso à estrutura', mat: null },
+  canaleta: { nome: 'Canaleta no chão', mat: 'canaleta' },
+  vala: { nome: 'Enterrado em vala', mat: 'vala_cabos' },
+};
+/** Alfinete translúcido: marca um trecho orçado sem desenho. */
+function marcador(cor) {
+  const m = new THREE.MeshStandardMaterial({ color: cor, transparent: true, opacity: 0.55, emissive: cor, emissiveIntensity: 0.35, depthWrite: false });
+  const haste = mk(new THREE.CylinderGeometry(0.08, 0.08, 4, 8).translate(0, 2, 0), m, null, 'marcador');
+  const cabeca = mk(new THREE.SphereGeometry(0.9, 16, 12).translate(0, 4.6, 0), m, null, 'marcador');
+  const ponta = mk(new THREE.ConeGeometry(0.35, 0.8, 10).rotateX(Math.PI).translate(0, 0.4, 0), m, null, 'marcador');
+  return grupo(haste, cabeca, ponta);
+}
 
 /** Escala da fachada + cobertura de um bloco de prédio quando a área e a altura mudam (1 no tamanho original). */
 function escalaPredio(w0, d0, h0, op) {

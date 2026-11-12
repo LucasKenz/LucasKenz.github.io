@@ -1,16 +1,19 @@
 // Projeto do Sandbox = base (registro de peças + dados) + lista de edições. Nunca altera parts.js nem os JSON.
 // Este módulo é só dados: criar, validar, serializar, comprimir para link, histórico e autosave.
-import { PECA, SISTEMAS, CATEGORIAS_CABO } from '../model/parts.js';
+import { PECA, SISTEMAS, CATEGORIAS_CABO, INSTALACOES } from '../model/parts.js';
 import { dados, materiais } from '../data.js';
 
 export const FORMATO = 'gmt-sandbox';
 export const VERSAO = 1;
 export const ANCORAS = ['fixo', 'az', 'el', 'domo'];
-export const TIPOS = ['cabo', 'adicionar', 'remover', 'mover', 'quantidade', 'parametro', 'material'];
+export const TIPOS = ['cabo', 'adicionar', 'remover', 'mover', 'quantidade', 'parametro', 'material', 'externo'];
 const CHAVE_LOCAL = 'gmt-sandbox-projeto';
 const MAX_EDICOES = 400;
 const MAX_PONTOS = 300;
 const MAX_TEXTO = 140;
+export const MAX_MODELO_BYTES = 4 * 1024 * 1024; // .glb
+export const MAX_MODELOS = 6;
+const MAX_ARQUIVO = 6 * MAX_MODELO_BYTES * 1.4 + 2e6; // modelos em base64 + edições
 
 /** Hash FNV-1a (32 bits, hex) de um texto. */
 export function fnv(txt) {
@@ -33,6 +36,7 @@ export function novoProjeto() {
     base: { assinatura: assinaturaBase(), data: agora.slice(0, 10) },
     precos: {}, cambio_brl: null,
     edicoes: [],
+    modelos: {},
   };
 }
 
@@ -74,7 +78,9 @@ export function validarEdicao(e) {
         feixe: Math.round(num(e.feixe, 1, 500, 1)),
         folga_pct: num(e.folga_pct, 0, 200, 0),
         eletrocalha: e.eletrocalha && typeof e.eletrocalha === 'object' ? { largura_m: num(e.eletrocalha.largura_m, 0.05, 2, 0.3) } : null,
+        instalacao: INSTALACOES[e.instalacao] ? e.instalacao : 'estrutura',
       };
+      if (e.rota && typeof e.rota === 'object') r.rota = { origem: txt(e.rota.origem).slice(0, 40), destino: txt(e.rota.destino).slice(0, 40) };
       if (pontos.length >= 2) r.pontos = pontos;
       else { r.comprimento_m = comprimento_m; r.pos = vet3(e.pos) ?? [0, 0, 0]; r.subsistema = txt(e.subsistema); }
       return r;
@@ -105,6 +111,21 @@ export function validarEdicao(e) {
     case 'material': {
       if (!pecaOk(e.peca) || !MAT[e.de] || !MAT[e.para] || e.de === e.para) return null;
       return { ...base, peca: e.peca, de: e.de, para: e.para };
+    }
+    case 'externo': {
+      if (typeof e.modelo !== 'string' || !/^[0-9a-f]{8}$/.test(e.modelo)) return null;
+      // material cobrado por volume (precisa ter densidade e preço); null = sem custo de material
+      const material = typeof e.material === 'string' && MAT[e.material]?.densidade ? e.material : null;
+      return {
+        ...base, modelo: e.modelo,
+        ancora: ANCORAS.includes(e.ancora) ? e.ancora : 'fixo',
+        pos: vet3(e.pos) ?? [0, 0, 0], rot: vet3(e.rot, 360) ?? [0, 0, 0], matriz: matriz(e.matriz),
+        escala: num(e.escala, 0.001, 1000, 1),
+        material,
+        preco_usd: e.preco_usd != null ? num(e.preco_usd, 0, 1e10, null) : null,
+        sistema: SISTEMAS.includes(e.sistema) ? e.sistema : 'Apoio',
+        qtd: Math.round(num(e.qtd, 1, 10000, 1)),
+      };
     }
   }
   return null;
@@ -146,6 +167,19 @@ export function validarProjeto(obj) {
     p.edicoes.push(v);
   }
   if (descartadas) avisos.push(`${descartadas} edição(ões) inválida(s) ou com peça desconhecida foram descartadas.`);
+  // modelos 3D importados: só base64 de até 4 MB, com o hash conferido (o conteúdo é lido depois pelo GLTFLoader, como dado)
+  if (obj.modelos && typeof obj.modelos === 'object') {
+    for (const [h, m] of Object.entries(obj.modelos).slice(0, MAX_MODELOS)) {
+      const d = m?.dados;
+      if (typeof d !== 'string' || d.length > MAX_MODELO_BYTES * 1.37 + 8 || !/^[A-Za-z0-9+/]*={0,2}$/.test(d) || fnv(d) !== h) {
+        avisos.push(`Modelo 3D ignorado (dados inválidos): ${txt(m?.nome, String(h)).slice(0, 40)}.`);
+        continue;
+      }
+      p.modelos[h] = { nome: txt(m.nome, 'modelo') || 'modelo', dados: d };
+    }
+  }
+  const faltam = new Set(p.edicoes.filter((e) => e.tipo === 'externo' && !p.modelos[e.modelo]).map((e) => e.modelo));
+  if (faltam.size) avisos.push(`${faltam.size} modelo(s) 3D não vieram junto (o link não leva modelos): as peças aparecem como caixas roxas e o material delas não é medido.`);
   const bs = obj.base?.assinatura;
   if (typeof bs === 'string') {
     p.base = { assinatura: bs.slice(0, 16), data: txt(obj.base.data).slice(0, 10) };
@@ -158,7 +192,7 @@ export const serializar = (p) => JSON.stringify(p, null, 1);
 
 /** Lê texto JSON de um projeto (com limite de tamanho). */
 export function lerTexto(texto) {
-  if (typeof texto !== 'string' || texto.length > 5e6) throw new Error('Arquivo grande demais (máx. 5 MB).');
+  if (typeof texto !== 'string' || texto.length > MAX_ARQUIVO) throw new Error(`Arquivo grande demais (máx. ${Math.round(MAX_ARQUIVO / 1e6)} MB).`);
   let obj;
   try { obj = JSON.parse(texto); } catch { throw new Error('O arquivo não é um JSON válido.'); }
   return validarProjeto(obj);
@@ -180,7 +214,8 @@ async function fluxo(bytes, transform) {
 }
 /** Projeto -> texto curto para o hash da URL (sem espaços nem campos vazios). */
 export async function comprimir(p) {
-  const enxuto = JSON.stringify(p, (k, v) => (v === null || v === '' ? undefined : v));
+  // o link não leva os modelos 3D importados (grandes demais para uma URL)
+  const enxuto = JSON.stringify({ ...p, modelos: undefined }, (k, v) => (v === null || v === '' ? undefined : v));
   return b64url(await fluxo(new TextEncoder().encode(enxuto), new CompressionStream('deflate-raw')));
 }
 export async function descomprimir(s) {
@@ -192,13 +227,15 @@ export async function descomprimir(s) {
 }
 
 // ---------- histórico (desfazer/refazer) ----------
+// Os modelos importados ficam fora das fotos do histórico (são grandes e só crescem); quem desfaz mantém os modelos atuais.
+const semModelos = (p) => serializar({ ...p, modelos: undefined });
 export function criarHistorico(inicial) {
-  const pilha = [serializar(inicial)];
+  const pilha = [semModelos(inicial)];
   let i = 0;
   return {
     /** Registra o estado atual (depois de uma mudança). */
     registrar(p) {
-      const s = serializar(p);
+      const s = semModelos(p);
       if (s === pilha[i]) return;
       pilha.splice(i + 1);
       pilha.push(s);

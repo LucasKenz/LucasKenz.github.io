@@ -136,14 +136,18 @@
       <button type="button" id="sbRefazer" title="Refazer (Ctrl+Shift+Z)" aria-label="Refazer">↷ Refazer</button>
       <button type="button" id="sbNovo">Novo</button>
     </div>
-    <label class="caixa"><input type="checkbox" id="sbCorte" checked> Corte do domo (ver por dentro)</label>
+    <div class="sb-grade2">
+      <label class="caixa"><input type="checkbox" id="sbCorte" checked> Corte do domo</label>
+      <label class="caixa"><input type="checkbox" id="sbTerreno" checked> Mostrar terreno</label>
+    </div>
 
     <h2>Ferramenta</h2>
-    <div class="chips sb-ferr" role="group" aria-label="Ferramenta">
-      <button type="button" data-ferr="navegar" aria-pressed="true">Navegar</button>
-      <button type="button" data-ferr="cabo" aria-pressed="false">Cabo</button>
-      <button type="button" data-ferr="adicionar" aria-pressed="false">Adicionar peça</button>
-      <button type="button" data-ferr="selecionar" aria-pressed="false">Selecionar</button>
+    <div class="sb-ferr" role="group" aria-label="Ferramenta">
+      <button type="button" data-ferr="navegar" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M3 12h18 M12 3c2.8 3 2.8 15 0 18 M12 3c-2.8 3-2.8 15 0 18"/></svg><span>Navegar</span></button>
+      <button type="button" data-ferr="cabo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c3 0 4-12 9-12s6 12 9 12 M3 18h0 M21 18h0"/></svg><span>Cabo</span></button>
+      <button type="button" data-ferr="adicionar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4z M13 13h7v7h-7z M16.5 4v7 M13 7.5h7"/></svg><span>Peça</span></button>
+      <button type="button" data-ferr="modelo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7z M3 7l9 5 9-5 M12 12v10"/></svg><span>Modelo 3D</span></button>
+      <button type="button" data-ferr="selecionar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l13 8-6 1.5L9 19z M12 12.5l5 6"/></svg><span>Selecionar</span></button>
     </div>
 
     <div data-ferr-painel="navegar">
@@ -151,7 +155,10 @@
     </div>
 
     <div data-ferr-painel="cabo" hidden>
-      <label class="sel">Tipo <select id="sbCat"></select></label>
+      <p class="sb-rot">Tipo de cabo</p>
+      <div class="sb-chips-cor" id="sbCat" role="group" aria-label="Tipo de cabo"></div>
+      <p class="sb-rot">Instalação</p>
+      <div class="sb-chips-cor sb-inst" id="sbInst" role="group" aria-label="Instalação do trecho"></div>
       <div class="sb-grade2">
         <label class="campo">Cabos no feixe <input type="number" id="sbFeixe" min="1" max="500" step="1" value="1"></label>
         <label class="campo">Folga (%) <input type="number" id="sbFolga" min="0" max="200" step="1" value="10"></label>
@@ -164,28 +171,59 @@
         <label class="caixa"><input type="checkbox" id="sbGrade"> Grade de 0,5 m</label>
         <label class="caixa"><input type="checkbox" id="sbOrto"> Só eixos (ortogonal)</label>
       </div>
-      <p class="sb-status" id="sbCaboStatus" aria-live="polite">Clique numa superfície do modelo para pôr o primeiro ponto.</p>
+      <p class="sb-status" id="sbCaboStatus" aria-live="polite">Clique numa superfície do modelo ou no terreno para pôr o primeiro ponto.</p>
       <div class="linha-btn">
         <button type="button" id="sbCaboOk"><kbd>Enter</kbd> Concluir trecho</button>
         <button type="button" id="sbCaboVolta"><kbd>⌫</kbd> Desfazer ponto</button>
         <button type="button" id="sbCaboCancela"><kbd>Esc</kbd> Cancelar</button>
       </div>
-      <details class="sb-det">
-        <summary>Orçar sem desenhar</summary>
-        <p class="dica">Digite o comprimento do caminho e escolha onde ele fica. O trecho aparece como um marcador.</p>
+      <p class="dica">Dois cliques seguidos no terreno: o trecho entre eles acompanha o relevo (um ponto a cada ~2 m).</p>
+      <details class="sb-det" id="sbRotaDet">
+        <summary>Rota pelo chão</summary>
+        <p class="dica">Cabo de uma estrutura externa até o enclosure, seguindo o terreno (contorna a parede quando precisa). Usa o tipo, a instalação e o feixe escolhidos acima.</p>
+        <label class="sel">Origem <select id="sbRotaOrig"></select></label>
+        <label class="sel">Destino <select id="sbRotaDest"></select></label>
+        <div class="linha-btn"><button type="button" id="sbRotaGerar">Gerar rota</button></div>
+      </details>
+      <details class="sb-det" id="sbSemDet">
+        <summary>Orçar sem desenhar <span id="sbSemN"></span></summary>
+        <p class="dica">Digite o comprimento do caminho e escolha onde ele fica. O trecho entra no orçamento e aparece no 3D só como um marcador (alfinete), não como cabo.</p>
         <div class="sb-grade2">
           <label class="campo">Comprimento (m) <input type="number" id="sbCaboL" min="0.1" max="100000" step="0.5" value="50"></label>
           <label class="campo">Onde <select id="sbCaboSub"></select></label>
         </div>
         <div class="linha-btn"><button type="button" id="sbCaboDigitar">Adicionar trecho</button></div>
+        <ul class="sb-sem" id="sbSemLista" aria-label="Trechos sem desenho"></ul>
       </details>
     </div>
 
     <div data-ferr-painel="adicionar" hidden>
-      <label class="campo">Buscar peça <input type="search" id="sbBusca" placeholder="ex.: passarela" autocomplete="off"></label>
-      <label class="sel">Peça <select id="sbPeca"></select></label>
+      <input type="search" id="sbBusca" placeholder="Buscar peça… (ex.: passarela)" aria-label="Buscar peça" autocomplete="off">
+      <div class="chips sb-chips-sis" id="sbPecaSis" role="group" aria-label="Filtrar por sistema"></div>
+      <div class="sb-pecas" id="sbPecaGrade" role="group" aria-label="Peças"></div>
+      <p class="dica" id="sbPecaVazia" hidden>Nenhuma peça com esse nome.</p>
+      <input type="hidden" id="sbPeca">
+      <p class="sb-status" id="sbPecaNome" aria-live="polite"></p>
       <label class="campo">Giro em torno do eixo vertical (°) <input type="number" id="sbGiro" min="-360" max="360" step="15" value="0"></label>
       <p class="dica">Clique numa superfície do modelo para colocar a peça. Ela entra no BOM como se já fizesse parte da base. Depois, use <b>Selecionar</b> para mover ou girar.</p>
+    </div>
+
+    <div data-ferr-painel="modelo" hidden>
+      <p class="dica">Traga uma estrutura feita em outro programa (SketchUp, Blender, Revit…) em <b>.glb</b>, em metros, até 4 MB. Ela entra no orçamento junto com o telescópio.</p>
+      <div class="linha-btn"><button type="button" id="sbGlbImportar">Importar modelo 3D (.glb)…</button></div>
+      <input type="file" id="sbGlbArquivo" accept=".glb,model/gltf-binary" hidden>
+      <div class="sb-modelos" id="sbGlbLista"></div>
+      <div class="sb-grade2">
+        <label class="campo">Escala <input type="number" id="sbGlbEscala" min="0.001" max="1000" step="any" value="1"></label>
+        <label class="campo">Quantidade <input type="number" id="sbGlbQtd" min="1" max="10000" step="1" value="1"></label>
+      </div>
+      <label class="sel">Material <select id="sbGlbMat"></select></label>
+      <div class="sb-grade2">
+        <label class="campo">Preço (US$/un.) <input type="number" id="sbGlbPreco" min="0" step="any" placeholder="opcional"></label>
+        <label class="campo">Giro (°) <input type="number" id="sbGlbGiro" min="-360" max="360" step="15" value="0"></label>
+      </div>
+      <label class="sel">Sistema <select id="sbGlbSis"></select></label>
+      <p class="dica">Clique no modelo ou no terreno para colocar. Custo = material × volume medido na malha (só vale para malhas fechadas) e/ou o preço informado por unidade.</p>
     </div>
 
     <div data-ferr-painel="selecionar" hidden>
@@ -211,6 +249,11 @@
 
     <details class="sb-det" id="sbEdDet" open>
       <summary>Edições <span id="sbEdN"></span></summary>
+      <div class="chips sb-filtro" id="sbFiltro" role="group" aria-label="Filtrar edições">
+        <button type="button" data-filtro="todas" aria-pressed="true">Todas</button>
+        <button type="button" data-filtro="modelo" aria-pressed="false">No modelo</button>
+        <button type="button" data-filtro="orcamento" aria-pressed="false">Só orçamento</button>
+      </div>
       <ol class="sb-lista" id="sbLista"></ol>
     </details>
 
@@ -229,8 +272,8 @@
         <button type="button" id="sbImportar">Importar projeto…</button>
         <button type="button" id="sbComparar">Comparar com arquivo…</button>
       </div>
-      <input type="file" id="sbArquivo" accept=".json,.gmt.json,application/json" hidden>
-      <p class="dica">Você também pode arrastar um arquivo <code>.gmt.json</code> para a página.</p>
+      <input type="file" id="sbArquivo" accept=".json,.gmt.json,application/json,.glb" hidden>
+      <p class="dica">Você também pode arrastar um arquivo <code>.gmt.json</code> (projeto) ou <code>.glb</code> (modelo 3D) para a página. O arquivo do projeto leva os modelos importados; o link não.</p>
     </details>
   </section>
 
@@ -316,8 +359,11 @@
     <div class="nums sb-nums" id="sbNums"></div>
     <h3>Base × editado</h3>
     <div class="tabela-rolo"><table class="tabela" id="sbTabMet"></table></div>
-    <h3>Custo por sistema</h3>
-    <div class="tabela-rolo"><table class="tabela" id="sbTabSis"></table></div>
+    <h3>Diferença de custo por sistema</h3>
+    <div class="sb-divs" id="sbBarSis"></div>
+    <div id="sbComposicao"></div>
+    <details class="sb-det"><summary>Tabela por sistema</summary>
+    <div class="tabela-rolo"><table class="tabela" id="sbTabSis"></table></div></details>
     <div id="sbComp" hidden></div>
     <p class="dica">Custos em ordem de grandeza (US$, fornecido e instalado). Tudo o que é criado ou reprecificado aqui é <b>estimado</b>.</p>
   </div>

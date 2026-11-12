@@ -396,5 +396,34 @@
    "confidence": "estimado",
    "nota": "Bandeja fornecida e instalada com suportes. Valor de partida para o sandbox; o usuário pode trocar pelo preço do cliente."
   }
+ },
+ "canaleta": {
+  "nome": "Canaleta de piso para cabos",
+  "spec": "Canaleta de concreto pré-moldado ou aço galvanizado com tampa, apoiada no terreno",
+  "unidade": "m",
+  "kg_m": 45,
+  "cor": "#b7a38a",
+  "confidence": "estimado",
+  "nota": "Por metro de caminho (independe do número de cabos).",
+  "preco": {
+   "usd": 60,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Canaleta fornecida e assentada com tampa. Valor de partida para o sandbox; o usuário pode trocar pelo preço do cliente."
+  }
+ },
+ "vala_cabos": {
+  "nome": "Vala para cabos (escavação e reaterro)",
+  "spec": "Vala de ~0,6 × 0,8 m em rocha alterada, envelope de areia, fita de aviso e reaterro compactado",
+  "unidade": "m",
+  "cor": "#8d7660",
+  "confidence": "estimado",
+  "nota": "Por metro de caminho. Cume rochoso: escavação mais cara que em solo comum.",
+  "preco": {
+   "usd": 140,
+   "por": "m",
+   "confidence": "estimado",
+   "nota": "Escavação em rocha alterada, areia, eletroduto, reaterro e sinalização. Valor de partida para o sandbox; o usuário pode trocar pelo preço do cliente."
+  }
  }
 }

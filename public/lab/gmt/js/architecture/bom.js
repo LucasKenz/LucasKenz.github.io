@@ -34,9 +34,19 @@ function medida(id, opcoes) {
   if (cacheMed.size > 400) cacheMed.clear();
   const raiz = construir(id, true, opcoes ?? undefined);
   const med = medirPeca(raiz);
-  raiz.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
-  cacheMed.set(k, med);
+  // malhas de modelos importados são compartilhadas com o registro (não descartar)
+  raiz.traverse((o) => { if (o.isMesh && !o.userData.compartilhada) o.geometry.dispose(); });
+  // peça que depende de algo ainda não carregado (modelo importado ausente) não entra no cache
+  if (!raiz.userData.semCache) cacheMed.set(k, med);
   return med;
+}
+
+/** Contexto de um item: o global (preços do cliente) com o do item por cima; os preços são mesclados. */
+function juntarCtx(g, it) {
+  if (!it && !g) return null;
+  const c = { ...g, ...it };
+  if (g?.precos && it?.precos) c.precos = { ...g.precos, ...it.precos };
+  return c;
 }
 
 /** Formata dinheiro em US$ (mil, mi, bi). */
@@ -178,7 +188,7 @@ export function totalObra(itens = null, ctxGlobal = null) {
     if (!p || !(n > 0)) continue;
     const sis = it.sistema && it.sistema in porSis ? it.sistema : p.sistema;
     const confQ = it.conf ?? p.qtd[2];
-    const ctx = it.ctx || ctxGlobal ? { ...ctxGlobal, ...it.ctx } : null;
+    const ctx = juntarCtx(ctxGlobal, it.ctx);
     const q = quantitativos(it.id, it.opcoes ?? null, ctx);
     for (const l of q.linhas) {
       const info = MAT[l.mat];
@@ -250,7 +260,7 @@ export function gerarCSV(itens = null, ctxGlobal = null) {
     const p = PECA[it.id], n = it.n;
     if (!p) continue;
     if (sandbox && !(n > 0) && it.origem !== 'removido') continue;
-    const ctx = it.ctx || ctxGlobal ? { ...ctxGlobal, ...it.ctx } : null;
+    const ctx = juntarCtx(ctxGlobal, it.ctx);
     const r = quantitativos(it.id, it.opcoes ?? null, ctx);
     const nome = it.nome ?? p.nome, sis = it.sistema ?? p.sistema;
     const fonteQ = it.origem && it.origem !== 'base' ? 'usuario' : p.qtd[1], confQ = it.conf ?? p.qtd[2];

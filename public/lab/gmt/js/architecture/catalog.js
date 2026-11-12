@@ -1,6 +1,6 @@
 // Catálogo: uma entrada por TIPO de peça, com miniatura renderizada, busca e filtro por sistema.
-import * as THREE from 'three';
-import { PECAS_BASE as PECAS, SISTEMAS, construir } from '../model/parts.js';
+import { PECAS_BASE as PECAS, SISTEMAS } from '../model/parts.js';
+import { miniatura } from '../ui/miniaturas.js';
 import { esc, selo } from '../data.js';
 import { fmt } from '../util.js';
 
@@ -36,40 +36,19 @@ export function criarCatalogo({ aoAbrir }) {
     });
   }
 
-  /** Renderiza as miniaturas uma a uma, num renderer pequeno e temporário. */
+  /** Pede as miniaturas (geradas aos poucos e guardadas em cache, ver ui/miniaturas.js). */
   function gerarMiniaturas() {
     if (miniaturas) return;
     miniaturas = true;
-    const cv = document.createElement('canvas');
-    cv.width = 240; cv.height = 180;
-    const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true, alpha: true });
-    r.outputColorSpace = THREE.SRGBColorSpace;
-    r.toneMapping = THREE.ACESFilmicToneMapping;
-    const cena = new THREE.Scene();
-    cena.add(new THREE.HemisphereLight(0xe6eeff, 0x2a3040, 2.2));
-    const sol = new THREE.DirectionalLight(0xffffff, 2.4); sol.position.set(3, 6, 4); cena.add(sol);
-    const cam = new THREE.PerspectiveCamera(32, 4 / 3, 0.01, 3000);
-    const fila = PECAS.map((p) => p.id);
-    const proximo = () => {
-      const id = fila.shift();
-      if (!id) { r.dispose(); r.forceContextLoss(); return; }
-      const g = construir(id, false);
-      cena.add(g);
-      const box = new THREE.Box3().setFromObject(g), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
-      const d = Math.max(s.x, s.y, s.z) * 1.55 + 0.2;
-      cam.position.set(c.x + d * 0.75, c.y + d * 0.5, c.z + d * 0.85);
-      cam.near = d / 100; cam.far = d * 10; cam.updateProjectionMatrix();
-      cam.lookAt(c);
-      r.render(cena, cam);
-      const img = grade.querySelector(`[data-mini="${id}"]`);
-      img.src = cv.toDataURL('image/webp', 0.85);
-      img.hidden = false;
-      img.nextElementSibling.remove();
-      cena.remove(g);
-      g.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
-      (window.requestIdleCallback ?? setTimeout)(proximo);
-    };
-    proximo();
+    for (const p of PECAS) {
+      miniatura(p.id).then((url) => {
+        const img = grade.querySelector(`[data-mini="${p.id}"]`);
+        if (!img || !img.hidden) return;
+        img.src = url;
+        img.hidden = false;
+        img.nextElementSibling?.remove();
+      }).catch(() => { /* sem WebGL: fica o espaço reservado */ });
+    }
   }
   return { gerarMiniaturas, filtrar };
 }
