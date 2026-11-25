@@ -153,6 +153,17 @@ export const lab: LabItem[] = [
     status: 'pronto',
   },
   {
+    slug: 'planta-2d-3d',
+    href: '/lab/planta-2d-3d/',
+    nome: { pt: 'Planta 2D ↔ 3D', en: '2D ↔ 3D Plumbing Plan' },
+    frase: {
+      pt: 'Abra a sua planta (DXF, SVG, PDF ou imagem), desenhe água fria, quente, esgoto e pluvial em níveis e veja em 3D, com interferências, orçamento e render. Exemplo: sobrado com quintal alto.',
+      en: 'Open your own floor plan (DXF, SVG, PDF or image), draw cold and hot water, sewer and rainwater on levels and see it in 3D, with clash detection, cost estimate and rendering (page in Portuguese).',
+    },
+    tecnica: { pt: 'React · Three.js · DXF, SVG, PDF · interferências · caminho de raios · offline', en: 'React · Three.js · DXF, SVG, PDF · clash detection · path tracing · offline' },
+    status: 'pronto',
+  },
+  {
     slug: 'curato',
     href: '/curato/',
     nome: { pt: 'Curato', en: 'Curato' },

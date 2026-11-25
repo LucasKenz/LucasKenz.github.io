@@ -119,3 +119,8 @@
 ## 2026-11-12 · Lab: Orçamento 3D, fase 2 (novos formatos)
 - Página copiada de novo do `orcamento-3d` (commit `6f2b766`): lê `.ifc` (web-ifc, com quantidades oficiais), `.step`/`.iges` (occt-import-js), `.3dm` (rhino3dm) e `.dxf` (rotas de cabo); bibliotecas baixadas só sob demanda. Técnica do card atualizada com os formatos.
 - Verificação: `astro check` 0 erros, `pnpm test` 15/15, build; no `dist`: `/`, `/lab/`, `/lab/orcamento-3d/`, `/lab/gmt/` 200 e testes do Orçamento 3D todos OK.
+
+## 2026-11-25 · Lab: Planta 2D ↔ 3D
+- Pedido do usuário: publicar a Planta 2D ↔ 3D no lab. Novo card em `content/lab.ts` (`href: '/lab/planta-2d-3d/'`, depois do Orçamento 3D), capa `public/media/lab-planta-2d-3d.webp` (1280 × 800, casa de dois andares no 3D) e o build copiado para `public/lab/planta-2d-3d/` (`npm run lab` do repositório privado `LucasKenz/planta-2d-3d`, commit `009110a`, versão 0.10.0; 6,7 MB, com HDRIs e exemplos).
+- `tsconfig.json`: `public/lab/planta-2d-3d` fora do `astro check`. É JS minificado de build; analisá-lo derrubava o `astro check` (exit 134, erro do V8).
+- Verificação: `astro check` 0 erros (157 arquivos), `pnpm test` 15/15, `pnpm build` ok (PDFs do CV regerados e descartados); no `pnpm preview`: `/lab/` 200 com o card, `/lab/planta-2d-3d/` 200, casa de dois andares aberta pelo menu sem interferências, modo Render carregado sob demanda, service worker no escopo `/lab/planta-2d-3d/`, console sem erros.

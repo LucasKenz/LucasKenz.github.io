@@ -1,7 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "docs/direcoes"],
+  "exclude": ["dist", "docs/direcoes", "public/lab/planta-2d-3d"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",
